@@ -22,5 +22,5 @@
 <Rainbow>Whoa, that's a high number!</Rainbow>
 {/if}
 <br>
-<Tree bind:object={object} pretty={true}/>
+<Tree bind:object pretty={true}/>
 </main>

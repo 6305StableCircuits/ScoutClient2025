@@ -6,4 +6,4 @@ declare interface Props {
 
 declare type StringLike = string|number|bigint
 
-declare type StyleSize = `${`${number}xl`|`xl`|"lg"|"md"|"sm"}`
+declare type StyleSize = `${number}xl`|`xl`|"lg"|"md"|"sm"

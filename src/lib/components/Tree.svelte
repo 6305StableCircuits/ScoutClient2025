@@ -40,7 +40,7 @@ It can also prettify camelCase, PascalCase, kebab-case, and snake_case.
         </summary>
         {#if typeof value === "object" && value !== null}
             {#if value !== object}
-                <Tree object={value} {editable} {pretty}/>
+                <Tree bind:object={object[name.toString()]} {editable} {pretty}/>
             {:else}
                 Circular Reference
             {/if}
@@ -52,9 +52,19 @@ It can also prettify camelCase, PascalCase, kebab-case, and snake_case.
                     <input type="number" bind:value={object[name.toString()]} />
                 {:else if typeof value === "string"}
                     <input type="text" bind:value={object[name.toString()]} />
+                {:else}
+                    {#if typeof value === "function"}
+                        [ƒ {value.name}]
+                    {:else}
+                        {value}
+                    {/if}
                 {/if}
             {:else}
-                {value}
+                {#if typeof value === "function"}
+                    [ƒ {value.name}]
+                {:else}
+                    {value}
+                {/if}
             {/if}
         {/if}
     </details><br>
