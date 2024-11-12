@@ -2,6 +2,7 @@
     import Button from '$lib/components/Button.svelte';
     import Rainbow from '$lib/components/Rainbow.svelte';
     import Tree from '$lib/components/Tree.svelte';
+    import Graph from '$lib/components/Graph.svelte';
     let count = $state(0);
     let double = $derived(count*2);
     let isHigh = $state(false);
@@ -13,6 +14,14 @@
     $inspect(count);
     let object:any = $state({hi:true,i:{hi:true,string:"hi",arr:[1,2,3]}});
     $inspect(object);
+    let data = $state<{x:number,y:number}[]>([]);
+    function genData(){
+		data = [];
+		for(let i = 0; i<200;i++){
+			data.push({x:i,y:Math.random()*200});
+		}
+	}
+	genData();
 </script>
 <main> 
 <h1>Welcome to SvelteKit</h1>
@@ -23,4 +32,5 @@
 {/if}
 <br>
 <Tree bind:object pretty={true}/>
+<Graph {data}/>
 </main>
