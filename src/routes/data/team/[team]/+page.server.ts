@@ -6,5 +6,8 @@ type Params = {team:number}
 export const load = async ({params}:{params:Params}) => {
 	const data = JSON.parse(fs.readFileSync('./src/routes/api/data.json','utf-8')??'{}');
 	let matches = data.matches.find((match:Match)=>match?.team?.toString?.() === params.team.toString());
-	return Response.json(data);
+	return {
+		matches,
+		number: params.team*1
+	};
 };

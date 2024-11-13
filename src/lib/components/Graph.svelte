@@ -90,7 +90,7 @@
 			{/each}
 		</g>
 		{#each points as [[x1,y1],[x2,y2]],i}
-			<line {x1} {x2} {y1} {y2} style="stroke:red; stroke-width:1.5"></line>
+			<line {x1} {x2} {y1} {y2} style="stroke:#135fef; stroke-width:1.5"></line>
 		{/each}
 	</svg>
 </div>

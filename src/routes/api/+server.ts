@@ -10,7 +10,7 @@ export const GET: RequestHandler = async () => {
 export const POST: RequestHandler = async ({ request }) => {
     const data = JSON.parse(fs.readFileSync('./src/routes/api/data.json','utf-8')??'{}');
     data.matches??=[];
-    data.matches.push(request.json());
+    data.matches.push((await request.json())?.matches);
     fs.writeFileSync('./src/routes/api/data.json',JSON.stringify(data));
     return json({status: 200})
 };

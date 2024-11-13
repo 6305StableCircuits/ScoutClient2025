@@ -3,7 +3,7 @@ let charged = false;
 let chargeStart = 0;
 export default {
     primaryScore: {
-        name: "Speaker",
+        name: "speaker",
         auto: {
             points: 5,
         },
@@ -19,7 +19,7 @@ export default {
         }
     },
     secondaryScore: {
-        name: "Amp",
+        name: "amp",
         auto: {
             points: 2,
         },
@@ -34,6 +34,6 @@ export default {
             }
         },
     },
-    endGoal: "Climb",
-    secondaryEndGoal: "Park",
-}
+    endGoal: "climb",
+    secondaryEndGoal: "park",
+} as const;
