@@ -12,15 +12,27 @@ export declare type Score = {
     auto: {
         score: number,
         leave: boolean,
-        [Config.primaryScore.name]: number,
-        [Config.secondaryScore.name]: number,
+        [Config.primaryScore.name]: {
+            amount: number,
+            points: number,
+        },
+        [Config.secondaryScore.name]: {
+            amount: number,
+            points: number,
+        },
     },
     teleop: {
         score: number,
-        [Config.endGoal]: boolean,
-        [Config.secondaryEndGoal]: boolean,
-        [Config.primaryScore.name]: number,
-        [Config.secondaryScore.name]: number,
+        [Config.endGoal.name]: boolean,
+        [Config.secondaryEndGoal.name]: boolean,
+        [Config.primaryScore.name]: {
+            amount: number,
+            points: number,
+        },
+        [Config.secondaryScore.name]: {
+            amount: number,
+            points: number,
+        },
     },
     accuracy: {
         overall: number,
@@ -48,7 +60,7 @@ export declare type TeamData = {
 }
 let numbers = [0,1,2,3,4,5,6,7,8,9] as const;
 type EventName = `on${string}`
-export declare type NumberString = typeof numbers[number]
+export declare type NumberString = typeof numbers[number];
 export declare type Time = `${"-"|""}${NumberString}${NumberString|''}:${NumberString}${NumberString}`;
 export declare type TimerOptions = {
     start?: boolean,
@@ -56,5 +68,48 @@ export declare type TimerOptions = {
     [x: EventName]: ()=>void,
     events?: {
         [event: string]: ()=>void
+    }
+}
+export declare type Config = {
+    readonly reset: ()=>void,
+    readonly undo: ()=>object,
+    readonly redo: ()=>object,
+    readonly assist: ()=>object,
+    readonly undoAvailable: boolean,
+    readonly redoAvailable: boolean,
+    readonly primaryScore: {
+        readonly name: string,
+        readonly auto: {
+            readonly points: number,
+        },
+        readonly teleop: {
+            readonly points: number,
+        },
+        readonly score: (points: number) => object
+    },
+    readonly secondaryScore: {
+        readonly name: string,
+        readonly auto: {
+            readonly points: number,
+        },
+        readonly teleop: {
+            readonly points: number,
+        },
+        readonly score: (points: number) => object
+    },
+    readonly leave: {
+        readonly name: string,
+        readonly points: number,
+        readonly score: (points: number) => object,
+    },
+    readonly endGoal: {
+        readonly name: string,
+        readonly points: number,
+        readonly score: (points: number) => object,
+    },
+    readonly secondaryEndGoal: {
+        readonly name: string,
+        readonly points: number,
+        readonly score: (points: number) => object
     }
 }

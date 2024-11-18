@@ -1,11 +1,13 @@
 <script lang="ts">
     import Tree from '$lib/components/Tree.svelte';
+    import type {Snippet} from 'svelte';
     interface Props{
         object:{[x:string]:any},
         editable?:boolean,
-        pretty?:boolean
+        pretty?:boolean,
+        children?: Snippet,
     }
-    let {object = $bindable<{[x:string]:any}>(), editable = false, pretty = false}:Props = $props();
+    let {object = $bindable<{[x:string|number]:any}>(), editable = false, pretty = false, children}:Props = $props();
     let entries = $derived(Object.entries(object));
     function prettify(name:string):string{
         return name.replace(/[A-Z]/g,(m:string)=>` ${m}`).replace(/^[a-z]/,(m:string)=>m.toUpperCase()).replace(/[_-]/g,' ').replace(/ [a-z]/g,(m)=>m.toUpperCase());
@@ -68,4 +70,6 @@ It can also prettify camelCase, PascalCase, kebab-case, and snake_case.
             {/if}
         {/if}
     </details><br>
+    {:else}
+        {@render children?.()}
 {/each}

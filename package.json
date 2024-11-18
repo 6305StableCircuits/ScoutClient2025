@@ -23,6 +23,7 @@
 	"type": "module",
 	"dependencies": {
 		"@fontsource/inter": "^5.1.0",
+		"@svelte-put/clickoutside": "^4.0.0",
 		"svelte-persisted-store": "^0.12.0"
 	}
 }

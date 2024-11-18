@@ -1,29 +1,28 @@
 <script lang="ts">
-    let pathname = globalThis?.location?.pathname?.slice?.(1);
-    import {paths,uppercase} from '$lib';
+    import {uppercase,pathEntries,isCurrentPath} from '$lib';
+    import {page} from '$app/stores';
     let mobile = globalThis?.matchMedia?.("only screen and (max-width: 600px)")?.matches;
     import Button from '$lib/components/Button.svelte';
-    let showing = $state(false);
     import NavMenu from '$lib/components/NavMenu.svelte';
+    import Link from '$lib/components/Link.svelte';
 </script>
-<main>
-<main class="justify-between flex max-w-6xl mx-auto px-4 justify-center text-center m-auto bg-gray-800 w-full">
-    <h1 class="text-lg">ScoutClient 2025</h1>
+<main class="justify-between flex max-h-16 px-10 content-center mx-[-1em] text-center px-10 m-auto bg-gray-800 w-[100.475vw] mt-0">
+    <h1 class="text-[2em] pt-2">ScoutClient 2025</h1>
     {#if !mobile}
-    {#each paths as path}
-    <span class="text-lg">
-        {#if path !== pathname}
-        <a href={path}>{uppercase(path)}</a>
-        {:else}
-        {uppercase(path)}
-        {/if}&nbsp;
-    </span>
-    {/each}
-    {/if}
-</main>
-    {#if mobile}
-    <div class="float-right z-index-100 absolute top-[2%] right-[5%]">
-    <NavMenu />
-    </div>
+        {#key $page}
+            {#each pathEntries as [title,path]}
+                <span class="text-lg pt-4 pb-0">
+                    {#if isCurrentPath(path)}
+                        <span class="cursor-not-allowed text-white">{uppercase(title??'')}</span>
+                    {:else}
+                        <Link url={path} class="text-white">{uppercase(title??'')}</Link>
+                    {/if}&nbsp;
+                </span>
+            {/each}
+        {/key}
+    {:else}
+        <div class="float-right absolute right-[5%] pt-3 pointer z-50">
+        <NavMenu />
+        </div>
     {/if}
 </main>

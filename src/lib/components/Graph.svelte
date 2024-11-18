@@ -13,9 +13,9 @@
         }
     }: {
         data: Point[],
-        width: number,
-        height: number,
-        spacing: Point
+        width?: number,
+        height?: number,
+        spacing?: Point
     } = $props();
     let xPoints = $state(spacing.x);
     let yPoints = $state(spacing.y);
@@ -120,6 +120,28 @@
     text {
         /*font-family:Inter,sans-serif;*/
         fill: white;
+    }
+    @media (prefers-color-scheme:light){
+        text{
+            fill: black;
+        }
+        line{
+            stroke: black
+        }
+        svg{
+            --line-color: black;
+        }
+    }
+    @media (prefers-color-scheme:dark){
+        text{
+            fill: white;
+        }
+        line {
+            stroke: white;
+        }
+        svg{
+            --line-color: rgba(255 255 255 / 0.1);
+        }
     }
 
     line {

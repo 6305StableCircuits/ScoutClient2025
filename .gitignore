@@ -19,3 +19,6 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+#API data, remove this during bugfixes
+./src/routes/api/data.json

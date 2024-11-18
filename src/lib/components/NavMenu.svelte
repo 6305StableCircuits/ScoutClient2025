@@ -1,54 +1,62 @@
 <script lang="ts">
+    import {clickoutside} from '@svelte-put/clickoutside';
+    import Link from '$lib/components/Link.svelte';
+    import {page} from '$app/stores';
     import {slide,fade} from 'svelte/transition';
-    let pathname = globalThis?.location?.pathname?.slice?.(1);
-    import {paths,uppercase} from '$lib';
+    import {uppercase,pathEntries,isCurrentPath} from '$lib';
     let mobile = globalThis?.matchMedia?.("only screen and (max-width: 600px)")?.matches;
     import Button from '$lib/components/Button.svelte';
     let showing = $state(false);
     let button = $state<any>();
-    function isParent(node:Node,parent:Node):boolean{
-        let parents = [];
-        while(node !== null){
-            parents.push(node as unknown as Node);
-            node = node.parentNode as unknown as Node;
-        }
-        return parents.includes(parent as unknown as Node);
-    }
-    function onclick(e:Event){
-        console.log(e.target);
-        console.log(button);
-        if(e.target !== button && !isParent(e.target as Node,button)){
-            showing = false;
-        }
-    }
-    document.addEventListener('click',onclick);
-    let shows = $state([true,false]);
+    // function isParent(node:Node,parent:Node):boolean{
+    //     let parents = [];
+    //     while(node !== null){
+    //         parents.push(node as unknown as Node);
+    //         node = node.parentNode as unknown as Node;
+    //     }
+    //     return parents.includes(parent as unknown as Node);
+    // }
+    // function onclick(e:Event){
+    //     if(e.target !== button && !isParent(e.target as Node,button)){
+    //         showing = false;
+    //     }
+    // }
+    //document.addEventListener('click',onclick);
+    let hidden = $state(true);
+    $effect(()=>{
+        showing;
+        setTimeout(()=>{
+            hidden = showing ? false : true;
+        },400);
+    })
 </script>
 <style>
-    .shadow{
+    /* .shadow{
         box-shadow: 0px 0px 5px black;
-    }
+    } */
 </style>
 <!--svelte-ignore a11y_no_noninteractive_element_interactions-->
 <!--svelte-ignore a11y_click_events_have_key_events-->
-<main onclick={onclick} bind:this={button} class="text-center" class:shadow={showing}>{#if showing}<br>{/if}
-{#if shows[0] && !showing}
-<span in:fade={{duration:100,delay:50}} out:fade={{duration:100}} onoutroend={()=>{shows[0]=false;shows[1]=true}}>
-<Button onmouseup={()=>showing = !showing}  class="bg-gray-800">
+<main class="top-0 text-center" use:clickoutside onclickoutside={()=>showing = false}>
+    <!-- {#if !showing} -->
+    <Button onmouseup={()=>showing = !showing}  class="top-0 bg-gray-800">
     ☰
-</Button>
-</span>
-{:else if shows[1]}
-    <span class="rounded pt-0 bg-gray-800" in:fade={{duration:100,delay:50}} out:fade={{duration:100}} onoutroend={()=>{shows[1]=false;shows[0]=true}}>
-    {#each paths as path}
-    <p class="text-lg px-5" >
-        {#if path !== pathname}
-        <a href={path}>{uppercase(path)}</a>
-        {:else}
-        {uppercase(path)}
-        {/if}
-    </p>
-    {/each}
-</span>
-{/if}
+    </Button>
+    {#if !hidden}
+        <div class="rounded pt-0 bg-gray-800 h-svh" onoutroend={()=>hidden=true} in:slide={{axis:"x"}} out:slide={{axis:"x"}}>
+            {#key $page}
+                {#each pathEntries as [title,path]}
+                    {#if showing}
+                        <p class="text-lg px-5" in:fade={{duration:250}} out:fade={{duration:250}}>
+                            {#if isCurrentPath(path)}
+                                <span class="cursor-not-allowed text-white">{uppercase(title??'')}</span>
+                            {:else}
+                                <Link url={path} class="text-white" onclick={()=>{showing = false;hidden=true;}}>{uppercase(title??'')}</Link>
+                            {/if}
+                        </p>
+                    {/if}
+                {/each}
+            {/key}
+        </div>
+    {/if}
 </main>

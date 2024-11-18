@@ -3,10 +3,10 @@ let dateNow = $state<number>(0);
 setInterval(() => {
     dateNow = Date.now();
 }, 1);
-function format(time:number):any {
+function format(time:number):string {
     if (time < 0) return "-" + format(Math.abs(time));
     let minutes = Math.abs(Math.floor(time / 60)).toString();
-    let seconds = Math.abs(Math.round(time % 60)).toString();
+    let seconds = Math.abs(Math.floor(time % 60)).toString();
     seconds = seconds.length === 1 ? '0' + seconds : seconds;
     return `${minutes}:${seconds}`;
 }
@@ -23,7 +23,7 @@ export default class Timer<T extends (string|number)> extends EventTarget {
     #stop = false;
     paused = $state<boolean>(false);
     #curr = 0;
-    time = $derived.by(() => {
+    time = $derived.by<number>(() => {
         if (this.started === false) return this.#amount;
         if (this.paused === true) return this.#curr;
         if (Math.round((this.#end - dateNow) / 1000) === 0 && this.finished !== true) {
@@ -65,7 +65,7 @@ export default class Timer<T extends (string|number)> extends EventTarget {
         start = false,
         stop = true,
         ...events
-    }: TimerOptions) {
+    }={}) {
         super();
         this.#stop = stop;
         if ("events" in events) {

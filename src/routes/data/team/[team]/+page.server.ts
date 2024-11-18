@@ -1,13 +1,14 @@
-//import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 import type {Match} from '$lib/types';
+import {coerce} from '$lib';
 import {json} from '@sveltejs/kit'
 import * as fs from 'fs';
-type Params = {team:number}
-export const load = async ({params}:{params:Params}) => {
+export const load: PageServerLoad = async ({params}) => {
 	const data = JSON.parse(fs.readFileSync('./src/routes/api/data.json','utf-8')??'{}');
-	let matches = data.matches.find((match:Match)=>match?.team?.toString?.() === params.team.toString());
+	let matches = data.matches.filter((match:Match)=>match?.team?.toString?.() === params.team.toString());
 	return {
+		data,
 		matches,
-		number: params.team*1
+		number: coerce<number>(params.team)*1
 	};
 };

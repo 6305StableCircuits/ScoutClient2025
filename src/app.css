@@ -17,4 +17,66 @@
     input[type="text"],input[type="number"]{
         background-color:black;
     }
+    td,th{
+        border-left: 1px white solid;
+        border-top: 1px white solid;
+        border-right: 0px transparent solid;
+    }
+    tr > th:last-of-type,td:last-of-type{
+        border-right: 1px solid white;
+    }
+    tr:last-of-type > td{
+        border-bottom: 1px solid white;
+    }
+}
+
+@media (prefers-color-scheme:light){
+    :root{
+        color: black;
+    }
+    h1.text-\[2em\].pt-2{
+        color: white;
+    }
+    td,th{
+        border-left: 1px black solid;
+        border-top: 1px black solid;
+        border-right: 0px transparent solid;
+    }
+    tr > th:last-of-type,td:last-of-type{
+        border-right: 1px solid black;
+    }
+    tr:last-of-type > td{
+        border-bottom: 1px solid black;
+    }
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+tr:first-of-type{
+    th:first-of-type{
+        border-top-left-radius: 0.25rem;
+    }
+    th:last-of-type{
+        border-top-right-radius: 0.25rem;
+    }
+}
+tr:last-of-type{
+    td:first-of-type{
+        border-bottom-left-radius: 0.25rem;
+    }
+    td:last-of-type{
+        border-bottom-right-radius: 0.25rem;
+    }
+}
+
+table{
+    border-collapse: separate;
 }
