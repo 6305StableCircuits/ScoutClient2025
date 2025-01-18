@@ -1,4 +1,5 @@
 <script lang="ts">
+    // import supabase from './api/apiKey.server.js'
     import Button from '$lib/components/Button.svelte';
     import Rainbow from '$lib/components/Rainbow.svelte';
     import Tree from '$lib/components/Tree.svelte';
@@ -27,6 +28,7 @@
     <title>ScoutClient 2025</title>
 </svelte:head>
 <main> 
+<p></p>
 <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 <Button onclick={()=>count++} textSize="sm">Count is {count}</Button> {count} * 2 = {double}<br>
