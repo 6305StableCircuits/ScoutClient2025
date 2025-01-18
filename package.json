@@ -25,7 +25,9 @@
 		"@fontsource/inter": "^5.1.0",
 		"@supabase/supabase-js": "^2.47.16",
 		"@svelte-put/clickoutside": "^4.0.0",
+		"@types/papaparse": "^5.3.15",
 		"dotenv": "^16.4.7",
+		"papaparse": "^5.5.1",
 		"svelte-persisted-store": "^0.12.0"
 	}
 }

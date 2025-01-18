@@ -2,6 +2,9 @@
     import Tree from '$lib/components/Tree.svelte';
     import Button from '$lib/components/Button.svelte';
     import {matches} from '$lib/stores';
+    //@ts-ignore
+    import Papa from "papaparse";
+    const {parse} = Papa;
     let downloadLink = $state<{[x:string]:any}>();
     let saved = $state(false);
     function download(type:"json"|"csv"){
@@ -21,6 +24,7 @@
         return "scoutSessions_on_" + date + ".json";
     }
     async function send(){
+        let csv = Papa.unparse(data);
         let headers:RequestInit = {
             method: 'POST',
             headers: {
@@ -29,7 +33,7 @@
             },
             body: JSON.stringify($matches)
         };
-        let res = await fetch('../api',headers);
+        let res = await fetch('../supabase',headers);
         if(res.status === 200){
             saved = true;
             return true;
@@ -53,6 +57,7 @@
         You haven't entered any matches yet, start scouting!
     </Tree><br>
     <Button disabled={$matches.matches.length === 0} onclick={()=>download("json")}>Export as JSON</Button>&nbsp;
+    <!-- <Button disabled={$matches.matches.length === 0} onclick={send}>Save Data</Button>&nbsp; -->
     <Button disabled={$matches.matches.length === 0} onclick={send}>Save Data</Button>&nbsp;
     <Button disabled={$matches.matches.length === 0} class="bg-[#ef0305]" onclick={deleteData}>Delete Data</Button>
     <!--svelte-ignore a11y_consider_explicit_label-->
