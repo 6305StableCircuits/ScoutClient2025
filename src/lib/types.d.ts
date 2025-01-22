@@ -41,13 +41,13 @@ export declare type Score = {
     }
 }
 export declare type Match = {
-    team: number,
-    match: number,
-    date: number,
-    scout: string,
-    alliance: "red"|"blue",
-    score: Score,
-    assists: number,
+    TeamNumber: number,
+    // match: number,
+    // date: number,
+    ScoutName: string,
+    // alliance: "red"|"blue",
+    // score: Score,
+    // assists: number,
 }
 export declare type TeamData = {
     number: number,

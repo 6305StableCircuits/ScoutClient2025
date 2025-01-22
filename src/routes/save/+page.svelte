@@ -24,12 +24,11 @@
         return "scoutSessions_on_" + date + ".json";
     }
     async function send(){
-        let csv = Papa.unparse(data);
         let headers:RequestInit = {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/csv'
             },
             body: JSON.stringify($matches)
         };
