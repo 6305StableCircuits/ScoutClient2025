@@ -28,7 +28,7 @@
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'text/csv'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify($matches)
         };
@@ -56,8 +56,7 @@
         You haven't entered any matches yet, start scouting!
     </Tree><br>
     <Button disabled={$matches.matches.length === 0} onclick={()=>download("json")}>Export as JSON</Button>&nbsp;
-    <!-- <Button disabled={$matches.matches.length === 0} onclick={send}>Save Data</Button>&nbsp; -->
-    <Button disabled={$matches.matches.length === 0} onclick={send}>Save Data</Button>&nbsp;
+    <Button onclick={send}>Save Data</Button>&nbsp;
     <Button disabled={$matches.matches.length === 0} class="bg-[#ef0305]" onclick={deleteData}>Delete Data</Button>
     <!--svelte-ignore a11y_consider_explicit_label-->
     <a bind:this={downloadLink} style="display:none" href="about:blank" download><span></span></a>

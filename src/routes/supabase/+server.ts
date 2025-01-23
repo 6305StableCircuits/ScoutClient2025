@@ -12,7 +12,7 @@ export async function GET() {
 
 export const POST: RequestHandler = async ({ request }) => {
   const res = await request.json();
-  const {data} = await supabase.from("scoutingData").insert(res.matches);
+  const data = await supabase.from("scoutingData").insert({ id: 1, name: 'denmark' });
   return json({status: 200})
 };
         //let csv = Papa.unparse(data);

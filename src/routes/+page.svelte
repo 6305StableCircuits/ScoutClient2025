@@ -1,4 +1,5 @@
 <script lang="ts">
+    //@ts-nocheck
     // import supabase from './api/apiKey.server.js'
     import Button from '$lib/components/Button.svelte';
     import Rainbow from '$lib/components/Rainbow.svelte';
@@ -11,6 +12,7 @@
     let {data} = $props();
     //@ts-ignore
     let {countries}:{countries:Record<string, any[]>} = data;
+    globalThis.countries = countries;
     $effect(()=>{ //this could have been a $derived, but i made it an effect to show how it works
         if(count > 10){
             isHigh = true;
