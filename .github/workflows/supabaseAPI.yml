@@ -24,8 +24,8 @@ jobs:
         with:
           node-version: 12.x
 
-      - name: Install Dependencies (prod)
-        run: yarn install --frozen-lockfile --production
+      # - name: Install Dependencies (prod)
+      #   run: yarn install --frozen-lockfile --production
 
       - name: Run Tests (JEST)
         run: yarn test --ci --silent --testPathIgnorePatterns=experimental
