@@ -16,29 +16,18 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - name: Git checkout
+        uses: actions/checkout@v2
 
+      - name: Use Node 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
 
+      - name: Install Dependencies (prod)
+        run: yarn install --frozen-lockfile --production
 
-# name: GitHub Actions Demo
-# run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-# on: [push]
-# jobs:
-#   Explore-GitHub-Actions:
-#     runs-on: ubuntu-latest
-#     steps:
-#         - name: Git checkout
-#           uses: actions/checkout@v2
-
-#         - name: Use Node 12.x
-#           uses: actions/setup-node@v1
-#           with:
-#             node-version: 12.x
-
-#         - name: Install Dependencies (prod)
-#           run: yarn install --frozen-lockfile --production
-
-#         - name: Run Tests (JEST)
-#           run: yarn test --ci --silent --testPathIgnorePatterns=experimental
-#           env:
-#             CI: true
-#             API_KEY: ${{secrets.SUPA_BASE_API_KEY}}
+      - name: Run Tests (JEST)
+        run: yarn test --ci --silent --testPathIgnorePatterns=experimental
+        env:
+          FUN_API_KEY: ${{ secrets.SUPA_BASE_API_KEY }}
