@@ -2,8 +2,9 @@ import type { RequestHandler } from '../routes/supabase/$types';
 import {json} from '@sveltejs/kit'
 import * as fs from 'fs';
 import { createClient } from '@supabase/supabase-js'
-import { API_KEY } from '$env/static/private';
+import * as dotenv from 'dotenv'
+dotenv.config();
 
 const supabaseUrl = 'https://ujpszjmkuhaknmzevzxg.supabase.co';
-const supabaseKey = API_KEY;
+const supabaseKey = process.env.UNFUN_API_KEY;
 export const supabase = createClient(supabaseUrl, supabaseKey);

@@ -5,8 +5,6 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
-      - shell: pwsh
+      - uses: actions/checkout@v4
         env:
           FUN_API_KEY: ${{ secrets.SUPA_BASE_API_KEY }}
-        run: |
-          # example-command "$env:SUPER_SECRET"
