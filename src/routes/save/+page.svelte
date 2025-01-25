@@ -2,9 +2,6 @@
     import Tree from '$lib/components/Tree.svelte';
     import Button from '$lib/components/Button.svelte';
     import {matches} from '$lib/stores';
-    //@ts-ignore
-    import Papa from "papaparse";
-    const {parse} = Papa;
     let downloadLink = $state<{[x:string]:any}>();
     let saved = $state(false);
     function download(type:"json"|"csv"){
