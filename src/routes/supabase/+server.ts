@@ -12,7 +12,6 @@ export async function GET() {
 
 export const POST: RequestHandler = async ({ request }) => {
   const res = await request.json();
-  const data = await supabase.from("scoutingData").insert({"match": 2});
-  // res.matches
+  const data = await supabase.from("scoutingData").insert(res.matches);
   return json({status: 200})
 };

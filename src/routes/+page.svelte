@@ -1,6 +1,5 @@
 <script lang="ts">
     //@ts-nocheck
-    // import supabase from './api/apiKey.server.js'
     import Button from '$lib/components/Button.svelte';
     import Rainbow from '$lib/components/Rainbow.svelte';
     import Tree from '$lib/components/Tree.svelte';
@@ -10,9 +9,6 @@
     let double = $derived(count*2);
     let isHigh = $state(false);
     let {data} = $props();
-    //@ts-ignore
-    let {countries}:{countries:Record<string, any[]>} = data;
-    globalThis.countries = countries;
     $effect(()=>{ //this could have been a $derived, but i made it an effect to show how it works
         if(count > 10){
             isHigh = true;
@@ -29,17 +25,11 @@
 		}
 	}
 	genData();
-    $inspect(countries.data);
 </script>
 <svelte:head>
     <title>ScoutClient 2025</title>
 </svelte:head>
 <main> 
-    <ul>
-        {#each countries.data as country}
-          <li>{country.TeamName}</li>
-        {/each}
-    </ul>
 <p></p>
 <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
@@ -50,4 +40,5 @@
 <br>
 <Tree bind:object pretty={true}/>
 <Graph data={data1}/>
+<a href="/results">kkkkokko</a>
 </main>
