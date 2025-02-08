@@ -13,6 +13,9 @@ function format(time:number):string {
 export default class Timer<T extends (string|number)> extends EventTarget {
     #init = $state<number>(0);
     #end = $state<number>(0);
+    /**
+     * Adds an event listener to the timer. 
+     */
     on(event: string, handler: EventListenerOrEventListenerObject | null, options?: AddEventListenerOptions | boolean): void {
         return this.addEventListener(event, handler, options);
     }
@@ -23,6 +26,9 @@ export default class Timer<T extends (string|number)> extends EventTarget {
     #stop = false;
     paused = $state<boolean>(false);
     #curr = 0;
+    /**
+     * The current time of the timer. 
+     */
     time = $derived.by<number>(() => {
         if (this.started === false) return this.#amount;
         if (this.paused === true) return this.#curr;
@@ -38,9 +44,15 @@ export default class Timer<T extends (string|number)> extends EventTarget {
         this.#curr = (this.#end - dateNow) / 1000;
         return this.#curr;
     })
+    /**
+     * Returns the current timer's time formatted as HH:MM:SS. 
+     */
     get formatted() {
         return format(this.time);
     };
+    /**
+     * Starts the timer. 
+     */
     start = (): void => {
         this.started = true;
         this.#init = dateNow;
@@ -49,12 +61,18 @@ export default class Timer<T extends (string|number)> extends EventTarget {
         this.dispatchEvent(new CustomEvent("start"));
     }
     #pauseStart = 0;
+    /**
+     * Pauses the timer, if it is not finished. 
+     */
     pause = (): void => {
         if (this.finished === true) return;
         if (this.paused === true) return this.play();
         this.paused = true;
         this.#pauseStart = dateNow;
     }
+    /**
+     * Resumes the timer, if it was paused. 
+     */
     play = (): void => {
         if (this.finished === true) return;
         if (this.paused === false) return this.pause();
@@ -65,7 +83,7 @@ export default class Timer<T extends (string|number)> extends EventTarget {
         start = false,
         stop = true,
         ...events
-    }={}) {
+    }:TimerOptions={}) {
         super();
         this.#stop = stop;
         if ("events" in events) {

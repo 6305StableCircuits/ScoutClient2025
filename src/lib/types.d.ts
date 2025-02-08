@@ -77,39 +77,23 @@ export declare type Config = {
     readonly assist: ()=>object,
     readonly undoAvailable: boolean,
     readonly redoAvailable: boolean,
-    readonly primaryScore: {
-        readonly name: string,
-        readonly auto: {
-            readonly points: number,
-        },
-        readonly teleop: {
-            readonly points: number,
-        },
-        readonly score: (points: number) => object
-    },
-    readonly secondaryScore: {
-        readonly name: string,
-        readonly auto: {
-            readonly points: number,
-        },
-        readonly teleop: {
-            readonly points: number,
-        },
-        readonly score: (points: number) => object
-    },
-    readonly leave: {
-        readonly name: string,
+    readonly scoring: Scoring[],
+    readonly leave: Goal,
+    readonly end: Goal[]
+    readonly park: Goal
+}
+type Goal = {
+    readonly name: string,
+    readonly points: number,
+    readonly score: (points: number) => object
+}
+type Scoring = {
+    readonly name: string,
+    readonly auto: {
         readonly points: number,
-        readonly score: (points: number) => object,
     },
-    readonly endGoal: {
-        readonly name: string,
+    readonly teleop: {
         readonly points: number,
-        readonly score: (points: number) => object,
     },
-    readonly secondaryEndGoal: {
-        readonly name: string,
-        readonly points: number,
-        readonly score: (points: number) => object
-    }
+    readonly score: (points: number) => object
 }

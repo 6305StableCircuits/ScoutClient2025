@@ -43,67 +43,53 @@ type ScoreAmount = {
     amount: number[],
     points: number[]
 };
-export type Scores = {
-    overall: number[],
-    auto: {
-        score: number[],
-        leave: boolean[],
-        [Config.primaryScore.name]: ScoreAmount,
-        [Config.secondaryScore.name]: ScoreAmount,
-    },
-    teleop: {
-        score: number[],
-        [Config.endGoal.name]: boolean[],
-        [Config.secondaryEndGoal.name]: boolean[],
-        [Config.primaryScore.name]: ScoreAmount,
-        [Config.secondaryScore.name]: ScoreAmount,
-    },
-    accuracy: {
-        overall: number[],
-        [Config.primaryScore.name]: number[],
-        [Config.secondaryScore.name]: number[],
-    }
-}
+// export type Scores = {
+//     overall: number[],
+//     auto: {
+//         [x: string]: (boolean[]|number[])|ScoreAmount,
+//     },
+//     teleop: {
+//         [x: string]: (boolean[]|number[])|ScoreAmount,
+//     },
+//     accuracy: {
+//         [x: string]: number[],
+//     }
+// }
 export function getAverageScore(matches:Match[]):Score{
     console.log(matches);
-    let res:Scores = {
+    let res = {
         overall: [],
         auto: {
             score: [],
             leave: [],
-            [Config.primaryScore.name]: {
+            ...Object.fromEntries(Config.scoring.map(({name})=>[name, {
                 amount: [],
                 points: [],
-            },
-            [Config.secondaryScore.name]: {
-                amount: [],
-                points: [],
-            },
+            }]))
         },
         teleop: {
             score: [],
-            [Config.endGoal.name]: [],
-            [Config.secondaryEndGoal.name]: [],
-            [Config.primaryScore.name]: {
+            ...Object.fromEntries(Config.end.map(({name})=>[name, []])),
+            ...Object.fromEntries(Config.scoring.map(({name})=>[name, {
                 amount: [],
-                points: []
-            },
-            [Config.secondaryScore.name]: {
-                amount: [],
-                points: []
-            },
+                points: [],
+            }]))
         },
         accuracy: {
-            overall: [],
-            [Config.primaryScore.name]: [],
-            [Config.secondaryScore.name]: [],
+            overall: Array<number>(),
+            ...Object.fromEntries(Config.scoring.map(({name})=>[name, {
+                amount: [],
+                points: [],
+            }]))
         }
     };
+    type Scores = typeof res;
     //@ts-ignore
-    matches.forEach(({score}:{score:Score})=>{
+    matches.forEach(({score}:{score:Scores})=>{
         res.overall.push(score.overall);
         res.auto.score.push(score.auto.score);
         res.auto.leave.push(score.auto.leave);
+
         res.auto[Config.primaryScore.name].amount.push(score.auto[Config.primaryScore.name].amount);
         res.auto[Config.primaryScore.name].points.push(score.auto[Config.primaryScore.name].points);
         res.auto[Config.secondaryScore.name].amount.push(score.auto[Config.secondaryScore.name].amount);

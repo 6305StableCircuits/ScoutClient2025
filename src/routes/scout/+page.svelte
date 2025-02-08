@@ -6,7 +6,11 @@
     import {fade, slide} from 'svelte/transition'; 
     import Button from '$lib/components/Button.svelte';
     import Input from '$lib/components/Input.svelte';
-    import { uppercase } from '$lib';
+    import { uppercase, coerce } from '$lib';
+    let sans = $derived($scouter.toLowerCase() === "sans");
+    //globalThis.Button = Button;
+    let papyrus = $derived($scouter.toLowerCase() === "papyrus");
+    let buttonClass = $state("py-2xl h-20 w-40");
     scouter; //used to shut up intellisense
     let score = $state({
         auto: 0,
@@ -15,54 +19,40 @@
             return score.auto+score.teleop;
         }
     });
-    let misses = {
-        [Config.primaryScore.name]:0,
-        [Config.secondaryScore.name]:0,
-    };
-    let matchScore = {
+    // warning ts gets very angry here, `coerce` comes in handy
+    let misses = Object.fromEntries(Config.scoring.map((score: any) => ([score.name, 0])));
+    let matchScore: Record<string, any> = {
         overall: 0,
         auto: {
             score: 0,
             leave: false,
-            [Config.primaryScore.name]: {
+            ...Object.fromEntries(coerce<[string, Record<string, any>][]>(Config.scoring.map(coerce<()=>any>((score: Record<string, string>) => ([score.name, {
                 amount: 0,
                 points: 0,
-            },
-            [Config.secondaryScore.name]: {
-                amount: 0,
-                points: 0,
-            },
+            }])))))
         },
         teleop: {
             score: 0,
-            [Config.endGoal.name]: false,
-            [Config.secondaryEndGoal.name]: false,
-            [Config.primaryScore.name]: {
-                amount: 0,
-                points: 0
-            },
-            [Config.secondaryScore.name]: {
+            ...Object.fromEntries(coerce<[string, boolean][]>(Config.end.map(coerce<()=>any>((score: Record<string, string>) => ([score.name, false]))))),
+            ...Object.fromEntries(coerce<[string, Record<string, any>][]>(Config.scoring.map(coerce<()=>any>((score: Record<string, string>) => ([score.name, {
                 amount: 0,
                 points: 0,
-            },
+            }])))))
         },
         get accuracy(){
-            let fulls = [
-                matchScore.auto[Config.primaryScore.name].amount+matchScore.teleop[Config.primaryScore.name].amount,
-                matchScore.teleop[Config.secondaryScore.name].amount+matchScore.auto[Config.secondaryScore.name].amount
-            ];
+            // let fulls = [
+            //     matchScore.auto[Config.primaryScore.name].amount+matchScore.teleop[Config.primaryScore.name].amount,
+            //     matchScore.teleop[Config.secondaryScore.name].amount+matchScore.auto[Config.secondaryScore.name].amount
+            // ];
+            let fulls = Config.scoring.map(score => matchScore.auto[score.name].amount + matchScore.teleop[score.name].amount);
             console.log(fulls);
-            let amounts = [
-                misses[Config.primaryScore.name]+fulls[0],
-                misses[Config.secondaryScore.name]+fulls[1]
-            ];
+            let amounts = Config.scoring.map(score => score.name).map((name, index) => misses[name]+fulls[index]);
             console.log(amounts);
-            let parts = [fulls[0]/amounts[0],fulls[1]/amounts[1]].map(n=>n!==n ? 1 : n);
+            let parts = fulls.map((f,i)=>f/amounts[i]).map(n=>n!==n ? 1 : n);
             console.log(parts);
             return {
-                overall: (parts[0]+parts[1])/parts.length,
-                [Config.primaryScore.name]: parts[0],
-                [Config.secondaryScore.name]: parts[1],
+                overall: parts.reduce((a,b)=>a+b, 0)/parts.length,
+                ...Object.fromEntries(Config.scoring.map(score => score.name).map((s, i)=>[s, parts[i]]))
             }
         }
     };
@@ -77,8 +67,7 @@
         amount: 0,
         points: 0,
     });
-    let endGoal = $state(false);
-    let secondaryEndGoal = $state(false);
+    let end = $state(Object.fromEntries(Config.end.map(({name}) => [name, false])));
     let red = $state($allianceStore === "red");
     let alliance = $derived<Match["alliance"]>(red ? "red" : "blue");
     $effect(()=>{
@@ -91,6 +80,7 @@
     let redoAvailable = $state(false);
     let assists = $state(0);
     $effect(()=>{
+        let names = Config.scoring.map(({name})=>name);
         score;
         matchScore.overall = score.overall;
         matchScore.auto.score = score.auto;
@@ -178,6 +168,10 @@
     function scoreSecondary(){
         ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.secondaryScore.score(Config?.secondaryScore?.[part].points));
     }
+    function scoreFn<N extends typeof Config["scoring"][number]["name"]>(name: N) {
+        let scorePart = score[part][Config.scoring.findIndex(({name: n})=>n === name)];
+         ({points: score[part], } = scoreFn(name));
+    }
     function updateScore(fn:()=>({points:number,charged:boolean,leave:boolean,endGoal:boolean,secondaryEndGoal:boolean,secondaryScore:{amount:number,points:number},primaryScore:{amount:number,points:number},assists:number})){
         ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists}=fn());
     }
@@ -186,10 +180,18 @@
         misses[type]++;
     }
 </script>
+<style>
+    .sans{
+        font-family: 'Comic Sans MS', cursive;
+    }
+    .papyrus{
+        font-family: "Papyrus", "Inter";
+    }
+</style>
 <svelte:head>
     <title>Scouting - ScoutClient2025</title>
 </svelte:head>
-<main class="text-center">
+<main class="text-center" class:sans class:papyrus>
     {#if $scoutState === 0}
     <main out:slide>
         <h1 class="text-2xl">Scout</h1>
@@ -212,18 +214,18 @@
             <h1 class="text-2xl border border-white inline p-0.1 rounded">
                 &nbsp;{timer?.formatted??""}&nbsp;{uppercase(gameState)} | Score: {score.overall}&nbsp;
             </h1>
-            <br>
-            <Button disabled={undoAvailable} onclick={()=>{updateScore(Config.undo)}}>Undo</Button>&nbsp;<Button disabled={redoAvailable} onclick={()=>{updateScore(Config.redo)}}>Redo</Button><br>
-            <Button onclick={scorePrimary}>{uppercase(Config.primaryScore.name)} Score</Button>&nbsp;
-            <Button onclick={scoreSecondary}>{uppercase(Config.secondaryScore.name)} Score</Button><br>
-            <Button onclick={()=>miss(Config.primaryScore.name)}>Miss {uppercase(Config.primaryScore.name)}</Button>&nbsp;
-            <Button onclick={()=>miss(Config.secondaryScore.name)}>Miss {uppercase(Config.secondaryScore.name)}</Button><br>
-            <Button onclick={()=>updateScore(Config.assist)}>Assist</Button>
+            <br><br>
+            <Button disabled={undoAvailable} class={buttonClass} onclick={()=>{updateScore(Config.undo)}}>Undo</Button>&nbsp;<Button disabled={redoAvailable} class={buttonClass} onclick={()=>{updateScore(Config.redo)}}>Redo</Button><br><br>
+            <Button onclick={scorePrimary} class={buttonClass}>{uppercase(Config.primaryScore.name)} Score</Button>&nbsp;
+            <Button onclick={scoreSecondary} class={buttonClass}>{uppercase(Config.secondaryScore.name)} Score</Button><br><br>
+            <Button onclick={()=>miss(Config.primaryScore.name)} class={buttonClass}>Miss {uppercase(Config.primaryScore.name)}</Button>&nbsp;
+            <Button onclick={()=>miss(Config.secondaryScore.name)} class={buttonClass}>Miss {uppercase(Config.secondaryScore.name)}</Button><br><br>
+            <Button onclick={()=>updateScore(Config.assist)} class={buttonClass}>Assist</Button>
             {#if gameState === "auto"}
-                <Button disabled={leave} onclick={()=>{updateScore(Config.leave.score.bind(null,Config.leave.points))}}>Leave</Button><br>
+                <Button disabled={leave} onclick={()=>{updateScore(Config.leave.score.bind(null,Config.leave.points))}} class={buttonClass}>Leave</Button><br><br>
             {:else}
-            <br><Button disabled={endGoal} onclick={()=>{updateScore(Config.endGoal.score.bind(null,Config.endGoal.points))}}>{uppercase(Config.endGoal.name)}</Button>&nbsp;
-                <Button disabled={secondaryEndGoal} onclick={()=>{updateScore(Config.secondaryEndGoal.score.bind(null,Config.secondaryEndGoal.points))}}>{uppercase(Config.secondaryEndGoal.name)}</Button><br>
+            <br><br><Button disabled={endGoal} onclick={()=>{updateScore(Config.endGoal.score.bind(null,Config.endGoal.points))}} class={buttonClass}>{uppercase(Config.endGoal.name)}</Button>&nbsp;
+                <Button disabled={secondaryEndGoal} onclick={()=>{updateScore(Config.secondaryEndGoal.score.bind(null,Config.secondaryEndGoal.points))}} class={buttonClass}>{uppercase(Config.secondaryEndGoal.name)}</Button><br>
             {/if}
         {/if}
     </main>

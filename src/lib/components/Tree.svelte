@@ -22,15 +22,18 @@ It can also prettify camelCase, PascalCase, kebab-case, and snake_case.
 <style>
     :root{
         margin: 0px auto;
+        left: 4em;
     }
     details{
         display: inline;
         margin-left: 2em;
+        margin-top: 0px auto;
     }
     summary {
         margin-left: -2em;
     }
 </style>
+<div class="ml-10 mt-0 pt-0 pb-0">
 {#each entries as [name, value]}
     <details>
         <summary>
@@ -69,7 +72,8 @@ It can also prettify camelCase, PascalCase, kebab-case, and snake_case.
                 {/if}
             {/if}
         {/if}
-    </details><br>
+    </details>
     {:else}
         {@render children?.()}
 {/each}
+</div>

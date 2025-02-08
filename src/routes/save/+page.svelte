@@ -2,6 +2,9 @@
     import Tree from '$lib/components/Tree.svelte';
     import Button from '$lib/components/Button.svelte';
     import {matches} from '$lib/stores';
+    import { createDialog } from 'svelte-headlessui';
+    import Transition from 'svelte-transition';
+    let dialog = createDialog({label: "Delete scouting data?"});
     let downloadLink = $state<{[x:string]:any}>();
     let saved = $state(false);
     function download(type:"json"|"csv"){
@@ -41,11 +44,32 @@
             $matches = {matches:[]};
         }
     })
-    function deleteData(){
-        let confirmation = confirm("Are you sure you want to delete your scouting data? This cannot be undone!");
+    async function deleteData(){
+        dialog.open();
+        let confirmation = await confirm();
         if(confirmation){
             saved = true;
         }
+    }
+    let stateConfirm = $state<boolean|null>();
+    async function confirm():Promise<boolean>{
+        stateConfirm = null;
+        // let timeout = new Promise((resolve,reject)=>{
+        //     setTimeout(()=>{
+        //         dialog.close();
+        //         resolve(false);
+        //     },60000);
+        // }) as Promise<boolean>;
+        let actual = new Promise((resolve,reject)=>{
+            let interval = setInterval(()=>{
+                if(stateConfirm !== null){
+                    dialog.close();
+                    clearInterval(interval);
+                    resolve(stateConfirm as boolean);
+                }
+            })
+        }) as Promise<boolean>;
+        return actual;//Promise.race([timeout,actual])
     }
 </script>
 <main>
@@ -55,6 +79,63 @@
     <Button disabled={$matches.matches.length === 0} onclick={()=>download("json")}>Export as JSON</Button>&nbsp;
     <Button disabled={$matches.matches.length === 0} onclick={send}>Save Data</Button>&nbsp;
     <Button disabled={$matches.matches.length === 0} class="bg-[#ef0305]" onclick={deleteData}>Delete Data</Button>
+    <div class="relative z-10">
+        <Transition show={$dialog.expanded}>
+          <Transition
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <Button class="fixed inset-0 bg-black bg-opacity-25" onclick={dialog.close} />
+          </Transition>
+    
+          <div class="fixed inset-0 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <div
+                  class="w-full max-w-md transform overflow-hidden rounded-2xl bg-slate-950 shadow-[0_0_2px_white] p-6 text-left align-middle shadow-xl transition-all"
+                  use:dialog.modal
+                >
+                  <h3 class="text-lg font-medium leading-6 text-white">Delete data?</h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-grey-900">
+                        Are you sure you want to delete your scouting data? This cannot be undone!
+                    </p>
+                  </div>
+    
+                  <div class="mt-4">
+                    <Button
+                      class="bg-specialred"
+                      onclick={()=>{
+                        stateConfirm = true;
+                      }}
+                    >
+                    Delete
+                  </Button>
+                  <Button
+                      onclick={()=>{
+                        stateConfirm = false;
+                      }}
+                    >
+                    Cancel
+                  </Button>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+          </div>
+        </Transition>
+      </div>
     <!--svelte-ignore a11y_consider_explicit_label-->
     <a bind:this={downloadLink} style="display:none" href="about:blank" download><span></span></a>
 </main>

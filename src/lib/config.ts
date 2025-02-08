@@ -3,27 +3,13 @@ let amps = 0;
 let charged = false;
 let chargeStart = 0;
 let assists = 0;
-let state = {
-    assists,
-    charged,
-    points:0,
-    leave:false,
-    endGoal:false,
-    secondaryEndGoal:false,
-    primaryScore:{
-        amount: 0,
-        points: 0,
-    },
-    secondaryScore:{
-        amount: 0,
-        points: 0,
-    }
-};
-type Action = typeof state;
-let actions:Action[] = [];
-let undone:Action[] = [];
+let state: Record<string, any> = {};
+let actions:Record<string, any>[] = [];
+let undone:Record<string, any>[] = [];
 let gameState = "auto";
-export default {
+let scoring: Config["scoring"][number]["name"][] = [];
+let end: Config["end"][number]["name"][] = [];
+var config: Config = {
     reset(){
         actions = [];
         undone = [];
@@ -33,16 +19,11 @@ export default {
             charged,
             points:0,
             leave:false,
-            endGoal:false,
-            secondaryEndGoal:false,
-            primaryScore:{
+            ...Object.fromEntries(this.end.map(({name}) => [name, false])),
+            ...Object.fromEntries(this.scoring.map(({name}) => [name, {
                 amount: 0,
                 points: 0,
-            },
-            secondaryScore:{
-                amount: 0,
-                points: 0,
-            }
+            }]))
         };
         amps = 0;
         charged = false;
@@ -75,63 +56,178 @@ export default {
         state.assists = assists;
         return state;
     },
-    primaryScore: {
-        name: "speaker",
-        auto: {
-            points: 5,
-        },
-        get teleop() {
-            if(gameState === "auto"){
-                gameState = "teleop";
-                state.primaryScore = {amount:0,points:0};
-                state.secondaryScore = {amount:0,points:0};
-            }
-            return {
-                get points(){
-                    let points = state.charged ? 5 : 2;
-                    return points;
+    scoring: [
+        {
+            name: "coral (trough)",
+            auto: {
+                points: 3,
+            },
+            get teleop() {
+                if(gameState === "auto"){
+                    gameState = "teleop";
+                    for (let score of scoring) {
+                        state[score] = {
+                            amount: 0,
+                            points: 0,
+                        };
+                    }
                 }
+                return {
+                    get points(){
+                        return 2;
+                    }
+                }
+            },
+            score(points:number){
+                actions.push({...state});
+                state.points+=points;
+                state["coral (trough)"].amount++;
+                state["coral (trough)"].points+=points;
+                return state;
             }
         },
-        score(points:number){
-            actions.push({...state});
-            state.points+=points;
-            if(state.charged && (Date.now()-chargeStart)/1000 > 15){
-                state.charged = false;
+        {
+            name: "coral (l2 branch)",
+            auto: {
+                points: 4,
+            },
+            get teleop() {
+                if(gameState === "auto"){
+                    gameState = "teleop";
+                    for (let score of scoring) {
+                        state[score] = {
+                            amount: 0,
+                            points: 0,
+                        };
+                    }
+                }
+                return {
+                    get points(){
+                        return 3;
+                    }
+                }
+            },
+            score(points:number){
+                actions.push({...state});
+                state.points+=points;
+                state["coral (l2 branch)"].amount++;
+                state["coral (l2 branch)"].points+=points;
+                return state;
             }
-            state.primaryScore.amount++;
-            state.primaryScore.points+=points;
-            return state;
-        }
-    },
-    secondaryScore: {
-        name: "amp",
-        auto: {
-            points: 2,
         },
-        get teleop(){
-            if(gameState === "auto"){
-                gameState = "teleop";
-                state.primaryScore = {amount:0,points:0};
-                state.secondaryScore = {amount:0,points:0};
-            }
-            return {
-                points: 1,
+        {
+            name: "coral (l3 branch)",
+            auto: {
+                points: 6,
+            },
+            get teleop() {
+                if(gameState === "auto"){
+                    gameState = "teleop";
+                    for (let score of scoring) {
+                        state.scoring[score] = {
+                            amount: 0,
+                            points: 0,
+                        };
+                    }
+                }
+                return {
+                    get points(){
+                        return 4;
+                    }
+                }
+            },
+            score(points:number){
+                actions.push({...state});
+                state.points+=points;
+                state.scoring["coral (l3 branch)"].amount++;
+                state.scoring["coral (l3 branch)"].points+=points;
+                return state;
             }
         },
-        score(points:number){
-            actions.push({...state});
-            state.points+=points;
-            amps++;
-            if(amps === 2){
-                state.charged = true;
-                chargeStart = Date.now();
+        {
+            name: "coral (l4 branch)",
+            auto: {
+                points: 7,
+            },
+            get teleop() {
+                if(gameState === "auto"){
+                    gameState = "teleop";
+                    for (let score of scoring) {
+                        state.scoring[score] = {
+                            amount: 0,
+                            points: 0,
+                        };
+                    }
+                }
+                return {
+                    get points(){
+                        return 5;
+                    }
+                }
+            },
+            score(points:number){
+                actions.push({...state});
+                state.points+=points;
+                state.scoring["coral (l4 branch)"].amount++;
+                state.scoring["coral (l4 branch)"].points+=points;
+                return state;
             }
-            state.secondaryScore.amount++;
-            state.secondaryScore.points+=points;
-            return state;
         },
-    },
+        {
+            name: "algae (processor)",
+            auto: {
+                points: 6,
+            },
+            get teleop(){
+                if(gameState === "auto"){
+                    gameState = "teleop";
+                    for (let score of scoring) {
+                        state.scoring[score] = {
+                            amount: 0,
+                            points: 0,
+                        };
+                    }
+                }
+                return {
+                    points: 6,
+                }
+            },
+            score(points:number){
+                actions.push({...state});
+                state.points+=points;
+                state.scoring["algae (processor)"].amount++;
+                state.scoring["algae (processor)"].points+=points;
+                return state;
+            },
+        },
+        {
+            name: "algae (net)",
+            auto: {
+                points: 4,
+            },
+            get teleop(){
+                if(gameState === "auto"){
+                    gameState = "teleop";
+                    for (let score of scoring) {
+                        state.scoring[score] = {
+                            amount: 0,
+                            points: 0,
+                        };
+                    }
+                }
+                return {
+                    points: 4,
+                }
+            },
+            score(points:number){
+                actions.push({...state});
+                state.points+=points;
+                state.scoring["algae (net)"].amount++;
+                state.scoring["algae (net)"].points+=points;
+                return state;
+            },
+        },
+    ],
     leave: {
         name: "Leave",
         points: 2,
@@ -142,34 +238,93 @@ export default {
             return state;
         }
     },
-    endGoal: {
-        name: "climb",
-        points: 3,
-        score(points:number){
-            if(gameState === "auto"){
-                gameState = "teleop";
-                state.primaryScore = {amount:0,points:0};
-                state.secondaryScore = {amount:0,points:0};
+    end: [
+        {
+            name: "deep cage",
+            points: 12,
+            score(points:number){
+                if(gameState === "auto"){
+                    gameState = "teleop";
+                    for (let score of scoring) {
+                        state.scoring[score] = {
+                            amount: 0,
+                            points: 0,
+                        };
+                    }
+                }
+                actions.push({...state});
+                state.end["deep cage"] = true;
+                state.points+=points;
+                return state;
             }
-            actions.push({...state});
-            state.endGoal = true;
-            state.points+=points;
-            return state;
+        },
+        {
+            name: "shallow cage",
+            points: 6,
+            score(points:number){
+                if(gameState === "auto"){
+                    gameState = "teleop";
+                    for (let score of scoring) {
+                        state.scoring[score] = {
+                            amount: 0,
+                            points: 0,
+                        };
+                    }
+                }
+                actions.push({...state});
+                state.end["shallow cage"] = true;
+                state.points+=points;
+                return state;
+            }
         }
-    },
-    secondaryEndGoal: {
+    ],
+    park: {
         name: "park",
-        points: 1,
-        score(points:number){
-            if(gameState === "auto"){
+        points: 2,
+        score(points:number) {
+            if (gameState === "auto") {
                 gameState = "teleop";
-                state.primaryScore = {amount:0,points:0};
-                state.secondaryScore = {amount:0,points:0};
+                for (let score of scoring) {
+                    state.scoring[score] = {
+                        amount: 0,
+                        points: 0,
+                    };
+                }
             }
             actions.push({...state});
-            state.secondaryEndGoal = true;
+            state.park = true;
             state.points+=points;
             return state;
         }
-    },
+    }
 } as const satisfies Config;
+state = {
+    assists,
+    charged,
+    points:0,
+    leave:false,
+    park: false,
+    end: Object.fromEntries(config.end.map(({name}) => [name, false])),
+    scoring: Object.fromEntries(config.scoring.map(({name}) => [name, {
+        amount: 0,
+        points: 0,
+    }]))
+};
+scoring = config.scoring.map(({name}) => name);
+end = config.end.map(({name}) => name);
+type Action = {
+    assists: number,
+    charged: boolean,
+    points: number,
+    leave: boolean,
+    end: {
+        [x: (typeof config)["end"][number]["name"]]: boolean,
+    },
+    scoring: {
+        [x: (typeof config)["scoring"][number]["name"]]: {
+            amount: number, 
+            points: number,
+        }
+    }
+};
+export default config;

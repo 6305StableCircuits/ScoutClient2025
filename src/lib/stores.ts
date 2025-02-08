@@ -1,8 +1,8 @@
-import {writable, readable} from 'svelte/store';
+import {writable, readable, get} from 'svelte/store';
 import type {Match} from '$lib/types';
 import { persisted } from 'svelte-persisted-store';
-import {get} from 'svelte/store';
 import Config from '$lib/config';
+import {coerce} from '$lib';
 export {get};
 export const matches = persisted<{matches:Match[]}>("matches",{matches:[]});
 export const scouter = persisted('scouter',"",{
@@ -11,8 +11,35 @@ export const scouter = persisted('scouter',"",{
         stringify: (v:string)=>v
     }
 });
-export const scoutState = writable(0);
+let scoutStateValue = 0;
+let subscribers = Symbol("subscribers");
+export const scoutState = {
+    subscribe(fn:(v?:typeof scoutStateValue)=>any){
+        fn(scoutStateValue);
+        this[subscribers].add(fn);
+        return ()=>{
+            this[subscribers].delete(fn);
+        }
+    },
+    [subscribers]:new Set<(v?:typeof scoutStateValue)=>any>,
+    set(v:number){
+        if(v !== scoutStateValue){
+            scoutStateValue = v;
+            [...this[subscribers]].forEach((s)=>s(v));
+        }
+    }
+};
 export const alliance = persisted<Match["alliance"]>("alliance","red");
+type Settings = {
+    mode: "amoled" | "dark" | "light",
+    fish: boolean,
+    scoutFont: "default" | "papyrus" | "sans"
+};
+export const settings = persisted<Settings>("settings",{
+    mode: "amoled",
+    fish: true,
+    scoutFont: "default",
+});
 export const currentMatch = writable<Match>({
     team: 0,
     match: 0,
@@ -24,32 +51,25 @@ export const currentMatch = writable<Match>({
         auto: {
             score: 0,
             leave: false,
-            [Config.primaryScore.name]: {
+            ...Object.fromEntries(coerce<[string, Record<string, any>][]>(Config.scoring.map(coerce<()=>any>((score: Record<string, string>) => ([score.name, {
                 amount: 0,
                 points: 0,
-            },
-            [Config.secondaryScore.name]: {
-                amount: 0,
-                points: 0,
-            },
+            }])))))
         },
         teleop: {
             score: 0,
-            [Config.endGoal.name]: false,
-            [Config.secondaryEndGoal.name]: false,
-            [Config.primaryScore.name]: {
+            ...Object.fromEntries(coerce<[string, Record<string, any>][]>(Config.end.map(coerce<()=>any>((score: Record<string, string>) => ([score.name, false]))))),
+            ...Object.fromEntries(coerce<[string, Record<string, any>][]>(Config.scoring.map(coerce<()=>any>((score: Record<string, string>) => ([score.name, {
                 amount: 0,
                 points: 0,
-            },
-            [Config.secondaryScore.name]: {
-                amount: 0,
-                points: 0
-            },
+            }])))))
         },
         accuracy: {
             overall: 0,
-            [Config.primaryScore.name]: 0,
-            [Config.secondaryScore.name]: 0,
+            ...Object.fromEntries(coerce<[string, Record<string, any>][]>(Config.scoring.map(coerce<()=>any>((score: Record<string, string>) => ([score.name, {
+                amount: 0,
+                points: 0,
+            }])))))
         }
     },
     assists: 0,

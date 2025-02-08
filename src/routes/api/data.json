@@ -1,1 +1,127 @@
-{}
+{
+    "matches": [
+        {
+            "team": 6305,
+            "match": 0,
+            "alliance": "red",
+            "scout": "Andrew",
+            "date": 1731903774429,
+            "score": {
+                "overall": 31,
+                "auto": {
+                    "score": 0,
+                    "leave": false,
+                    "speaker": {
+                        "amount": 0,
+                        "points": 0
+                    },
+                    "amp": {
+                        "amount": 0,
+                        "points": 0
+                    }
+                },
+                "teleop": {
+                    "score": 31,
+                    "climb": true,
+                    "park": false,
+                    "speaker": {
+                        "amount": 7,
+                        "points": 26
+                    },
+                    "amp": {
+                        "amount": 2,
+                        "points": 2
+                    }
+                },
+                "accuracy": {
+                    "overall": 0.7708333333333333,
+                    "speaker": 0.875,
+                    "amp": 0.6666666666666666
+                }
+            },
+            "assists": 1
+        },
+        {
+            "team": 1671,
+            "match": 1,
+            "alliance": "blue",
+            "scout": "Andrew",
+            "date": 1731903919404,
+            "score": {
+                "overall": 47,
+                "auto": {
+                    "score": 0,
+                    "leave": false,
+                    "speaker": {
+                        "amount": 0,
+                        "points": 0
+                    },
+                    "amp": {
+                        "amount": 0,
+                        "points": 0
+                    }
+                },
+                "teleop": {
+                    "score": 47,
+                    "climb": true,
+                    "park": false,
+                    "speaker": {
+                        "amount": 10,
+                        "points": 41
+                    },
+                    "amp": {
+                        "amount": 3,
+                        "points": 3
+                    }
+                },
+                "accuracy": {
+                    "overall": 0.9761904761904762,
+                    "speaker": 0.9523809523809523,
+                    "amp": 1
+                }
+            },
+            "assists": 3
+        },
+        {
+            "team": 1323,
+            "match": 2,
+            "alliance": "blue",
+            "scout": "Andrew",
+            "date": 1731904032667,
+            "score": {
+                "overall": 57,
+                "auto": {
+                    "score": 0,
+                    "leave": false,
+                    "speaker": {
+                        "amount": 0,
+                        "points": 0
+                    },
+                    "amp": {
+                        "amount": 0,
+                        "points": 0
+                    }
+                },
+                "teleop": {
+                    "score": 57,
+                    "climb": true,
+                    "park": false,
+                    "speaker": {
+                        "amount": 13,
+                        "points": 50
+                    },
+                    "amp": {
+                        "amount": 4,
+                        "points": 4
+                    }
+                },
+                "accuracy": {
+                    "overall": 0.9814814814814814,
+                    "speaker": 0.9629629629629629,
+                    "amp": 1
+                }
+            },
+            "assists": 4
+        }
+    ]
+}

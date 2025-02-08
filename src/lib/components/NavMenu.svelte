@@ -2,7 +2,7 @@
     import {clickoutside} from '@svelte-put/clickoutside';
     import Link from '$lib/components/Link.svelte';
     import {page} from '$app/stores';
-    import {slide,fade} from 'svelte/transition';
+    import {slide,fade,fly} from 'svelte/transition';
     import {uppercase,pathEntries,isCurrentPath} from '$lib';
     let mobile = globalThis?.matchMedia?.("only screen and (max-width: 600px)")?.matches;
     import Button from '$lib/components/Button.svelte';
@@ -43,7 +43,7 @@
     ☰
     </Button>
     {#if !hidden}
-        <div class="rounded pt-0 bg-gray-800 h-svh" onoutroend={()=>hidden=true} in:slide={{axis:"x"}} out:slide={{axis:"x"}}>
+        <div class="rounded pt-0 bg-gray-800 h-svh" in:slide={{axis:"x"}} out:fly={{x:100,duration:1000}}><!--Can't quite decide between out:fly and out:slide-->
             {#key $page}
                 {#each pathEntries as [title,path]}
                     {#if showing}
