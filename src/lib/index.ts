@@ -55,6 +55,7 @@ type ScoreAmount = {
 //         [x: string]: number[],
 //     }
 // }
+
 export function getAverageScore(matches:Match[]):Score{
     console.log(matches);
     let res = {

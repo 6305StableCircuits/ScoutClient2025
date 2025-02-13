@@ -3,6 +3,7 @@
     import Rainbow from '$lib/components/Rainbow.svelte';
     import Tree from '$lib/components/Tree.svelte';
     import Graph from '$lib/components/Graph.svelte';
+    import Link from '$lib/components/Link.svelte';
     let count = $state(0);
     let double = $derived(count*2);
     let isHigh = $state(false);
@@ -27,7 +28,12 @@
     <title>ScoutClient 2025</title>
 </svelte:head>
 <main> 
-<h1>Welcome to SvelteKit</h1>
+    <img src="src/routes/blue-horse.png" alt="Honse">
+    <h1>6305 Scouting</h1>
+    <Link url="scout">Scout</Link>
+    <Link url="save">Save Data</Link>
+    <Link url="data">Leaderboards</Link>
+<!-- <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 <Button onclick={()=>count++} textSize="sm">Count is {count}</Button> {count} * 2 = {double}<br>
 {#if isHigh}
@@ -35,5 +41,5 @@
 {/if}
 <br>
 <Tree bind:object pretty={true}/>
-<Graph {data}/>
+<Graph {data}/> -->
 </main>

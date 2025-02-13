@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types';
 import {json} from '@sveltejs/kit'
+//@ts-ignore
 import * as fs from 'fs';
 
 export const GET: RequestHandler = async () => {
