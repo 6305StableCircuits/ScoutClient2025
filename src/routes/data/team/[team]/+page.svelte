@@ -42,15 +42,17 @@
 		<details>
 			<summary>Accuracy: {Math.trunc(deNaN(td.avg.score.accuracy.overall*100))}%</summary>
 			<p>
-				{uppercase(Config.primaryScore.name)}: {Math.trunc(deNaN(td.avg.score.accuracy[Config.primaryScore.name]*100))}%<br>
-				{uppercase(Config.secondaryScore.name)}: {Math.trunc(deNaN(td.avg.score.accuracy[Config.secondaryScore.name]*100))}%
+				{#each Config.scoring as score}
+					{uppercase(score.name)}: {Math.trunc(deNaN(td.avg.score.accuracy[score.name]*100))}%<br>
+				{/each}
 			</p>
 		</details>
 	</div>
 	<h2>Autonomous</h2>
 	<div class="border border-white rounded">
-		{uppercase(Config.primaryScore.name)}: {deNaN(td.avg.score.auto[Config.primaryScore.name].amount)}<br>
-		{uppercase(Config.secondaryScore.name)}: {deNaN(td.avg.score.auto[Config.secondaryScore.name].amount)}
+		{#each Config.scoring as score}
+			{uppercase(score.name)}: {deNaN(td.avg.score.auto[score.name].amount)}<br>
+		{/each}
 	</div>
 	<h2>Performance Over Time</h2>
 	<center>

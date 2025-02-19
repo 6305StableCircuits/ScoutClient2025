@@ -25,9 +25,6 @@ var config: Config = {
                 points: 0,
             }]))
         };
-        amps = 0;
-        charged = false;
-        chargeStart = 0;
         assists = 0;
     },
     get undoAvailable(){

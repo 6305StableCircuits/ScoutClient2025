@@ -7,10 +7,16 @@
     import Button from '$lib/components/Button.svelte';
     import Input from '$lib/components/Input.svelte';
     import { uppercase, coerce } from '$lib';
+    import { isRedirect } from '@sveltejs/kit';
+    import { config } from 'dotenv';
     let sans = $derived($scouter.toLowerCase() === "sans");
     //globalThis.Button = Button;
     let papyrus = $derived($scouter.toLowerCase() === "papyrus");
     let buttonClass = $state("py-2xl h-20 w-40");
+    //@ts-ignore
+    let scoringStuff = [];
+    //@ts-ignore
+    let endingStuff = [];
     scouter; //used to shut up intellisense
     let score = $state({
         auto: 0,
@@ -85,10 +91,12 @@
         matchScore.overall = score.overall;
         matchScore.auto.score = score.auto;
         matchScore.auto.leave = leave;
-        matchScore[part][Config.primaryScore.name] = $state.snapshot(primaryScore);
-        matchScore[part][Config.secondaryScore.name] = $state.snapshot(secondaryScore);
-        matchScore.teleop[Config.endGoal.name] = endGoal;
-        matchScore.teleop[Config.secondaryEndGoal.name] = secondaryEndGoal;
+        for (let index = 0; index < Config.end.length; index++) {
+            //@ts-ignore
+            matchScore[part][Config.scoring[index].name] = $state.snapshot(scoringStuff[index]);
+            //@ts-ignore
+            matchScore.teleop[Config.end[index].name] = $state.snapshot(endingStuff[index]);
+        }
         matchScore.teleop.score = score.teleop;
         $currentMatch.score = matchScore;
         ({undoAvailable,redoAvailable} = Config);
@@ -162,15 +170,23 @@
             }
         })
     }
-    function scorePrimary(){
-        ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.primaryScore.score(Config?.primaryScore?.[part].points));
-    }
-    function scoreSecondary(){
-        ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.secondaryScore.score(Config?.secondaryScore?.[part].points));
-    }
-    function scoreFn<N extends typeof Config["scoring"][number]["name"]>(name: N) {
-        let scorePart = score[part][Config.scoring.findIndex(({name: n})=>n === name)];
-         ({points: score[part], } = scoreFn(name));
+    // function scorePrimary(){
+    //     ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.primaryScore.score(Config?.primaryScore?.[part].points));
+    // }
+    // function scoreSecondary(){
+    //     ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.secondaryScore.score(Config?.secondaryScore?.[part].points));
+    // }
+    // function scoreFn<N extends typeof Config["scoring"][number]["name"]>(name: N) {
+    //     let scorePart = score[part][Config.scoring.findIndex(({name: n})=>n === name)];
+    //      ({points: score[part], } = scoreFn(name));
+    // }
+    function scoreScore<N extends keyof (typeof Config)['scoring']>(index: N) {
+        function setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state: Record<string, any>) {
+            //todo implement
+        }
+        return function () {
+            setStuffIReallyDontWannaDealWithRightNowInsertNameHere(coerce<(...args:any[])=>any>(coerce<Record<string, (...args: any[])=>any>>(Config.scoring[index]).score)(coerce<{[i: number]: any}>(Config.scoring)[coerce<number>(index)][coerce<number>(part)].points))
+        }
     }
     function updateScore(fn:()=>({points:number,charged:boolean,leave:boolean,endGoal:boolean,secondaryEndGoal:boolean,secondaryScore:{amount:number,points:number},primaryScore:{amount:number,points:number},assists:number})){
         ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists}=fn());
@@ -228,6 +244,7 @@
                 <Button disabled={secondaryEndGoal} onclick={()=>{updateScore(Config.secondaryEndGoal.score.bind(null,Config.secondaryEndGoal.points))}} class={buttonClass}>{uppercase(Config.secondaryEndGoal.name)}</Button><br>
             {/if}
         {/if}
+        
     </main>
     {/if}
 </main>
