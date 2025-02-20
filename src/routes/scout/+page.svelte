@@ -14,9 +14,9 @@
     let papyrus = $derived($scouter.toLowerCase() === "papyrus");
     let buttonClass = $state("py-2xl h-20 w-40");
     //@ts-ignore
-    let scoringStuff = [];
+    let scoringStuff: any[] = [];
     //@ts-ignore
-    let endingStuff = [];
+    let endingStuff: any[] = [];
     scouter; //used to shut up intellisense
     let score = $state({
         auto: 0,
@@ -188,10 +188,10 @@
             setStuffIReallyDontWannaDealWithRightNowInsertNameHere(coerce<(...args:any[])=>any>(coerce<Record<string, (...args: any[])=>any>>(Config.scoring[index]).score)(coerce<{[i: number]: any}>(Config.scoring)[coerce<number>(index)][coerce<number>(part)].points))
         }
     }
-    function updateScore(fn:()=>({points:number,charged:boolean,leave:boolean,endGoal:boolean,secondaryEndGoal:boolean,secondaryScore:{amount:number,points:number},primaryScore:{amount:number,points:number},assists:number})){
-        ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists}=fn());
+    function updateScore(fn:()=>({points:number,leave:boolean,endingStuff:any[],scoringStuff:any[],assists:number})){
+        ({points:score[part],leave,endingStuff,scoringStuff,assists}=fn());
     }
-    type ScoreType = [typeof Config.primaryScore.name,typeof Config.secondaryScore.name][number];
+    type ScoreType = [typeof Config.scoring[number]['name']][number];
     function miss(type:ScoreType){
         misses[type]++;
     }
@@ -232,16 +232,19 @@
             </h1>
             <br><br>
             <Button disabled={undoAvailable} class={buttonClass} onclick={()=>{updateScore(Config.undo)}}>Undo</Button>&nbsp;<Button disabled={redoAvailable} class={buttonClass} onclick={()=>{updateScore(Config.redo)}}>Redo</Button><br><br>
-            <Button onclick={scorePrimary} class={buttonClass}>{uppercase(Config.primaryScore.name)} Score</Button>&nbsp;
-            <Button onclick={scoreSecondary} class={buttonClass}>{uppercase(Config.secondaryScore.name)} Score</Button><br><br>
-            <Button onclick={()=>miss(Config.primaryScore.name)} class={buttonClass}>Miss {uppercase(Config.primaryScore.name)}</Button>&nbsp;
-            <Button onclick={()=>miss(Config.secondaryScore.name)} class={buttonClass}>Miss {uppercase(Config.secondaryScore.name)}</Button><br><br>
+            {#each Config.scoring as score, i}
+                <Button onclick={scoreScore(i)} class={buttonClass}>{uppercase(Config.scoring[i].name)} Score</Button>&nbsp;
+            {/each}
+            <!-- <Button onclick={()=>miss(Config.primaryScore.name)} class={buttonClass}>Miss {uppercase(Config.primaryScore.name)}</Button>&nbsp;
+            <Button onclick={()=>miss(Config.secondaryScore.name)} class={buttonClass}>Miss {uppercase(Config.secondaryScore.name)}</Button><br><br> -->
             <Button onclick={()=>updateScore(Config.assist)} class={buttonClass}>Assist</Button>
             {#if gameState === "auto"}
                 <Button disabled={leave} onclick={()=>{updateScore(Config.leave.score.bind(null,Config.leave.points))}} class={buttonClass}>Leave</Button><br><br>
             {:else}
-            <br><br><Button disabled={endGoal} onclick={()=>{updateScore(Config.endGoal.score.bind(null,Config.endGoal.points))}} class={buttonClass}>{uppercase(Config.endGoal.name)}</Button>&nbsp;
-                <Button disabled={secondaryEndGoal} onclick={()=>{updateScore(Config.secondaryEndGoal.score.bind(null,Config.secondaryEndGoal.points))}} class={buttonClass}>{uppercase(Config.secondaryEndGoal.name)}</Button><br>
+                <br><br><Button disabled={endingStuff[0]} onclick={()=>{updateScore(Config.endGoal.score.bind(null,endingStuff[0]))}} class={buttonClass}>{uppercase(Config.endGoal.name)}</Button>&nbsp;
+                {#each endingStuff as end,i}
+                <Button disabled={end[i+1]} onclick={()=>{updateScore(Config.secondaryEndGoal.score.bind(null,Config.end[i+1].points))}} class={buttonClass}>{uppercase(Config.secondaryEndGoal.name)}</Button><br>
+                {/each}
             {/if}
         {/if}
         
