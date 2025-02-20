@@ -16,6 +16,7 @@ export default {
             ExtraGreen: "rgba(54, 197, 68, 0.52)",
             ExtraOrange: "#FF8559",
             ExtraLightBlue: "#31A8C0",
+            GrayedOutText: "rgba(91, 90, 90, 1)",
             ...colors
         },
         extend: {

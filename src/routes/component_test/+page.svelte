@@ -1,13 +1,18 @@
 <script lang="ts">
   import { ButtonSizes, ButtonBgColors } from "$lib/ButtonStyles";
+  import Dropdown from "$lib/components/Dropdown.svelte";
   import Incrementor from "$lib/components/incrementor.svelte";
   import InScoutNav from "$lib/components/InScoutNav.svelte";
 import NewButton from "$lib/components/NewButton.svelte";
   import type { NavButtonIds } from "$lib/utils";
+  import { redirect } from "@sveltejs/kit";
   let nav : InScoutNav;
   function change(id: NavButtonIds){
     
   }
+  let DropdownValue: any;
+  
+  
 
 </script>
 <InScoutNav selected={2}  bind:this={nav} func={change}></InScoutNav>
@@ -22,4 +27,8 @@ import NewButton from "$lib/components/NewButton.svelte";
 
 <Incrementor color={ButtonBgColors.ExtraOrange} middle_opacity="brightness-75" MAX_SCORE={10}></Incrementor>
 <Incrementor color={ButtonBgColors.ExtraLightBlue} middle_opacity="brightness-25" MAX_SCORE={20} wide={true}></Incrementor>
+<Dropdown options={["Red", "Blue"]} bind:current_value={DropdownValue}></Dropdown>
+<p>
+  {DropdownValue}
+</p>
 
