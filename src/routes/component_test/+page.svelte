@@ -3,10 +3,14 @@
   import Incrementor from "$lib/components/incrementor.svelte";
   import InScoutNav from "$lib/components/InScoutNav.svelte";
 import NewButton from "$lib/components/NewButton.svelte";
-
+  import type { NavButtonIds } from "$lib/utils";
+  let nav : InScoutNav;
+  function change(id: NavButtonIds){
+    
+  }
 
 </script>
-<InScoutNav selected={2}></InScoutNav>
+<InScoutNav selected={2}  bind:this={nav} func={change}></InScoutNav>
 <NewButton text="Win" func={() => {console.log("Win Button pressed")}} colour={ButtonBgColors.Win} size={ButtonSizes.Short}/>
 <NewButton text="Lose" func={() => {console.log("Lose Button pressed")}} colour={ButtonBgColors.Lose} size={ButtonSizes.Short}/>
 <NewButton text="Submit" func={() => {console.log("Submit Button pressed")}} colour={ButtonBgColors.Submit} size={ButtonSizes.Longest}/>
