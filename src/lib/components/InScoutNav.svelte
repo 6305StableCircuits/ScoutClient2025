@@ -28,9 +28,8 @@
 {#snippet navButton(text: String, selected: boolean = false)}
   <button
     onclick={func}
-    class="rounded-[99px] hover:brightness-125 {selected
-      ? 'bg-[#6567AE]'
-      : 'bg-secondary'} p-2 m-2 shadow-inner shadow-black w-[103px] h-[37px]"
+    class="rounded-[99px] hover:brightness-125 {selected ? 'bg-[#6567AE]': 'bg-secondary'}
+    p-2 m-2 shadow-inner shadow-black w-[103px] h-[37px]"
     >{text}</button
   >
 {/snippet}
