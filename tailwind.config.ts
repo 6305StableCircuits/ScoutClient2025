@@ -7,6 +7,15 @@ export default {
             specialgreen: `#03c12b`,
             specialblue: '#135fef',
             specialred: '#ef0305',
+            primary: "#B1B2CB",
+            secondary: "#393A60",
+            WinGreen: "#549C47",
+            LoseRed: "#D50306",
+            SubmitBlue: "#3445FF",
+            ExtraBlue: "#3682C5",
+            ExtraGreen: "rgba(54, 197, 68, 0.52)",
+            ExtraOrange: "#FF8559",
+            ExtraLightBlue: "#31A8C0",
             ...colors
         },
         extend: {
