@@ -4,18 +4,19 @@
   import Incrementor from "$lib/components/incrementor.svelte";
   import InScoutNav from "$lib/components/InScoutNav.svelte";
 import NewButton from "$lib/components/NewButton.svelte";
-  import type { NavButtonIds } from "$lib/utils";
+  import { NavButtonIds } from "$lib/utils";
   import { redirect } from "@sveltejs/kit";
   let nav : InScoutNav;
   function change(id: NavButtonIds){
-    
+    console.log(id)
   }
-  let DropdownValue: any;
-  
-  
+  let DropdownValue: any = $state("Red")
+  let selected_value = $derived(DropdownValue === "Red" ? NavButtonIds.Teleop : NavButtonIds.End)
+  let inc_vals = $state([0, 0])
+  $inspect(inc_vals)
 
 </script>
-<InScoutNav selected={2}  bind:this={nav} func={change}></InScoutNav>
+<InScoutNav selected={selected_value}  bind:this={nav} func={change}></InScoutNav>
 <NewButton text="Win" func={() => {console.log("Win Button pressed")}} colour={ButtonBgColors.Win} size={ButtonSizes.Short}/>
 <NewButton text="Lose" func={() => {console.log("Lose Button pressed")}} colour={ButtonBgColors.Lose} size={ButtonSizes.Short}/>
 <NewButton text="Submit" func={() => {console.log("Submit Button pressed")}} colour={ButtonBgColors.Submit} size={ButtonSizes.Longest}/>
@@ -25,10 +26,12 @@ import NewButton from "$lib/components/NewButton.svelte";
 <NewButton text="Extra1" func={() => {console.log("Etxra1 Button pressed")}} colour={ButtonBgColors.ExtraBlue} size={ButtonSizes.Longest}/>
 <NewButton text="Submit" func={() => {console.log("Extra2 Button pressed")}} colour={ButtonBgColors.ExtraGreen} size={ButtonSizes.Longest}/>
 
-<Incrementor color={ButtonBgColors.ExtraOrange} middle_opacity="brightness-75" MAX_SCORE={10}></Incrementor>
-<Incrementor color={ButtonBgColors.ExtraLightBlue} middle_opacity="brightness-25" MAX_SCORE={20} wide={true}></Incrementor>
-<Dropdown options={["Red", "Blue"]} bind:current_value={DropdownValue}></Dropdown>
+<Incrementor color={ButtonBgColors.ExtraOrange} middle_opacity="brightness-75" MAX_SCORE={10} bind:value={inc_vals[0]}></Incrementor>
+<Incrementor color={ButtonBgColors.ExtraLightBlue} middle_opacity="brightness-25" MAX_SCORE={20} wide={true} bind:value={inc_vals[1]}></Incrementor>
+<Dropdown options={["Red", "Blue", "Other"]} bind:current_value={DropdownValue}></Dropdown>
 <p>
   {DropdownValue}
+  {inc_vals[0]}
+  {inc_vals[1]}
 </p>
 

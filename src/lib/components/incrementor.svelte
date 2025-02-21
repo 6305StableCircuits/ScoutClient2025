@@ -7,6 +7,7 @@
     middle_opacity: IncrementorOpacities;
     wide?: boolean;
     MAX_SCORE: number;
+    value?: any;
   }
   let {
     net = false,
@@ -14,6 +15,7 @@
     middle_opacity,
     wide = false,
     MAX_SCORE,
+    value = $bindable()
   }: Props = $props();
 
   // If not wide make it not wide
@@ -40,10 +42,13 @@
   });
   function increment() {
     count++;
+    value = count
   }
   function decrement() {
     count--;
+    value = count
   }
+
 </script>
 
   
