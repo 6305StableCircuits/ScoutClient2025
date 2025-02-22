@@ -19,7 +19,7 @@
   import { NavButtonIds } from '$lib/utils';
   import type { MouseEventHandler } from 'svelte/elements';
 
-  let { selected, func }: { selected: NavButtonIds; func: any } = $props();
+  let { selected = $bindable(), func }: { selected: NavButtonIds; func: any } = $props();
 </script>
 
 <div class="relative top-0 flex justify-between">
