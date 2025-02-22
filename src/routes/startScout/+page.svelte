@@ -4,11 +4,13 @@
   import Dropdown from "$lib/components/Dropdown.svelte";
   import NewButton from "$lib/components/NewButton.svelte";
   import type { TeamColors } from "$lib/types";
-  import { redirect } from "@sveltejs/kit";
+
 
   
   let max_reached = $state(false);
+
   let errors_text : HTMLParagraphElement;
+  let errors_head: HTMLLabelElement;
 
 
   let scout_name = $state("");
@@ -23,9 +25,10 @@
       max_reached = false;
     }
   });
+
   function validate(data : Map<string, string | Number | TeamColors | undefined >){
     let data_errors : string[] = []
-    if (data.get("name") === ""){
+    if (data.get("name") === "" || data.get("name") === undefined){
       data_errors.push("Scout name is empty, please put a name")
     }
     if (data.get("team_num") !== undefined ){
@@ -50,17 +53,21 @@
     data.set("team_num", team_num)
     data.set("team_color", team_color)
     data.set("match_num", match_num)
+    console.info(data)
     let errors: string[] = validate(data)
-    console.error(errors)
     if (errors.length !== 0){ // if there are errors
       errors_text.hidden = false;
-      errors_text.textContent = ""
+      errors_head.hidden = false;
+      errors_text.textContent = "" // clear it just in case there were previous errors
       errors.forEach(element => {
         errors_text.textContent += element + (errors.indexOf(element) !== errors.length-1 ? ", \n" : ".") // append every error to the errors_text and add a comma or period
       });
       
     }
-    goto(`/duringScout?name=${scout_name}&team_num=${team_num}&team_color=${team_color}&match_num=${match_num}`)
+    else{
+      goto(`/duringScout?name=${scout_name}&team_num=${team_num}&team_color=${team_color}&match_num=${match_num}`)
+    }
+    
 
   }
 </script>
@@ -69,9 +76,9 @@
   <div class="flex h-[80vh] flex-col items-center">
     <h1 class="mb-5">New Game</h1>
     <div>
-      <p>
+      <label for="_" bind:this={errors_head} hidden>
         Errors(s): 
-      </p>
+      </label>
       <p hidden class="text-red-400 whitespace-pre-line" bind:this={errors_text}>
         
 
