@@ -21,9 +21,9 @@
     select{
         background-color:black;
     }
-    input[type="text"],input[type="number"]{
+    /* input[type="text"],input[type="number"]{
         background-color:black;
-    }
+    } */
     td,th{
         border-left: 1px white solid;
         border-top: 1px white solid;
@@ -86,4 +86,8 @@ tr:last-of-type{
 
 table{
     border-collapse: separate;
+}
+h1{
+    font-weight: 700;
+    font-size: 40.36px;
 }
