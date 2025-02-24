@@ -7,7 +7,7 @@
     middle_opacity: IncrementorOpacities;
     wide?: boolean;
     MAX_SCORE: number;
-    value?: any;
+    value: number;
   }
   let {
     net = false,
@@ -15,7 +15,7 @@
     middle_opacity,
     wide = false,
     MAX_SCORE,
-    value = $bindable()
+    value = $bindable<number>()
   }: Props = $props();
 
   // If not wide make it not wide

@@ -17,7 +17,7 @@
 
 <script lang="ts">
   import { NavButtonIds } from '$lib/utils';
-  import type { MouseEventHandler } from 'svelte/elements';
+
 
   let { selected = $bindable(), func }: { selected: NavButtonIds; func: any } = $props();
 </script>

@@ -76,7 +76,7 @@
   <div class="flex h-[80vh] flex-col items-center">
     <h1 class="mb-5">New Game</h1>
     <div>
-      <label for="_" bind:this={errors_head} hidden>
+      <label for="_" bind:this={errors_head} hidden> <!--It's a label because labels are already styled nicely-->
         Errors(s): 
       </label>
       <p hidden class="text-red-400 whitespace-pre-line" bind:this={errors_text}>
@@ -86,16 +86,14 @@
     </div>
     <div>
       <label for="name"
-        >Scouter Name: <span class="text-red-400 italic"
-          >{max_reached ? "(max of 20 characters)" : ""}</span
-        ></label
+        >Scouter Name: <span class="text-red-400 italic">{max_reached ? "(max of 20 characters)" : ""}</span></label
       >
       <input
         type="text"
         placeholder="John Smith"
         name="name"
         bind:value={scout_name}
-        class="text_input"
+        class="text_input lg:w-[400px] lg:h-[76px] w-[173px] h-[66px]"
       />
     </div>
 
@@ -105,7 +103,7 @@
         type="number"
         name="team_num"
         bind:value={team_num}
-        class="text_input"
+        class="text_input  w-[173px] h-[66px] font-[700] text-[30px]"
         placeholder="6305"
       />
     </div>
@@ -120,8 +118,9 @@
       <input
         type="number"
         name="match_num"
-        class="text_input"
+        class="text_input w-[173px] h-[66px] font-[700] text-[30px]"
         bind:value={match_num}
+        placeholder="42"
       />
     </div>
 
@@ -137,7 +136,7 @@
   @import "tailwindcss/utilities";
   @layer components {
     .text_input {
-      @apply p-1 placeholder:text-GrayedOutText lg:text-[36px] text-[30] font-[700] placeholder:font-[700] border-secondary border-8 rounded-[6px]  bg-gray-100  text-black lg:w-[400px] lg:h-[76px] w-[173px] h-[66px];
+      @apply p-1 placeholder:text-GrayedOutText lg:text-[36px] text-[30] font-[700] placeholder:font-[700] border-secondary border-8 rounded-[6px]  bg-gray-100  text-black ;
     }
   }
   div {
