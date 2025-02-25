@@ -77,7 +77,7 @@
         You haven't entered any matches yet, start scouting!
     </Tree><br>
     <Button disabled={$matches.matches.length === 0} onclick={()=>download("json")}>Export as JSON</Button>&nbsp;
-    <Button  onclick={send}>Save Data</Button>&nbsp;
+    <Button disabled={$matches.matches.length === 0} onclick={send}>Save Data</Button>&nbsp;
     <Button disabled={$matches.matches.length === 0} class="bg-[#ef0305]" onclick={deleteData}>Delete Data</Button>
     <div class="relative z-10">
         <Transition show={$dialog.expanded}>

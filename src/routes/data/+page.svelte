@@ -4,14 +4,31 @@
     import type {Match} from '$lib/types';
     import Link from '$lib/components/Link.svelte';
     import List from '$lib/components/List.svelte';
+    // import { supabase } from '$lib/supabase';
     let {data}:{data:PageData} = $props();
     let {matches} = data;
     console.log(matches);
     let rankings = $state(rank(matches));
     let alliances = $derived(chooseAlliances(rankings));
+    async function get(){
+        let headers:RequestInit = {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify($matches)
+        };
+        let res = await fetch('../supabase',headers);
+        if(res.status === 200){
+            return true;
+        }
+        return false;
+    }
 </script>
 <main class="text-center content-center">
-    <h1 class="text-lg">Match Data</h1>
+    <button onclick={get}>qwenw</button>
+    <!-- <h1 class="text-lg">Match Data</h1>
     {#snippet item({team,score,match,alliance,scout}:Match,index:number)}
             <tr>
                 <td><Link url="./data/match/{match}">{match}</Link>&nbsp;</td>
@@ -50,6 +67,6 @@
                 {/each}
             </li>
         {/each}
-    </ol>
-</div>
+    </ol> -->
+<!-- </div> -->
 </main>

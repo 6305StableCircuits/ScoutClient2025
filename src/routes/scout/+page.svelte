@@ -14,9 +14,9 @@
     let papyrus = $derived($scouter.toLowerCase() === "papyrus");
     let buttonClass = $state("py-2xl h-20 w-40");
     //@ts-ignore
-    let scoringStuff: any[] = [];
+    let scoringStuff: any[] = $state([]);
     //@ts-ignore
-    let endingStuff: any[] = [];
+    let endingStuff: any[] = $state([]);
     scouter; //used to shut up intellisense
     let score = $state({
         auto: 0,
@@ -98,7 +98,7 @@
             matchScore.teleop[Config.end[index].name] = $state.snapshot(endingStuff[index]);
         }
         matchScore.teleop.score = score.teleop;
-        $currentMatch.score = matchScore;
+        ($currentMatch as Record<string, any>).score = matchScore;
         ({undoAvailable,redoAvailable} = Config);
     });
     let timer = $state<Timer<any>|null>();
@@ -138,32 +138,37 @@
                     auto: {
                         score: 0,
                         leave: false,
-                        [Config.primaryScore.name]: {
-                            amount: 0,
-                            points: 0,
-                        },
-                        [Config.secondaryScore.name]: {
-                            amount: 0,
-                            points: 0,
-                        },
+                        ...scoringStuff.reduce((a, b, index) => ({
+                            ...a,
+                            [Config.scoring[scoringStuff[index]].name]: {
+                                amount: 0,
+                                points: 0
+                            }
+                        }), {}),
                     },
                     teleop: {
                         score: 0,
-                        [Config.endGoal.name]: false,
-                        [Config.secondaryEndGoal.name]: false,
-                        [Config.primaryScore.name]: {
-                            amount: 0,
-                            points: 0
-                        },
-                        [Config.secondaryScore.name]: {
-                            amount: 0,
-                            points: 0
-                        },
+                        ...endingStuff.reduce((a, b, index) => ({
+                            ...a,
+                            [Config.scoring[endingStuff[index]].name]: false
+                        }), {}),
+                        ...scoringStuff.reduce((a, b, index) => ({
+                            ...a,
+                            [Config.scoring[scoringStuff[index]].name]: {
+                                amount: 0,
+                                points: 0
+                            }
+                        }), {}),
                     },
                     accuracy: {
                         overall: 0,
-                        [Config.primaryScore.name]: 0,
-                        [Config.secondaryScore.name]: 0,
+                        ...endingStuff.reduce((a, b, index) => ({
+                            ...a,
+                            [Config.scoring[endingStuff[index]].name]: {
+                                amount: 0,
+                                points: 0
+                            }
+                        }), {}),
                     }
                 },
                 assists: 0,
@@ -188,8 +193,8 @@
             setStuffIReallyDontWannaDealWithRightNowInsertNameHere(coerce<(...args:any[])=>any>(coerce<Record<string, (...args: any[])=>any>>(Config.scoring[index]).score)(coerce<{[i: number]: any}>(Config.scoring)[coerce<number>(index)][coerce<number>(part)].points))
         }
     }
-    function updateScore(fn:()=>({points:number,leave:boolean,endingStuff:any[],scoringStuff:any[],assists:number})){
-        ({points:score[part],leave,endingStuff,scoringStuff,assists}=fn());
+    function updateScore(fn:()=>Record<string, any>){
+        ({points: score[part], leave, end: endingStuff, scoring: scoringStuff, assists}=fn());
     }
     type ScoreType = [typeof Config.scoring[number]['name']][number];
     function miss(type:ScoreType){
@@ -231,19 +236,19 @@
                 &nbsp;{timer?.formatted??""}&nbsp;{uppercase(gameState)} | Score: {score.overall}&nbsp;
             </h1>
             <br><br>
-            <Button disabled={undoAvailable} class={buttonClass} onclick={()=>{updateScore(Config.undo)}}>Undo</Button>&nbsp;<Button disabled={redoAvailable} class={buttonClass} onclick={()=>{updateScore(Config.redo)}}>Redo</Button><br><br>
+            <Button disabled={undoAvailable} class={buttonClass} onclick={()=>{updateScore(coerce<()=>any>(Config.undo))}}>Undo</Button>&nbsp;<Button disabled={redoAvailable} class={buttonClass} onclick={()=>{updateScore(Config.redo)}}>Redo</Button><br><br>
             {#each Config.scoring as score, i}
                 <Button onclick={scoreScore(i)} class={buttonClass}>{uppercase(Config.scoring[i].name)} Score</Button>&nbsp;
             {/each}
             <!-- <Button onclick={()=>miss(Config.primaryScore.name)} class={buttonClass}>Miss {uppercase(Config.primaryScore.name)}</Button>&nbsp;
             <Button onclick={()=>miss(Config.secondaryScore.name)} class={buttonClass}>Miss {uppercase(Config.secondaryScore.name)}</Button><br><br> -->
-            <Button onclick={()=>updateScore(Config.assist)} class={buttonClass}>Assist</Button>
+            <Button onclick={()=>updateScore(coerce<()=>any>(Config.assist))} class={buttonClass}>Assist</Button>
             {#if gameState === "auto"}
-                <Button disabled={leave} onclick={()=>{updateScore(Config.leave.score.bind(null,Config.leave.points))}} class={buttonClass}>Leave</Button><br><br>
+                <Button disabled={leave} onclick={()=>{updateScore(coerce<()=>any>(Config.leave.score.bind(null,Config.leave.points)))}} class={buttonClass}>Leave</Button><br><br>
             {:else}
-                <br><br><Button disabled={endingStuff[0]} onclick={()=>{updateScore(Config.endGoal.score.bind(null,endingStuff[0]))}} class={buttonClass}>{uppercase(Config.endGoal.name)}</Button>&nbsp;
+                <br><br><Button disabled={endingStuff[0]} onclick={()=>{updateScore(coerce<()=>any>(Config.scoring[endingStuff[0]].score.bind(null,endingStuff[0])))}} class={buttonClass}>{uppercase(Config.scoring[endingStuff[0]].name)}</Button>&nbsp;
                 {#each endingStuff as end,i}
-                <Button disabled={end[i+1]} onclick={()=>{updateScore(Config.secondaryEndGoal.score.bind(null,Config.end[i+1].points))}} class={buttonClass}>{uppercase(Config.secondaryEndGoal.name)}</Button><br>
+                <Button disabled={end[i+1]} onclick={()=>{updateScore(coerce<()=>any>(Config.scoring[end[i+1]].score.bind(null,Config.end[i+1].points)))}} class={buttonClass}>{uppercase(Config.scoring[end[i+1]].name)}</Button><br>
                 {/each}
             {/if}
         {/if}

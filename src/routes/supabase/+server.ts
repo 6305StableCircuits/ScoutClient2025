@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import {json} from '@sveltejs/kit';
 
 export async function GET() {
-  const { data } = await supabase.from("scoutingData").select();
+  const { data } = await supabase.from("scoutingData").select('*');
   return {
     scoutingData: data ?? [],
   };
