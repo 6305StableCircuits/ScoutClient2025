@@ -4,10 +4,12 @@
   interface Props {
     net?: boolean;
     color: ButtonBgColors;
-    middle_opacity: IncrementorOpacities;
+    middle_opacity?: IncrementorOpacities;
     wide?: boolean;
     MAX_SCORE: number;
     value: number;
+    increment_override? : any;
+    decrement_override?: any;
   }
   let {
     net = false,
@@ -15,38 +17,38 @@
     middle_opacity,
     wide = false,
     MAX_SCORE,
-    value = $bindable<number>()
+    value = $bindable<number>(),
+    increment_override,
+    decrement_override,
+
   }: Props = $props();
 
   // If not wide make it not wide
   let size = !wide ? "w-[94px] h-[203px]" : "w-[172px] h-[197px]";
-  let count: number = $state(0);
   let minus_button: HTMLButtonElement;
   let plus_button: HTMLButtonElement;
 
   // Check  if if it's less than inside the accpeted values, if not don't change anything
   $effect(() => {
-    if (count <= 0) {
-      count = 0;
+    if (value <= 0) {
+      value = 0;
       console.log(minus_button);
       minus_button.disabled = true;
     } else {
       minus_button.disabled = false;
     }
-    if (count >= MAX_SCORE) {
-      count = MAX_SCORE;
+    if (value >= MAX_SCORE) {
+      value = MAX_SCORE;
       plus_button.disabled = true;
     } else {
       plus_button.disabled = false;
     }
   });
   function increment() {
-    count++;
-    value = count
+    value++;
   }
   function decrement() {
-    count--;
-    value = count
+    value++;
   }
 
 </script>
@@ -60,9 +62,10 @@
     </svg>
     {/if}
     
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
       class="flex  transition-all duration-[300ms] h-1/3 justify-center items-center w-[100%] {color} disabled:brightness-50 rounded-tr-[15px] rounded-tl-[15px] hover:brightness-125 z-20"
-      onclick={increment}
+      onclick={increment_override ?? increment}
       bind:this={plus_button}
     >
       <svg
@@ -83,10 +86,10 @@
     </button>
 
     <div
-      class="h-1/3 {color} {middle_opacity} flex justify-center items-center"
+      class="h-1/3 {color} flex justify-center items-center"
     >
       <p class="font-Inter font-[700px] text-[37.9px] text-white">
-        {count}
+        {value}
       </p>
     </div>
     <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -94,7 +97,7 @@
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
       class="flex h-1/3 transition-all duration-[300ms] justify-center items-center w-[100%] {color} disabled:brightness-50 rounded-br-[15px] rounded-bl-[15px] hover:brightness-125"
-      onclick={decrement}
+      onclick={decrement_override ?? decrement}
       bind:this={minus_button}
     >
       <svg
