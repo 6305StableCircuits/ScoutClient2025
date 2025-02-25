@@ -97,5 +97,6 @@ type Scoring = {
     },
     readonly score: (points: number) => object
 }
-export declare type IncrementorOpacities = "brightness-25" | "brightness-50" | "brightness-75" | "brightness-90"
+
+export declare type IncrementorOpacities = "brightness-[50%]" | "brightness-[70%]" | "brightness-[80%]" | "brightness-[90%]" 
 export declare type TeamColors = "Red" | "Blue"
