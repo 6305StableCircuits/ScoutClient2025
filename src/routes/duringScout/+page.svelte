@@ -6,12 +6,16 @@
     import { CoralLevels, NavButtonIds } from "$lib/utils";
     import type { SvelteComponent } from "svelte";
 
+    // util variabkles
+    let incrementor_opacities_arr = [25, 50, 75, 90]
+
+
     const scoutName = $page.url.searchParams.get("name");
     const teamNum = $page.url.searchParams.get("team_num");
     const team_color = $page.url.searchParams.get("team_color");
     const match_num = $page.url.searchParams.get("match_num");
 
-    let current_tab: NavButtonIds = NavButtonIds.Auto;
+    let current_tab: NavButtonIds = $state(NavButtonIds.Auto);
 
     interface coral_score_type {
         l1: number;
@@ -26,6 +30,7 @@
     function switchTab(id: NavButtonIds) {
         current_tab = id;
     }
+
 </script>
 
 <main class="flex flex-col items-center w-screen">
@@ -41,11 +46,12 @@
 
 {#snippet AutoTab()}
     <h1>Auto</h1>
-    {@render CoralScorer()}
+    {@render CoralScorer("auto")}
 {/snippet}
 
 {#snippet TeleopTab()}
-    <p>telepo</p>
+    <h1>Teleop</h1>
+    {@render CoralScorer("teleop")}
 {/snippet}
 
 {#snippet EndTab()}
@@ -54,21 +60,74 @@
 
 {#snippet CoralScorer(section: "auto" | "teleop")}
     <div class="flex justify-between">
-        <div class="flex flex-col items-center`">
-            <label for="_">L1</label>
-            <Incrementor
+            {#if section==="teleop"}
+                <div class="col_div">
+                    <label for="_">L1</label>
+                    <Incrementor
+                    color={ButtonBgColors.ExtraOrange}
+                    MAX_SCORE={9e10}
+                    bind:value={coral_score_teleop.l1}
+                />
+                </div>
+                <div class="col_div">
+                    <label for="_">L2</label>
+                    <Incrementor
+                    color={ButtonBgColors.ExtraOrange}
+                    MAX_SCORE={9e10}
+                    bind:value={coral_score_teleop.l2}
+                />
+                </div>
+                <div class="col_div">
+                    <label for="_">L3</label>
+                    <Incrementor
+                    color={ButtonBgColors.ExtraOrange}
+                    MAX_SCORE={9e10}
+                    bind:value={coral_score_teleop.l3}
+                />
+                </div>
+                <div class="col_div">
+                    <label for="_">L4</label>
+                    <Incrementor
+                    color={ButtonBgColors.ExtraOrange}
+                    MAX_SCORE={9e10}
+                    bind:value={coral_score_teleop.l4}
+                />
+                </div>
+            {:else}
+            <div class="col_div">
+                <label for="_">L1</label>
+                <Incrementor
                 color={ButtonBgColors.ExtraOrange}
-                middle_opacity={"brightness-25"}
                 MAX_SCORE={9e10}
-                
+                bind:value={coral_score_auto.l1}
             />
+            </div>
+            <div class="col_div">
+                <label for="_">L2</label>
+                <Incrementor
+                color={ButtonBgColors.ExtraOrange}
+                MAX_SCORE={9e10}
+                bind:value={coral_score_auto.l2}
+            />
+            </div>
+            <div class="col_div">
+                <label for="_">L3</label>
+                <Incrementor
+                color={ButtonBgColors.ExtraOrange}
+                MAX_SCORE={9e10}
+                bind:value={coral_score_auto.l3}
+            />
+            </div>
+            <div class="col_div">
+                <label for="_">L4</label>
+                <Incrementor
+                color={ButtonBgColors.ExtraOrange}
+                MAX_SCORE={9e10}
+                bind:value={coral_score_auto.l4}
+            />
+            </div>
+            {/if}
             <!--TODO: FIGURE OUT WHAT THE ACTUAL MAX SCORE IS!!!!-->
-            <Incrementor
-                color={ButtonBgColors.ExtraOrange}
-                middle_opacity={"brightness-50"}
-                MAX_SCORE={9e10}
-            />
-        </div>
     </div>
 {/snippet}
 
@@ -78,5 +137,11 @@
     @import "tailwindcss/utilities";
     laebl {
         @apply text-3xl font-[700];
+    }
+    @layer components{
+        .col_div{
+            @apply flex flex-col items-center m-4;
+        }
+        
     }
 </style>
