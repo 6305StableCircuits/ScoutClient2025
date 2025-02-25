@@ -23,9 +23,16 @@
         l3: number;
         l4: number;
     }
+    interface algae_score_type{
+        net: number;
+        barge: number
+    }
 
     let coral_score_auto: coral_score_type = $state({ l1: 0, l2: 0, l3: 0, l4: 0 });
     let coral_score_teleop: coral_score_type = $state({ l1: 0, l2: 0, l3: 0, l4: 0 });
+
+    let algae_score_teleop: algae_score_type = $state({net: 0,  barge: 0})
+    let algae_score_auto: algae_score_type = $state({net: 0,  barge: 0})
 
     function switchTab(id: NavButtonIds) {
         current_tab = id;
@@ -47,11 +54,13 @@
 {#snippet AutoTab()}
     <h1>Auto</h1>
     {@render CoralScorer("auto")}
+    {@render AlgaeScorer("auto")}
 {/snippet}
 
 {#snippet TeleopTab()}
     <h1>Teleop</h1>
     {@render CoralScorer("teleop")}
+    {@render AlgaeScorer("teleop")}
 {/snippet}
 
 {#snippet EndTab()}
@@ -128,6 +137,50 @@
             </div>
             {/if}
             <!--TODO: FIGURE OUT WHAT THE ACTUAL MAX SCORE IS!!!!-->
+    </div>
+{/snippet}
+
+{#snippet AlgaeScorer(section: "auto" | "teleop")}
+    <div class="flex justify-between">
+        {#if section==="auto"}
+        <div class="col_div">
+            <label for="_">Net</label>
+            <Incrementor
+            color={ButtonBgColors.ExtraBlue}
+            MAX_SCORE={9e2}
+            bind:value={algae_score_auto.net}
+            wide={true}
+            />
+        </div>
+        <div class="col_div">
+            <label for="_">Barge</label>
+            <Incrementor
+            color={ButtonBgColors.ExtraBlue}
+            MAX_SCORE={9e4}
+            bind:value={algae_score_auto.barge}
+            wide={true}
+            />
+        </div>
+        {:else}
+        <div class="col_div">
+            <label for="_">Net</label>
+            <Incrementor
+            color={ButtonBgColors.ExtraBlue}
+            MAX_SCORE={9e2}
+            bind:value={algae_score_teleop.net}
+            wide={true}
+            />
+        </div>
+        <div class="col_div">
+            <label for="_">Barge</label>
+            <Incrementor
+            color={ButtonBgColors.ExtraBlue}
+            MAX_SCORE={9e4}
+            bind:value={algae_score_teleop.barge}
+            wide={true}
+            />
+        </div>
+        {/if}
     </div>
 {/snippet}
 
