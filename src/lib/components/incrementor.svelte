@@ -86,7 +86,7 @@
     </button>
 
     <div
-      class="h-1/3 {color} flex justify-center items-center"
+      class="h-1/3 {color} flex justify-center items-center shadow-[inset_0_0px_10px_rgba(0,0,0,0.6)]"
     >
       <p class="font-Inter font-[700px] text-[37.9px] text-white">
         {value}
