@@ -4,30 +4,62 @@
     import type {Match} from '$lib/types';
     import Link from '$lib/components/Link.svelte';
     import List from '$lib/components/List.svelte';
-    // import { supabase } from '$lib/supabase';
-    let {data}:{data:PageData} = $props();
-    let {matches} = data;
-    console.log(matches);
-    let rankings = $state(rank(matches));
-    let alliances = $derived(chooseAlliances(rankings));
+    import Tree from '$lib/components/Tree.svelte';
+    import { TableHandler } from '@vincjo/datatables'
+    import { Datatable, Search, RowsPerPage, RowCount, Pagination } from '@vincjo/datatables'
+    import { ThSort, ThFilter } from '@vincjo/datatables'
+    // let {data}:{data:PageData} = $props();
+    // let {matches} = data;
+    // console.log(matches);
+    // let rankings = $state(rank(matches));
+    // let alliances = $derived(chooseAlliances(rankings));
+    let betterData = $state();
     async function get(){
         let headers:RequestInit = {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify($matches)
+            method: 'GET'
         };
         let res = await fetch('../supabase',headers);
+        betterData = await res.json();
         if(res.status === 200){
             return true;
         }
         return false;
-    }
+    }   
+    let { data2 }: { data2: any[] } = $props()
+
+    const table = new TableHandler(data2, { rowsPerPage: 10 })   
 </script>
 <main class="text-center content-center">
     <button onclick={get}>qwenw</button>
+    <p>{JSON.stringify(betterData)}</p>
+    <Tree object={betterData ?? {} as object} pretty={true}/>
+
+    <Datatable basic {table}>
+        <table>
+            <thead>
+                <tr>
+                    <ThSort {table} field="first_name">First Name</ThSort>
+                    <ThSort {table} field="last_name">Last Name</ThSort>
+                    <ThSort {table} field="email">Email</ThSort>
+                </tr>
+    
+                <tr>
+                    <ThFilter {table} field="first_name" />
+                    <ThFilter {table} field="last_name" />
+                    <ThFilter {table} field="email" />
+                </tr>
+            </thead>
+            <tbody>
+                {#each table.rows as row}
+                    <tr>
+                        <td>{row.first_name}</td>
+                        <td>{row.last_name}</td>
+                        <td>{row.email}</td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    </Datatable>
     <!-- <h1 class="text-lg">Match Data</h1>
     {#snippet item({team,score,match,alliance,scout}:Match,index:number)}
             <tr>
