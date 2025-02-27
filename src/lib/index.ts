@@ -18,6 +18,10 @@ export function uppercase(string:string):string{
     string??='';
     return string.replace(/(( |^)[a-z])/g,m=>m.toUpperCase());
 }
+export function pretty(string: string): string {
+    string ??= '';
+    return uppercase(string.replace(/_/g, ' ').replace(/[a-z][A-Z]/g, (m)=>m.charAt(0) + ' ' + m.charAt(1)));
+}
 export function isCurrentPath(path:string):boolean{
     let [p,c] = [path.replace(/(^\/)|(\/$)/g,''),get(page).url.pathname.replace(/(^\/)|(\/$)/g,'')];
     return p === c;

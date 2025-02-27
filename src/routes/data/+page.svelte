@@ -1,65 +1,79 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-    import {uppercase,rank,splitParts,chooseAlliances} from '$lib';
+    import {uppercase,rank,splitParts,chooseAlliances,pretty,coerce} from '$lib';
     import type {Match} from '$lib/types';
     import Link from '$lib/components/Link.svelte';
     import List from '$lib/components/List.svelte';
     import Tree from '$lib/components/Tree.svelte';
+    import { onMount } from 'svelte';
+    import Button from '$lib/components/Button.svelte';
+    import ClickForMore from '$lib/components/ClickForMore.svelte';
     import { TableHandler } from '@vincjo/datatables'
     import { Datatable, Search, RowsPerPage, RowCount, Pagination } from '@vincjo/datatables'
     import { ThSort, ThFilter } from '@vincjo/datatables'
+    // import { get } from 'svelte/store';
     // let {data}:{data:PageData} = $props();
     // let {matches} = data;
     // console.log(matches);
     // let rankings = $state(rank(matches));
     // let alliances = $derived(chooseAlliances(rankings));
-    let betterData = $state();
+    let betterData = $state([]);
+    // svelte-ignore state_referenced_locally
+    const table = new TableHandler(betterData, { rowsPerPage: 10 });
+    let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'assists', 'notes'];
+
     async function get(){
         let headers:RequestInit = {
             method: 'GET'
         };
         let res = await fetch('../supabase',headers);
         betterData = await res.json();
+        console.log(betterData);
+        //@ts-ignore
+        table.setRows(betterData?.scoutingData);
         if(res.status === 200){
             return true;
         }
         return false;
-    }   
-    let { data2 }: { data2: any[] } = $props()
-
-    const table = new TableHandler(data2, { rowsPerPage: 10 })   
+    }
+    
+    onMount(() => {
+        get();
+    });
 </script>
 <main class="text-center content-center">
-    <button onclick={get}>qwenw</button>
-    <p>{JSON.stringify(betterData)}</p>
-    <Tree object={betterData ?? {} as object} pretty={true}/>
-
     <Datatable basic {table}>
         <table>
             <thead>
                 <tr>
-                    <ThSort {table} field="first_name">First Name</ThSort>
-                    <ThSort {table} field="last_name">Last Name</ThSort>
-                    <ThSort {table} field="email">Email</ThSort>
-                </tr>
-    
-                <tr>
-                    <ThFilter {table} field="first_name" />
-                    <ThFilter {table} field="last_name" />
-                    <ThFilter {table} field="email" />
+                    {#each keysss as key}
+                        <ThSort {table} field={key as typeof keysss[number]}>{pretty(key)}</ThSort>
+                    {/each}
                 </tr>
             </thead>
             <tbody>
                 {#each table.rows as row}
                     <tr>
-                        <td>{row.first_name}</td>
-                        <td>{row.last_name}</td>
-                        <td>{row.email}</td>
+                        {#each Object.keys(row) as key}
+                            {@const bullshit = row[key as keyof typeof row]}
+                            {#if key === 'notes'}
+                                {#if bullshit}
+                                    <td><ClickForMore stuff={bullshit} /></td>
+                                {:else}
+                                    <td>"No Notes"</td>
+                                {/if}
+                            <!-- {:else if key === 'Team'}
+                            <td><Link url=``>{bullshit}</Link></td> -->
+                            {:else}
+                                <td>{key === 'score' ? (bullshit as Record<string, any>)?.overall : bullshit}</td>
+                            {/if}
+                        {/each}
                     </tr>
                 {/each}
             </tbody>
         </table>
     </Datatable>
+    <Button onclick={get}>Refresh</Button>
     <!-- <h1 class="text-lg">Match Data</h1>
     {#snippet item({team,score,match,alliance,scout}:Match,index:number)}
             <tr>
