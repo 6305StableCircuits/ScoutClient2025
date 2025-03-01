@@ -63,8 +63,8 @@ type ScoreAmount = {
 export function getAverageScore(matches:Match[]):Score{
     console.log(matches);
     let res = {
-        overall: [],
-        auto: {
+        overall: <any[]>[],
+        auto: <Record<string, any>>{
             score: [],
             leave: [],
             ...Object.fromEntries(Config.scoring.map(({name})=>[name, {
@@ -72,7 +72,7 @@ export function getAverageScore(matches:Match[]):Score{
                 points: [],
             }]))
         },
-        teleop: {
+        teleop: <Record<string, any>>{
             score: [],
             ...Object.fromEntries(Config.end.map(({name})=>[name, []])),
             ...Object.fromEntries(Config.scoring.map(({name})=>[name, {
@@ -80,7 +80,7 @@ export function getAverageScore(matches:Match[]):Score{
                 points: [],
             }]))
         },
-        accuracy: {
+        accuracy: <Record<string, any>>{
             overall: Array<number>(),
             ...Object.fromEntries(Config.scoring.map(({name})=>[name, {
                 amount: [],
@@ -88,13 +88,18 @@ export function getAverageScore(matches:Match[]):Score{
             }]))
         }
     };
-    type Scores = typeof res;
+    // type Scores = typeof res;
     //@ts-ignore
-    matches.forEach(({score}:{score:Scores})=>{
+    matches.forEach(({score}:{score: Record<string, any>})=>{
         res.overall.push(score.overall);
         res.auto.score.push(score.auto.score);
         res.auto.leave.push(score.auto.leave);
-
+        for (let s of Config.scoring) {
+            res.auto[coerce<Record<string, any>>(s).name].amount.push(score.auto[s.name].amount);
+            res.auto[s.name].points.push(score.auto[s.name].points);
+            res.teleop[s.name].amount.push(score.teleop[s.name].amount);
+            res.teleop[s.name].points.push(score.teleop[s.name].points);
+        }
         res.auto[Config.primaryScore.name].amount.push(score.auto[Config.primaryScore.name].amount);
         res.auto[Config.primaryScore.name].points.push(score.auto[Config.primaryScore.name].points);
         res.auto[Config.secondaryScore.name].amount.push(score.auto[Config.secondaryScore.name].amount);
@@ -124,7 +129,7 @@ export function getAverageScore(matches:Match[]):Score{
                 points: average(res.auto[Config.secondaryScore.name].points)
             },
         },
-        teleop: {
+        teleop: <Record<string & 'score', any>>{
             score: average(res.teleop.score),
             [Config.endGoal.name]: average(res.teleop[Config.endGoal.name]),
             [Config.secondaryEndGoal.name]: average(res.teleop[Config.secondaryEndGoal.name]),

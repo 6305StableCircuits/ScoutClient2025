@@ -7,6 +7,12 @@ export declare interface Props {
 export declare type StringLike = string|number|bigint
 
 export declare type StyleSize = `${number}xl`|`xl`|"lg"|"md"|"sm"
+export declare type Scoring = {
+    name: string,
+    auto: {
+        score: number,
+    }
+}
 export declare type Score = {
     overall: number,
     auto: {
@@ -46,7 +52,7 @@ export declare type Match = {
     date: number,
     scout: string,
     alliance: "red"|"blue",
-    score: Score,
+    score: Record<string, any>,
     assists: number,
 }
 export declare type TeamData = {
