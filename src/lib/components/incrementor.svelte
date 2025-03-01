@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ButtonBgColors } from "$lib/ButtonStyles";
+  import { ButtonBgColors } from "$lib/ButtonStyles";
   import type { IncrementorOpacities } from "$lib/types";
   interface Props {
     net?: boolean;
@@ -10,6 +10,7 @@
     value: number;
     increment_override? : any;
     decrement_override?: any;
+    extraStyles? : string
   }
   let {
     net = false,
@@ -20,6 +21,7 @@
     value = $bindable<number>(),
     increment_override,
     decrement_override,
+    extraStyles = ""
 
   }: Props = $props();
 
@@ -28,11 +30,15 @@
   let minus_button: HTMLButtonElement;
   let plus_button: HTMLButtonElement;
 
+  let second_color : string | undefined = $state(undefined)
+  // Make darker orange if orange
+  if (color === ButtonBgColors.ExtraOrange){
+    second_color = "bg-[#bf6443]"
+  }
   // Check  if if it's less than inside the accpeted values, if not don't change anything
   $effect(() => {
     if (value <= 0) {
       value = 0;
-      console.log(minus_button);
       minus_button.disabled = true;
     } else {
       minus_button.disabled = false;
@@ -48,13 +54,13 @@
     value++;
   }
   function decrement() {
-    value++;
+    value--;
   }
 
 </script>
 
   
-  <div  id="incrementor" class="{size} {color} rounded-[15px] z-0 relative">
+  <div  id="incrementor" class="{size} {color} rounded-[15px] z-0 relative {extraStyles}">
     <!-- svelte-ignore a11y_consider_explicit_label -->
      {#if net===true}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 183 197" class="z-[100%] h-[100%] w-[200%] absolute">
@@ -64,7 +70,7 @@
     
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-      class="flex  transition-all duration-[300ms] h-1/3 justify-center items-center w-[100%] {color} disabled:brightness-50 rounded-tr-[15px] rounded-tl-[15px] hover:brightness-125 z-20"
+      class="flex p-[1rem]  transition-all duration-[300ms] h-1/3 justify-center items-center w-[100%] {color} disabled:brightness-[200%] rounded-tr-[15px] rounded-tl-[15px] hover:brightness-125 z-20"
       onclick={increment_override ?? increment}
       bind:this={plus_button}
     >
@@ -86,9 +92,9 @@
     </button>
 
     <div
-      class="h-1/3 {color} flex justify-center items-center shadow-[inset_0_0px_10px_rgba(0,0,0,0.6)]"
+      class="h-1/3 {color} flex justify-center items-center shadow {second_color ?? ""}"
     >
-      <p class="font-Inter font-[700px] text-[37.9px] text-white">
+      <p class="font-Inter font-[700px] text-[37.9px] text-white brightness-125 ">
         {value}
       </p>
     </div>
@@ -96,7 +102,7 @@
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-      class="flex h-1/3 transition-all duration-[300ms] justify-center items-center w-[100%] {color} disabled:brightness-50 rounded-br-[15px] rounded-bl-[15px] hover:brightness-125"
+      class="flex h-1/3 justify-center p-[1rem] items-center w-[100%] {color} disabled:brightness-100 rounded-br-[15px] rounded-bl-[15px] hover:brightness-125"
       onclick={decrement_override ?? decrement}
       bind:this={minus_button}
     >
@@ -118,4 +124,14 @@
     </button>
   </div>
 
+
+
+<style>
+
+
+      .shadow{
+        box-shadow: inset 0 0px 8px rgba(0, 0, 0, 0.4)
+      }
+    
+</style>
 
