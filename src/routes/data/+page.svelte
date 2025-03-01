@@ -19,7 +19,7 @@
     // let alliances = $derived(chooseAlliances(rankings));
     let betterData = $state([]);
     // svelte-ignore state_referenced_locally
-    const table = new TableHandler(betterData, { rowsPerPage: 10 });
+    const table = new TableHandler(betterData, { rowsPerPage: 10, highlight: false });
     let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'assists', 'notes'];
 
     async function get(){
