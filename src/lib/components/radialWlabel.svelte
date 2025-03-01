@@ -14,7 +14,7 @@
 </script>
 
 
-<div class="flex justify-center text-4xl font-[700]">
+<div class="flex justify-center text-4xl font-[700] m-4">
     <label for={id} class="mr-3">{label}</label>
     <input
       type="radio"
