@@ -124,10 +124,7 @@ export function getAverageScore(matches: Match[]): Score {
             ...Object.fromEntries(
                 Config.scoring.map(({ name }) => [
                     name,
-                    {
-                        amount: [],
-                        points: []
-                    }
+                    []
                 ])
             )
         }

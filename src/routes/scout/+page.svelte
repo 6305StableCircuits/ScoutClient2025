@@ -86,7 +86,7 @@
             //     matchScore.auto[Config.primaryScore.name].amount+matchScore.teleop[Config.primaryScore.name].amount,
             //     matchScore.teleop[Config.secondaryScore.name].amount+matchScore.auto[Config.secondaryScore.name].amount
             // ];
-            // console.log(matchScore);
+            console.log(matchScore);
             let fulls = Config.scoring.map(
                 (score) => this.auto[score.name].amount + this.teleop[score.name].amount
             );
@@ -154,6 +154,7 @@
         }
     });
     $inspect($currentMatch);
+    $inspect(endingStuff);
     let part = $derived<'auto' | 'teleop'>(gameState === 'teleop' ? 'teleop' : 'auto');
     function start() {
         $currentMatch.date = Date.now();
@@ -236,35 +237,42 @@
     //     let scorePart = score[part][Config.scoring.findIndex(({name: n})=>n === name)];
     //      ({points: score[part], } = scoreFn(name));
     // }
-    function scoreScore<N extends keyof (typeof Config)['scoring']>(index: N) {
-        function setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
+    function setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
             state: Record<string, any>
         ) {
-            // console.log(state);
-            let scoring;
-            let end;
-            ({ points: score[part], leave, end, scoring, assists } = state);
-            for (let { name } of Config.scoring) {
-                scoringStuff[Config.scoring.findIndex(({ name: n }) => n === name)] = scoring[name];
-            }
-            for (let { name } of Config.end) {
-                endingStuff[Config.end.findIndex(({ name: n }) => n === name)] = end[name];
+        // console.log(state);
+        let scoring;
+        let end;
+        ({ points: score[part], leave, end, scoring, assists } = state);
+        for (let index = 0; index < Config.scoring.length; index++) {
+            scoringStuff[index] = scoring[Config.scoring[index].name];
+        }
+        for (let index = 0; index < Config.end.length; index++) {
+            endingStuff[index] = end[Config.end[index].name];
+        }
+        console.log({endingStuff, scoringStuff});
+    }
+    function scoreScore<N extends keyof (typeof Config)[T], T extends 'scoring' | 'end' | 'leave' = 'scoring'>(index: N, type?: T) {
+        if (type === 'leave') {
+            return function() {
+                setStuffIReallyDontWannaDealWithRightNowInsertNameHere(Config.leave.score(Config.leave.points));
             }
         }
+        type ??= 'scoring' as T;
         return function () {
+            let thing = Config[type][index];
+            if (type === 'scoring') thing = thing[part as keyof unknown];
             setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
                 coerce<(...args: any[]) => any>(
-                    coerce<Record<string, (...args: any[]) => any>>(Config.scoring[index]).score
+                    coerce<Record<string, (...args: any[]) => any>>(Config[type][index]).score
                 )(
-                    coerce<{ [i: number]: any }>(Config.scoring)[coerce<number>(index)][
-                        coerce<number>(part)
-                    ].points
+                    coerce<Record<string, any>>(thing).points
                 )
             );
         };
     }
     function updateScore(fn: () => Record<string, any>) {
-        ({ points: score[part], leave, end: endingStuff, scoring: scoringStuff, assists } = fn());
+        setStuffIReallyDontWannaDealWithRightNowInsertNameHere(fn());
     }
     type ScoreType = [(typeof Config.scoring)[number]['name']][number];
     function miss(type: ScoreType) {
@@ -368,13 +376,7 @@
                 {#if gameState === 'auto'}
                     <Button
                         disabled={leave}
-                        onclick={() => {
-                            updateScore(
-                                coerce<() => any>(
-                                    Config.leave.score.bind(null, Config.leave.points)
-                                )
-                            );
-                        }}
+                        onclick={scoreScore('points', 'leave')}
                         class={buttonClass}>Leave</Button
                     ><br /><br />
                 {:else}
@@ -382,15 +384,7 @@
                     {#each endingStuff as end, i}
                         <Button
                             disabled={endingStuff[i]}
-                            onclick={() => {
-                                updateScore(
-                                    coerce<() => any>(
-                                        coerce<Record<string & 'score', any>>(
-                                            Config.end[i]
-                                        ).score.bind(null, Config.end[i].points)
-                                    )
-                                );
-                            }}
+                            onclick={scoreScore(i, 'end')}
                             class={buttonClass}>{uppercase(Config.end[i].name)}</Button
                         ><br />
                     {/each}
