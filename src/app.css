@@ -24,8 +24,7 @@
     & select {
         background-color: black;
     }
-    & > input[type='text'],
-    input[type='number'] {
+    & input {
         background-color: black;
     }
     /* & > td,
