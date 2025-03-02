@@ -24,16 +24,19 @@
         class: className = '',
         placeholder = '',
         type = 'text',
+        //@ts-ignore
         ...props
+        //@ts-ignore
     }: Props = $props();
+    const _for = $props.id();
 </script>
 
 <!--
 @component This is an input. Use it instead of `<input type="text">`.
 -->
 <main>
-    {#if label.length > 0}<label class="mx-1 text-lg" for="text">{label}</label>{/if}<input
-        id="text"
+    {#if label.length > 0}<label class="mx-1 text-lg" for={_for}>{label}</label>{/if}<input
+        id={_for}
         {type}
         {...props}
         {placeholder}

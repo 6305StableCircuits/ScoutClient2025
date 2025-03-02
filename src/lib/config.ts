@@ -19,8 +19,8 @@ var config: Config = {
             charged,
             points: 0,
             leave: false,
-            ...Object.fromEntries(this.end.map(({ name }) => [name, false])),
-            ...Object.fromEntries(
+            end: Object.fromEntries(this.end.map(({ name }) => [name, false])),
+            scoring: Object.fromEntries(
                 this.scoring.map(({ name }) => [
                     name,
                     {
@@ -30,6 +30,7 @@ var config: Config = {
                 ])
             )
         };
+        console.log(state);
         assists = 0;
     },
     get undoAvailable() {
@@ -68,7 +69,7 @@ var config: Config = {
                 if (gameState === 'auto') {
                     gameState = 'teleop';
                     for (let score of scoring) {
-                        state[score] = {
+                        state.scoring[score] = {
                             amount: 0,
                             points: 0
                         };
@@ -83,8 +84,8 @@ var config: Config = {
             score(points: number) {
                 actions.push({ ...state });
                 state.points += points;
-                state['coral (trough)'].amount++;
-                state['coral (trough)'].points += points;
+                state.scoring['coral (trough)'].amount++;
+                state.scoring['coral (trough)'].points += points;
                 return state;
             }
         },
@@ -97,7 +98,7 @@ var config: Config = {
                 if (gameState === 'auto') {
                     gameState = 'teleop';
                     for (let score of scoring) {
-                        state[score] = {
+                        state.scoring[score] = {
                             amount: 0,
                             points: 0
                         };
@@ -112,8 +113,8 @@ var config: Config = {
             score(points: number) {
                 actions.push({ ...state });
                 state.points += points;
-                state['coral (l2 branch)'].amount++;
-                state['coral (l2 branch)'].points += points;
+                state.scoring['coral (l2 branch)'].amount++;
+                state.scoring['coral (l2 branch)'].points += points;
                 return state;
             }
         },

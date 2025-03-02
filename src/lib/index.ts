@@ -64,17 +64,17 @@ type ScoreAmount = {
     points: number[];
 };
 export function splitScoring(scoreNames: string[]) {
-	let res: Record<string, {name: string, index: number}[]> = {};
-	for (let name of scoreNames) {
-		let main = name.split(' ')[0];
-		let subset = pretty(name.replace(main+'', '').replace(/\((.*?)\)/, (_, m) => m));
-		console.log(subset);
-		(res[main] ??= []).push({
-			name: subset,
-			index: scoreNames.indexOf(name)
-		});
-	}
-	return res;
+    let res: Record<string, { name: string; index: number }[]> = {};
+    for (let name of scoreNames) {
+        let main = name.split(' ')[0];
+        let subset = pretty(name.replace(main + '', '').replace(/\((.*?)\)/, (_, m) => m));
+        console.log(subset);
+        (res[main] ??= []).push({
+            name: subset,
+            index: scoreNames.indexOf(name)
+        });
+    }
+    return res;
 }
 // export type Scores = {
 //     overall: number[],

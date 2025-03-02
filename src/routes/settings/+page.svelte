@@ -2,6 +2,7 @@
     import { settings } from '$lib/stores';
     import Button from '$lib/components/Button.svelte';
     import { pretty } from '$lib';
+    import fish from '$lib/assets/fish-spinning-compressed.gif';
     //nowhere near completion
 </script>
 
@@ -26,11 +27,13 @@
     </select>
     <br />
     <h2>
-        Fish <img
-            src="./src/routes/fish-spinning-compressed.gif"
-            alt="fish"
-            class="inline w-[10%] h-[10%]"
-        />
+        Fish <img src={fish} alt="fish" class="inline w-[10%] h-[10%]" /><br />
+        <Button disabled={$settings.fish} onclick={() => ($settings.fish = true)} class="text-sm"
+            >Yes Please :)</Button
+        ><br />
+        <Button disabled={!$settings.fish} onclick={() => ($settings.fish = false)} class="text-sm"
+            >No, I have no taste</Button
+        >
     </h2>
 </main>
 

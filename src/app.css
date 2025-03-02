@@ -21,15 +21,14 @@
 :root > *:has(.dark) {
     background-color: #111111;
     color: white;
-    &  select {
+    & select {
         background-color: black;
     }
     & > input[type='text'],
-    input[type='number'],
-    input {
+    input[type='number'] {
         background-color: black;
     }
-    & > td,
+    /* & > td,
     th {
         border-left: 1px white solid;
         border-top: 1px white solid;
@@ -41,7 +40,7 @@
     }
     & > tr:last-of-type > td {
         border-bottom: 1px solid white;
-    }
+    } */
 }
 
 :root > *:has(.light) {
@@ -52,7 +51,7 @@
     & select {
         color: white !important;
     }
-    & > td,
+    /* & > td,
     th {
         border-left: 1px black solid;
         border-top: 1px black solid;
@@ -64,19 +63,25 @@
     }
     & > tr:last-of-type > td {
         border-bottom: 1px solid black;
-    }
+    } */
+}
+
+select {
+    outline: none;
 }
 
 .override-select {
-    background-color: #135fef !important;
+    background-color: #236fff !important;
     text-align: center;
-    padding-left: 0px;
-    margin-left: 0px;
+    /* padding-left: 0px;
+    margin-left: 0px; */
     width: 50%;
+    text-indent: -2px;
+    border-radius: 0.2em;
 }
 button > .override-select {
-    margin-left: -5% !important;
-    padding-left: 0 !important;
+    /* margin-left: -5% !important; */
+    /* padding-left: 0 !important; */
 }
 
 input::-webkit-outer-spin-button,
@@ -87,9 +92,10 @@ input::-webkit-inner-spin-button {
 
 input[type='number'] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
-tr:first-of-type {
+/* tr:first-of-type {
     th:first-of-type {
         border-top-left-radius: 0.25rem;
     }
@@ -108,4 +114,4 @@ tr:last-of-type {
 
 table {
     border-collapse: separate;
-}
+} */

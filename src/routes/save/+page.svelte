@@ -18,6 +18,7 @@
             downloadLink!.click();
             downloadLink!.href = 'about:blank';
             saved = true;
+            $matches.matches.length = 0;
         }
     }
     const fileName = function () {
@@ -60,20 +61,17 @@
         let res = await fetch('../supabase', headers);
         if (res.status === 200) {
             saved = true;
+            $matches.matches.length = 0;
             return true;
         }
         return false;
     }
-    $effect(() => {
-        if (saved === true) {
-            $matches = { matches: [] };
-        }
-    });
     async function deleteData() {
         dialog.open();
         let confirmation = await confirm();
         if (confirmation) {
             saved = true;
+            $matches.matches.length = 0;
         }
     }
     let stateConfirm = $state<boolean | null>();

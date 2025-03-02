@@ -8,6 +8,7 @@
         class?: string;
         underline?: boolean;
         onclick?: () => any;
+        [x: string]: any;
     };
     let {
         url,
@@ -15,7 +16,8 @@
         title = '',
         class: className = '',
         underline = true,
-        onclick = () => {}
+        onclick = () => {},
+        ...props
     }: Props = $props();
 </script>
 
@@ -26,6 +28,7 @@
     class="transition cursor-pointer hover:cursor-pointer dark:text-white hover:text-slate-300 {underline
         ? 'underline'
         : ''} {className}"
+    {...props}
     onclick={() => {
         onclick();
         goto(url);

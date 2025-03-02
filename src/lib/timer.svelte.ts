@@ -1,11 +1,17 @@
 import type { Time, TimerOptions } from '$lib/types';
-import { onDestroy } from 'svelte';
+import { onMount } from 'svelte';
 let dateNow = $state<number>(0);
-let interval = setInterval(() => {
-    dateNow = Date.now();
-}, 1);
+let interval: number | NodeJS.Timeout;
 export function init() {
-    onDestroy(() => clearInterval(interval));
+    onMount(() => {
+        if (typeof interval === 'number') {
+            clearInterval(interval);
+        }
+        interval = setInterval(() => {
+            dateNow = Date.now();
+        }, 1);
+        return () => clearInterval(interval);
+    });
 }
 function format(time: number): string {
     if (time < 0) return '-' + format(Math.abs(time));
@@ -91,7 +97,7 @@ export default class Timer<T extends string | number> extends EventTarget {
         super();
         this.#stop = stop;
         if ('events' in events) {
-            events = events.events as Record<string, ()=>any>;
+            events = events.events as Record<string, () => any>;
             Object.entries(events).forEach(([event, handler]) => {
                 this.on(event, handler as () => void);
             });

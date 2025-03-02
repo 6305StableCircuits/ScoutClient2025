@@ -9,18 +9,19 @@
     import Button from '$lib/components/Button.svelte';
     import ClickForMore from '$lib/components/ClickForMore.svelte';
     import { TableHandler } from '@vincjo/datatables';
-    import { Datatable, Search, RowsPerPage, RowCount, Pagination } from '@vincjo/datatables';
+    import { Datatable } from '@vincjo/datatables';
     import { ThSort, ThFilter } from '@vincjo/datatables';
     // import { get } from 'svelte/store';
-    // let {data}:{data:PageData} = $props();
+    let { data }: { data: PageData } = $props();
     // let {matches} = data;
     // console.log(matches);
-    // let rankings = $state(rank(matches));
-    // let alliances = $derived(chooseAlliances(rankings));
-    let betterData = $state([]);
+    console.log(data);
+    let rankings = $state(rank(data.matches));
+    let alliances = $derived(chooseAlliances(rankings));
+    let betterData = $state(data.matches);
     // svelte-ignore state_referenced_locally
     const table = new TableHandler(betterData, { rowsPerPage: 10, highlight: false });
-    let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'assists', 'notes'];
+    let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'notes'];
 
     async function get() {
         let headers: RequestInit = {
@@ -36,13 +37,10 @@
         }
         return false;
     }
-
-    onMount(() => {
-        get();
-    });
 </script>
 
 <main class="text-center content-center">
+    <Button onclick={get} class="absolute right-12.8 mt-2.5 text-xl">Refresh</Button>
     <Datatable basic {table}>
         <table>
             <thead>
@@ -56,22 +54,32 @@
             <tbody>
                 {#each table.rows as row}
                     <tr>
-                        {#each Object.keys(row) as key}
+                        {#each keysss as key}
                             {@const bullshit = row[key as keyof typeof row]}
                             {#if key === 'notes'}
                                 {#if bullshit}
                                     <td><ClickForMore stuff={bullshit} /></td>
                                 {:else}
-                                    <td>"No Notes"</td>
+                                    <td><i>None Provided</i></td>
                                 {/if}
                                 <!-- {:else if key === 'Team'}
                             <td><Link url=``>{bullshit}</Link></td> -->
-                            {:else}
+                            {:else if key === 'score'}
+                                <td>{(bullshit as Record<string, any>)?.overall}</td>
+                            {:else if key === 'team' || key === 'match' || key === 'scout'}
                                 <td
-                                    >{key === 'score'
-                                        ? (bullshit as Record<string, any>)?.overall
-                                        : bullshit}</td
+                                    ><Link
+                                        style="text-shadow: 0 0 1px #9999ff"
+                                        url="/data/{key === 'scout' ? 'scouter' : key}/{bullshit}"
+                                        >{bullshit}</Link
+                                    ></td
                                 >
+                            {:else if key === 'date'}
+                                <td>{new Date(bullshit).toLocaleDateString()}</td>
+                            {:else if key === 'alliance'}
+                                <td style="color:{bullshit}">{pretty(bullshit)}</td>
+                            {:else}
+                                <td>{bullshit}</td>
                             {/if}
                         {/each}
                     </tr>
@@ -79,7 +87,6 @@
             </tbody>
         </table>
     </Datatable>
-    <Button onclick={get}>Refresh</Button>
     <!-- <h1 class="text-lg">Match Data</h1>
     {#snippet item({team,score,match,alliance,scout}:Match,index:number)}
             <tr>

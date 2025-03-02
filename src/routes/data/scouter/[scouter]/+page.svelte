@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { PageData } from './$types';
     import type { Match } from '$lib/types';
+    import { pretty } from '$lib';
     let { data }: { data: PageData } = $props();
     function rankScouters(matches: Match[]): string[] {
         let scouters = matches.map((match: Match) => match.scout);
@@ -27,7 +28,7 @@
 <main class="text-center">
     <h1 class="text-lg">Scouter: {data.scouter}</h1>
     <h2>Matches scouted: {data.matches.length}</h2>
-    <h2>Preferred Alliance: {preferred}</h2>
+    <h2>Preferred Alliance: <span class="text-[{preferred}]">{pretty(preferred)}</span></h2>
     <h2>Teams scouted: {teams.length}</h2>
     <h2>Rank: {rank}</h2>
 </main>

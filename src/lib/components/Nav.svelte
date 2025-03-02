@@ -38,12 +38,16 @@
                     {/if}&nbsp;
                 </span>
             {/each}
-            <Link url="settings"><img src={settingsIcon} alt="settings" width="24px" /></Link>
+            &nbsp;<Link class="pt-4 pb-0" url="settings"
+                ><img src={settingsIcon} alt="settings" width="24px" /></Link
+            >
         {/key}
     </span>
     <span class="portrait" bind:this={portrait}>
-        <Link url="settings"><img src={settingsIcon} alt="settings" width="24px" /></Link>
-        <div class="float-right absolute right-[5%] pt-3 pointer z-50">
+        <div class="float-right flex absolute right-[5%] pt-3 pointer z-50">
+            <Link url="settings" class="float-left pt-1 pb-0"
+                ><img src={settingsIcon} alt="settings" width="24px" /></Link
+            >&nbsp;
             <NavMenu />
         </div>
     </span>
