@@ -1,82 +1,116 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-@import "$lib/fonts/styles.css";
-:root{
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    padding:10px;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import '$lib/assets/styles.css';
+:root {
+    font-family:
+        'Inter',
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        'Open Sans',
+        'Helvetica Neue',
+        sans-serif;
+    padding: 10px;
 }
-@media (prefers-color-scheme:dark){
-    :root{
-        background-color:#111111;
-        color: white;
+:root > *:has(.dark) {
+    background-color: #111111;
+    color: white;
+    & select {
+        background-color: black;
     }
-    select{
-        background-color:black;
+    & input {
+        background-color: black;
     }
-    input[type="text"],input[type="number"]{
-        background-color:black;
-    }
-    td,th{
+    /* & > td,
+    th {
         border-left: 1px white solid;
         border-top: 1px white solid;
         border-right: 0px transparent solid;
     }
-    tr > th:last-of-type,td:last-of-type{
+    & > tr > th:last-of-type,
+    td:last-of-type {
         border-right: 1px solid white;
     }
-    tr:last-of-type > td{
+    & > tr:last-of-type > td {
         border-bottom: 1px solid white;
-    }
+    } */
 }
 
-@media (prefers-color-scheme:light){
-    :root{
-        color: black;
+:root > *:has(.light) {
+    color: black;
+    & header {
+        color: white !important;
     }
-    h1.text-\[2em\].pt-2{
-        color: white;
+    & select {
+        color: white !important;
     }
-    td,th{
+    /* & > td,
+    th {
         border-left: 1px black solid;
         border-top: 1px black solid;
         border-right: 0px transparent solid;
     }
-    tr > th:last-of-type,td:last-of-type{
+    & > tr > th:last-of-type,
+    td:last-of-type {
         border-right: 1px solid black;
     }
-    tr:last-of-type > td{
+    & > tr:last-of-type > td {
         border-bottom: 1px solid black;
-    }
+    } */
+}
+
+select {
+    outline: none;
+}
+
+.override-select {
+    background-color: #236fff !important;
+    text-align: center;
+    /* padding-left: 0px;
+    margin-left: 0px; */
+    width: 50%;
+    text-indent: -2px;
+    border-radius: 0.2em;
+}
+button > .override-select {
+    /* margin-left: -5% !important; */
+    /* padding-left: 0 !important; */
 }
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+    -webkit-appearance: none;
+    margin: 0;
 }
 
-input[type=number] {
-  -moz-appearance: textfield;
+input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
-tr:first-of-type{
-    th:first-of-type{
+/* tr:first-of-type {
+    th:first-of-type {
         border-top-left-radius: 0.25rem;
     }
-    th:last-of-type{
+    th:last-of-type {
         border-top-right-radius: 0.25rem;
     }
 }
-tr:last-of-type{
-    td:first-of-type{
+tr:last-of-type {
+    td:first-of-type {
         border-bottom-left-radius: 0.25rem;
     }
-    td:last-of-type{
+    td:last-of-type {
         border-bottom-right-radius: 0.25rem;
     }
 }
 
-table{
+table {
     border-collapse: separate;
-}
+} */

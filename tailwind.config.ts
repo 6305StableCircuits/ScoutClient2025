@@ -1,7 +1,7 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 import colors from 'tailwindcss/colors';
 export default {
-    content: ["./src/**/*.{html,js,svelte,ts}"],
+    content: ['./src/**/*.{html,js,svelte,ts}'],
     theme: {
         colors: {
             specialgreen: `#03c12b`,
@@ -10,8 +10,8 @@ export default {
             ...colors
         },
         extend: {
-            fontFamily:{
-                Inter:["Inter","sans-serif"]
+            fontFamily: {
+                Inter: ['Inter', 'sans-serif']
             }
         }
     },
