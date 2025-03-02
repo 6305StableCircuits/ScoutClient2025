@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-    import {uppercase,rank,splitParts,chooseAlliances,pretty,coerce} from '$lib';
-    import type {Match} from '$lib/types';
+    import type { PageData } from './$types';
+    import { uppercase, rank, splitParts, chooseAlliances, pretty, coerce } from '$lib';
+    import type { Match } from '$lib/types';
     import Link from '$lib/components/Link.svelte';
     import List from '$lib/components/List.svelte';
     import Tree from '$lib/components/Tree.svelte';
     import { onMount } from 'svelte';
     import Button from '$lib/components/Button.svelte';
     import ClickForMore from '$lib/components/ClickForMore.svelte';
-    import { TableHandler } from '@vincjo/datatables'
-    import { Datatable, Search, RowsPerPage, RowCount, Pagination } from '@vincjo/datatables'
-    import { ThSort, ThFilter } from '@vincjo/datatables'
+    import { TableHandler } from '@vincjo/datatables';
+    import { Datatable, Search, RowsPerPage, RowCount, Pagination } from '@vincjo/datatables';
+    import { ThSort, ThFilter } from '@vincjo/datatables';
     // import { get } from 'svelte/store';
     // let {data}:{data:PageData} = $props();
     // let {matches} = data;
@@ -22,32 +22,34 @@
     const table = new TableHandler(betterData, { rowsPerPage: 10, highlight: false });
     let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'assists', 'notes'];
 
-    async function get(){
-        let headers:RequestInit = {
+    async function get() {
+        let headers: RequestInit = {
             method: 'GET'
         };
-        let res = await fetch('../supabase',headers);
+        let res = await fetch('../supabase', headers);
         betterData = await res.json();
         console.log(betterData);
         //@ts-ignore
         table.setRows(betterData?.scoutingData);
-        if(res.status === 200){
+        if (res.status === 200) {
             return true;
         }
         return false;
     }
-    
+
     onMount(() => {
         get();
     });
 </script>
+
 <main class="text-center content-center">
     <Datatable basic {table}>
         <table>
             <thead>
                 <tr>
                     {#each keysss as key}
-                        <ThSort {table} field={key as typeof keysss[number]}>{pretty(key)}</ThSort>
+                        <ThSort {table} field={key as (typeof keysss)[number]}>{pretty(key)}</ThSort
+                        >
                     {/each}
                 </tr>
             </thead>
@@ -62,10 +64,14 @@
                                 {:else}
                                     <td>"No Notes"</td>
                                 {/if}
-                            <!-- {:else if key === 'Team'}
+                                <!-- {:else if key === 'Team'}
                             <td><Link url=``>{bullshit}</Link></td> -->
                             {:else}
-                                <td>{key === 'score' ? (bullshit as Record<string, any>)?.overall : bullshit}</td>
+                                <td
+                                    >{key === 'score'
+                                        ? (bullshit as Record<string, any>)?.overall
+                                        : bullshit}</td
+                                >
                             {/if}
                         {/each}
                     </tr>
@@ -114,5 +120,5 @@
             </li>
         {/each}
     </ol> -->
-<!-- </div> -->
+    <!-- </div> -->
 </main>
