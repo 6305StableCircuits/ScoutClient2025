@@ -1,37 +1,27 @@
 <script lang="ts">
   import { ButtonSizes, ButtonBgColors } from "$lib/ButtonStyles";
+  import CheckboxWlabel from "$lib/components/checkboxWlabel.svelte";
   import Dropdown from "$lib/components/Dropdown.svelte";
   import Incrementor from "$lib/components/incrementor.svelte";
   import InScoutNav from "$lib/components/InScoutNav.svelte";
 import NewButton from "$lib/components/NewButton.svelte";
+  import RadialWlabel from "$lib/components/radialWlabel.svelte";
   import { NavButtonIds } from "$lib/utils";
   import { redirect } from "@sveltejs/kit";
   let nav : InScoutNav;
   function change(id: NavButtonIds){
     console.log(id)
   }
-  let DropdownValue: any = $state("Red")
-  let selected_value = $derived(DropdownValue === "Red" ? NavButtonIds.Teleop : NavButtonIds.End)
-  let inc_vals = $state([0, 0])
-  $inspect(inc_vals)
+  let value : number  = $state(1);
+  let test : number[] = $state([])
+
+  $inspect(value)
+  $inspect(test)
 
 </script>
-<InScoutNav selected={selected_value}  bind:this={nav} func={change}></InScoutNav>
-<NewButton text="Win" func={() => {console.log("Win Button pressed")}} colour={ButtonBgColors.Win} size={ButtonSizes.Short}/>
-<NewButton text="Lose" func={() => {console.log("Lose Button pressed")}} colour={ButtonBgColors.Lose} size={ButtonSizes.Short}/>
-<NewButton text="Submit" func={() => {console.log("Submit Button pressed")}} colour={ButtonBgColors.Submit} size={ButtonSizes.Longest}/>
-<NewButton text="Begin Scouting" func={() => {console.log("Begin Scouting Button pressed")}} colour={ButtonBgColors.Secondary} size={ButtonSizes.SlightlyLessLong}/>
-<NewButton text="Scouting" func={() => {console.log("Scouting Button pressed")}} colour={ButtonBgColors.Primary} size={ButtonSizes.Longest}/>
-<NewButton text="Leaderboard" func={() => {console.log("Leaderboard Button pressed")}} colour={ButtonBgColors.ExtraLightBlue} size={ButtonSizes.Longest}/>
-<NewButton text="Extra1" func={() => {console.log("Etxra1 Button pressed")}} colour={ButtonBgColors.ExtraBlue} size={ButtonSizes.Longest}/>
-<NewButton text="Submit" func={() => {console.log("Extra2 Button pressed")}} colour={ButtonBgColors.ExtraGreen} size={ButtonSizes.Longest}/>
 
-<Incrementor color={ButtonBgColors.ExtraOrange} middle_opacity="brightness-75" MAX_SCORE={10} bind:value={inc_vals[0]}></Incrementor>
-<Incrementor color={ButtonBgColors.ExtraLightBlue} middle_opacity="brightness-25" MAX_SCORE={20} wide={true} bind:value={inc_vals[1]}></Incrementor>
-<Dropdown options={["Red", "Blue", "Other"]} bind:current_value={DropdownValue}></Dropdown>
-<p>
-  {DropdownValue}
-  {inc_vals[0]}
-  {inc_vals[1]}
-</p>
+<RadialWlabel label="AJ" friend_name="YAY" bind:values={value} value={0}></RadialWlabel>
+<RadialWlabel label="djdj" friend_name="YAY" bind:values={value} value={1}></RadialWlabel>
 
+<CheckboxWlabel label="hi" bind:values={test[0]} value={0}></CheckboxWlabel>
+<CheckboxWlabel label="hi" bind:values={test[1]} value={1}></CheckboxWlabel>

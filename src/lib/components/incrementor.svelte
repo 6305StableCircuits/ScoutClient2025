@@ -60,7 +60,7 @@
 </script>
 
   
-  <div  id="incrementor" class="{size} {color} rounded-[15px] z-0 relative {extraStyles}">
+  <div  id="incrementor" class="{size} {color} rounded-[15px] z-0 relative {extraStyles} h-[20vh]">
     <!-- svelte-ignore a11y_consider_explicit_label -->
      {#if net===true}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 183 197" class="z-[100%] h-[100%] w-[200%] absolute">

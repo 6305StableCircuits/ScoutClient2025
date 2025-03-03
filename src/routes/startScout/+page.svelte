@@ -125,7 +125,7 @@
     </div>
 
     <div>
-      <NewButton text="Begin Scouting" func={begin_scout} colour={ButtonBgColors.Secondary}/>
+      <NewButton text="Begin Scouting" func={begin_scout} colour={ButtonBgColors.Secondary} extraStyles="m-2 w-[50vw]"/>
     </div>
   </div>
 </main>

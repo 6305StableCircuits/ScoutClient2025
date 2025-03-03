@@ -1,15 +1,15 @@
 <script lang="ts">
-    import {v4 as uuidv4} from 'uuid'
+    
 
     
     interface Props{
         label: string;
-        values: number;
+        values: any[];
         value: number
     }
     let {label, values = $bindable(), value} : Props  = $props();
 
-    let id: string = uuidv4()
+    const id = $props.id();
 </script>
 
 
