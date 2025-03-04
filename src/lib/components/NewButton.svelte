@@ -25,7 +25,7 @@ Extrastyles prop SHOULD override any classes but you should check, feels like it
 
 <button
 	onclick={func}
-	class="{colour} {size} text-Text button {extraStyles} "
+	class="{colour} {size} text-Text button max-w-[402px] m-2 w-[50vw] "
 >
 	{text}
 </button>

@@ -20,7 +20,7 @@
       type="radio"
       bind:group={values}
       {value}
-      class="w-16 h-16 lg:w-10 lg:h-10 accent-secondary rounded-lg"
+      class="w-[51px] h-[51px] lg:w-10 lg:h-10 accent-secondary rounded-full cursor-pointer"
       {id}
       name={friend_name ?? id}
     />

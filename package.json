@@ -13,6 +13,7 @@
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
+		"@types/node": "^22.13.9",
 		"autoprefixer": "^10.4.20",
 		"bits-ui": "^1.0.0-next.64",
 		"clsx": "^2.1.1",
@@ -29,6 +30,7 @@
 	"dependencies": {
 		"@fontsource/inter": "^5.1.0",
 		"@svelte-put/clickoutside": "^4.0.0",
+		"@tailwindcss/forms": "^0.5.10",
 		"svelte-headlessui": "^0.0.45",
 		"svelte-persisted-store": "^0.12.0",
 		"svelte-transition": "^0.0.17"

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import { ButtonBgColors } from "$lib/ButtonStyles";
+  import { ButtonBgColors, ButtonSizes } from "$lib/ButtonStyles";
   import CheckboxWlabel from "$lib/components/checkboxWlabel.svelte";
   import Incrementor from "$lib/components/incrementor.svelte";
   import InScoutNav from "$lib/components/InScoutNav.svelte";
+  import NewButton from "$lib/components/NewButton.svelte";
   import RadialWlabel from "$lib/components/radialWlabel.svelte";
   import { cageOrPark, CoralLevels, NavButtonIds, RankingPoints } from "$lib/utils";
 
@@ -67,6 +68,9 @@
   function switchTab(id: NavButtonIds) {
     current_tab = id;
   }
+  function submit(winLossTie: "win" | "loss" | "tie"){
+
+  }
   //#endregion
 </script>
 
@@ -80,8 +84,6 @@
     {@render AutoTab()}
     {:else if current_tab === NavButtonIds.Teleop}
     {@render TeleopTab()}
-  <!-- {:else if current_tab === NavButtonIds.End}
-    {@render EndTab()} -->
   {:else if current_tab === NavButtonIds.End}
     {@render EndTab()}
   {/if}
@@ -97,14 +99,14 @@
 
 {#snippet AutoTab()}
   <h1>Auto</h1>
-  <CheckboxWlabel label=leave values={endgame_data.rankingPoints[3] as any} value={RankingPoints.Leave}></CheckboxWlabel>
+  <CheckboxWlabel label=Leave: values={endgame_data.rankingPoints[3] as any} value={RankingPoints.Leave}></CheckboxWlabel>
   {@render CoralScorer("auto")}
 
   {@render AlgaeScorer("auto")}
 {/snippet}
 <!--#region End-->
 {#snippet EndTab()}
-  <h1>Endgame</h1>
+  <h1>Endgame</h1 >
   <div class="m-2">
     <RadialWlabel label="Deep Cage: " values={endgame_data.cageOrPark} value={cageOrPark.Deep} friend_name="cageOrpark"></RadialWlabel>
     <RadialWlabel label="Shallow Cage: " values={endgame_data.cageOrPark} value={cageOrPark.Shallow} friend_name="cageOrpark"></RadialWlabel>
@@ -115,7 +117,13 @@
     <CheckboxWlabel label="Auto RP: " values={endgame_data.rankingPoints[1] as any} value={RankingPoints.Auto}></CheckboxWlabel>
     <CheckboxWlabel label="Coral RP: " values={endgame_data.rankingPoints[2] as any} value={RankingPoints.Coral}></CheckboxWlabel>
   </div>
-
+  <div class="flex flex-col items-center">
+  <div class="flex justify-between m-2">
+    <NewButton text={"Win"} func={() => {submit("win")}} colour={ButtonBgColors.Win} size={ButtonSizes.Short}></NewButton>
+    <NewButton text={"Lose"} func={() => {submit("loss")}} colour={ButtonBgColors.Lose} size={ButtonSizes.Short}></NewButton>
+  </div>
+  <NewButton text={"Submit (Tie)"} func={() => {submit("tie")}} colour={ButtonBgColors.Submit} size={ButtonSizes.SlightlyLessLong}></NewButton>
+</div>
 {/snippet}
 <!--#endregion-->
 
@@ -123,6 +131,7 @@
 
 <!--#region coral-->
 {#snippet CoralScorer(section: "auto" | "teleop")}
+  <label for='djdjdjdjrjkerjkdj' class="m-2">Coral</label>
   <div class="flex justify-between scale-[70%] lg:scale-100">
     {#if section === "teleop"}
       <div class="col_div m-2">
@@ -198,6 +207,7 @@
 
 <!--#region algae-->
 {#snippet AlgaeScorer(section: "auto" | "teleop")}
+  <label class="m-2">Algae</label>
   <div class="flex justify-between">
     {#if section === "auto"}
       <div class="col_div m-2">
@@ -221,7 +231,7 @@
         />
       </div>
     {:else}
-      <div class="col_div">
+      <div class="col_div m-2">
         <label for="_">Net</label>
         <Incrementor
           color={ButtonBgColors.ExtraBlue}
@@ -231,7 +241,7 @@
           extraStyles="h-[20vh]"
         />
       </div>
-      <div class="col_div">
+      <div class="col_div m-2">
         <label for="_">Barge</label>
         <Incrementor
           color={ButtonBgColors.ExtraBlue}
@@ -254,7 +264,7 @@
       bind:this={notesEntry}
       bind:textContent={notesText}
       contenteditable="true"
-      class="text-white p-3 border-8 border-white bg-black overflow-auto w-[90%] h-[90%] text-ellipsis"
+      class="text-white p-3 border-8 border-white bg-black overflow-auto w-[90%] h-[90%] text-ellipsis min-h-36"
     ></p>
   </div>
 {/snippet}
@@ -270,6 +280,9 @@
     }
     label {
       @apply text-3xl font-[700];
+    }
+    h1 {
+      @apply text-4xl font-[700]
     }
   }
 </style>

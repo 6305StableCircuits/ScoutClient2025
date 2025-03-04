@@ -17,14 +17,14 @@
   let team_num: number | undefined = $state();
   let team_color: TeamColors = $state("Red");
   let match_num: number | undefined = $state();
-  $effect(() => {
-    if (scout_name.length >= 20) {
-      scout_name = scout_name.substring(0, 20); // idk 'bout this
-      max_reached = true;
-    } else {
-      max_reached = false;
-    }
-  });
+  // $effect(() => {
+  //   if (scout_name.length >= 20) {
+  //     scout_name = scout_name.substring(0, 20); // idk 'bout this
+  //     max_reached = true;
+  //   } else {
+  //     max_reached = false;
+  //   }
+  // });
 
   function validate(data : Map<string, string | Number | TeamColors | undefined >){
     let data_errors : string[] = []
@@ -74,12 +74,12 @@
 
 <main class="flex justify-center max-w-[1440px] m-auto">
   <div class="flex h-[80vh] flex-col items-center">
-    <h1 class="mb-5">New Game</h1>
+    <h1 class="m-5 text-5xl font-[700]">New Game</h1>
     <div>
       <label for="_" bind:this={errors_head} hidden> <!--It's a label because labels are already styled nicely-->
         Errors(s): 
       </label>
-      <p hidden class="text-red-400 whitespace-pre-line" bind:this={errors_text}>
+      <p hidden class="text-red-400 whitespace-pre-line sm:text-2xl" bind:this={errors_text}>
         
 
       </p>
@@ -93,7 +93,7 @@
         placeholder="John Smith"
         name="name"
         bind:value={scout_name}
-        class="text_input lg:w-[400px] lg:h-[76px] w-[173px] h-[66px]"
+        class="text_input lg:w-[400px] lg:h-[76px] w-[173px] h-[66px] "
       />
     </div>
 
