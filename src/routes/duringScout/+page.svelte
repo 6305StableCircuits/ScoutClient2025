@@ -112,6 +112,7 @@
     <RadialWlabel label="Shallow Cage: " values={endgame_data.cageOrPark} value={cageOrPark.Shallow} friend_name="cageOrpark"></RadialWlabel>
     <RadialWlabel label="Park: " values={endgame_data.cageOrPark} value={cageOrPark.Park} friend_name="cageOrpark"></RadialWlabel>
   </div>
+  <h1  class="m-2 text-5xl">Ranking Points</h1>
   <div class="m-2">
     <CheckboxWlabel label="Coopertion: " values={endgame_data.rankingPoints[0] as any} value={RankingPoints.Coopertition}></CheckboxWlabel>
     <CheckboxWlabel label="Auto RP: " values={endgame_data.rankingPoints[1] as any} value={RankingPoints.Auto}></CheckboxWlabel>
