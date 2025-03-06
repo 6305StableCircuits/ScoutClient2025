@@ -43,43 +43,53 @@
     <Button onclick={get} class="absolute right-12.8 mt-2.5 text-xl">Refresh</Button>
     <Datatable basic {table}>
         <table>
-            <thead>
-                <tr>
+            <thead style="background-color: rgb(219, 219, 219);">
+                <tr style="color:black">
                     {#each keysss as key}
                         <ThSort {table} field={key as (typeof keysss)[number]}>{pretty(key)}</ThSort
                         >
                     {/each}
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="thiskew" style="border-color:black;">
                 {#each table.rows as row}
                     <tr>
                         {#each keysss as key}
                             {@const bullshit = row[key as keyof typeof row]}
                             {#if key === 'notes'}
                                 {#if bullshit}
-                                    <td><ClickForMore stuff={bullshit} /></td>
+                                    <td style="color:black;border: 1px solid black"
+                                        ><ClickForMore stuff={bullshit} /></td
+                                    >
                                 {:else}
-                                    <td><i>None Provided</i></td>
+                                    <td style="color:black;border: 1px solid black;"
+                                        ><i>None Provided</i></td
+                                    >
                                 {/if}
                                 <!-- {:else if key === 'Team'}
                             <td><Link url=``>{bullshit}</Link></td> -->
                             {:else if key === 'score'}
-                                <td>{(bullshit as Record<string, any>)?.overall}</td>
+                                <td style="color:black;border: 1px solid black;"
+                                    >{(bullshit as Record<string, any>)?.overall}</td
+                                >
                             {:else if key === 'team' || key === 'match' || key === 'scout'}
-                                <td
+                                <td style="border: 1px solid black"
                                     ><Link
-                                        style="text-shadow: 0 0 1px #9999ff"
+                                        style="text-shadow: 0 0 1px #9999ff; color:black;"
                                         url="/data/{key === 'scout' ? 'scouter' : key}/{bullshit}"
                                         >{bullshit}</Link
                                     ></td
                                 >
                             {:else if key === 'date'}
-                                <td>{new Date(bullshit).toLocaleDateString()}</td>
+                                <td style="color:black;border: 1px solid black;"
+                                    >{new Date(bullshit).toLocaleDateString()}</td
+                                >
                             {:else if key === 'alliance'}
-                                <td style="color:{bullshit}">{pretty(bullshit)}</td>
+                                <td style="color:{bullshit};border: 1px solid black;"
+                                    >{pretty(bullshit)}</td
+                                >
                             {:else}
-                                <td>{bullshit}</td>
+                                <td style="color:black;border: 1px solid black;">{bullshit}</td>
                             {/if}
                         {/each}
                     </tr>
@@ -87,7 +97,9 @@
             </tbody>
         </table>
     </Datatable>
-    <!-- <h1 class="text-lg">Match Data</h1>
+</main>
+
+<!-- <h1 class="text-lg">Match Data</h1>
     {#snippet item({team,score,match,alliance,scout}:Match,index:number)}
             <tr>
                 <td><Link url="./data/match/{match}">{match}</Link>&nbsp;</td>
@@ -127,5 +139,13 @@
             </li>
         {/each}
     </ol> -->
-    <!-- </div> -->
-</main>
+<!-- </div> -->
+
+<style>
+    #thiskew > *:nth-child(n) {
+        background-color: white;
+    }
+    #thiskew > *:nth-child(2n) {
+        background-color: rgb(219, 219, 219);
+    }
+</style>

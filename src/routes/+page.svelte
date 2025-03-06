@@ -30,12 +30,23 @@
 <svelte:head>
     <title>ScoutClient 2025</title>
 </svelte:head>
-<main>
+<main style="display:flex;flex-direction:column;align-items:center;">
     <img src={horse} alt="Honse" />
-    <h1>6305 Scouting</h1>
-    <Link url="scout">Scout</Link>
-    <Link url="save">Save Data</Link>
-    <Link url="data">Leaderboards</Link>
+    <h1 style="font-size: 40px; font-weight:700; margin-bottom:1em">6305 Scouting</h1>
+    <div style="display: flex; flex-direction:column">
+        <Link
+            style="background-color:blue; border-radius:6px; padding:1em 2em;text-align:center;text-decoration:none;font-size:20px;margin-bottom:1em"
+            url="scout">Scout</Link
+        >
+        <Link
+            style="background-color:darkblue; border-radius:6px; padding:1em 2em;text-align:center;text-decoration:none;font-size:20px;margin-bottom:1em"
+            url="save">Save Your Data</Link
+        >
+        <Link
+            style="background-color:green; border-radius:6px; padding:1em 2em;text-align:center;text-decoration:none;font-size:20px;margin-bottom:1em"
+            url="data">Leaderboards</Link
+        >
+    </div>
     <!-- <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 <Button onclick={()=>count++} textSize="sm">Count is {count}</Button> {count} * 2 = {double}<br>

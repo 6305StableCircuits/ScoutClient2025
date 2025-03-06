@@ -237,9 +237,7 @@
     //     let scorePart = score[part][Config.scoring.findIndex(({name: n})=>n === name)];
     //      ({points: score[part], } = scoreFn(name));
     // }
-    function setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
-            state: Record<string, any>
-        ) {
+    function setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state: Record<string, any>) {
         // console.log(state);
         let scoring;
         let end;
@@ -250,13 +248,18 @@
         for (let index = 0; index < Config.end.length; index++) {
             endingStuff[index] = end[Config.end[index].name];
         }
-        console.log({endingStuff, scoringStuff});
+        console.log({ endingStuff, scoringStuff });
     }
-    function scoreScore<N extends keyof (typeof Config)[T], T extends 'scoring' | 'end' | 'leave' = 'scoring'>(index: N, type?: T) {
+    function scoreScore<
+        N extends keyof (typeof Config)[T],
+        T extends 'scoring' | 'end' | 'leave' = 'scoring'
+    >(index: N, type?: T) {
         if (type === 'leave') {
-            return function() {
-                setStuffIReallyDontWannaDealWithRightNowInsertNameHere(Config.leave.score(Config.leave.points));
-            }
+            return function () {
+                setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
+                    Config.leave.score(Config.leave.points)
+                );
+            };
         }
         type ??= 'scoring' as T;
         return function () {
@@ -265,9 +268,7 @@
             setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
                 coerce<(...args: any[]) => any>(
                     coerce<Record<string, (...args: any[]) => any>>(Config[type][index]).score
-                )(
-                    coerce<Record<string, any>>(thing).points
-                )
+                )(coerce<Record<string, any>>(thing).points)
             );
         };
     }

@@ -33,7 +33,6 @@
     "type": "module",
     "dependencies": {
         "@fontsource/inter": "^5.1.0",
-        "@rollup/plugin-terser": "^0.4.4",
         "@supabase/supabase-js": "^2.48.1",
         "@svelte-put/clickoutside": "^4.0.0",
         "dotenv": "^16.4.7",
