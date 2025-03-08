@@ -13,6 +13,8 @@
     import { ThSort, ThFilter } from '@vincjo/datatables';
     // import { get } from 'svelte/store';
     let { data }: { data: PageData } = $props();
+    let background = 'rgb(0,0,0)';
+    let foreground = 'rgb(255,255,255)'
     // let {matches} = data;
     // console.log(matches);
     console.log(data);
@@ -24,6 +26,7 @@
     const table = new TableHandler(betterData, { rowsPerPage: 10, highlight: false });
     const tabl = new TableHandler(datata, { rowsPerPage: 10, highlight: false });
     let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'notes'];
+    let teamkeys = ['Team','Match','Overall','Auto','L1 (Amount)','L2','L3','L4','Processor','Net','Barge','Accuracy']
     let teams = $derived<number[]>([...new Set(betterData.map(({team})=>Number(team)))]);
     let teamstuff = $derived.by(()=>{
         return teams.map((team) => {
@@ -32,7 +35,8 @@
             return sorted[0];
         });
     });
-
+    //svelte-ignore state_referenced_locally
+    tabl.setRows(teamstuff);
     async function get() {
         let headers: RequestInit = {
             method: 'GET'
@@ -42,6 +46,7 @@
         console.log(betterData);
         //@ts-ignore
         table.setRows(betterData?.scoutingData);
+        tabl.setRows(teamstuff);
         if (res.status === 200) {
             return true;
         }
@@ -53,53 +58,54 @@
     <Button onclick={get} class="absolute right-12.8 mt-2.5 text-xl">Refresh</Button>
     <Datatable basic {table}>
         <table>
-            <thead style="background-color: rgb(219, 219, 219);">
-                <tr style="color:black">
+            <thead style="background-color:{background}">
+                <!-- rgb(219, 219, 219) -->
+                <tr style="color:{foreground}">
                     {#each keysss as key}
                         <ThSort {table} field={key as (typeof keysss)[number]}>{pretty(key)}</ThSort
                         >
                     {/each}
                 </tr>
             </thead>
-            <tbody id="thiskew" style="border-color:black;">
+            <tbody class="thiskew" style="border-color:{foreground};">
                 {#each table.rows as row}
                     <tr>
                         {#each keysss as key}
                             {@const bullshit = row[key as keyof typeof row]}
                             {#if key === 'notes'}
                                 {#if bullshit}
-                                    <td style="color:black;border: 1px solid black"
+                                    <td style="color:{foreground};border: 1px solid {foreground}"
                                         ><ClickForMore stuff={bullshit} /></td
                                     >
                                 {:else}
-                                    <td style="color:black;border: 1px solid black;"
+                                    <td style="color:{foreground};border: 1px solid {foreground};"
                                         ><i>None Provided</i></td
                                     >
                                 {/if}
                                 <!-- {:else if key === 'Team'}
                             <td><Link url=``>{bullshit}</Link></td> -->
                             {:else if key === 'score'}
-                                <td style="color:black;border: 1px solid black;"
+                                <td style="color:{foreground};border: 1px solid {foreground};"
                                     >{(bullshit as Record<string, any>)?.overall}</td
                                 >
                             {:else if key === 'team' || key === 'match' || key === 'scout'}
-                                <td style="border: 1px solid black"
+                                <td style="border: 1px solid {foreground}"
                                     ><Link
-                                        style="text-shadow: 0 0 1px #9999ff; color:black;"
+                                        style="text-shadow: 0 0 1px #9999ff; color:{foreground};"
                                         url="/data/{key === 'scout' ? 'scouter' : key}/{bullshit}"
                                         >{bullshit}</Link
                                     ></td
                                 >
                             {:else if key === 'date'}
-                                <td style="color:black;border: 1px solid black;"
+                                <td style="color:{foreground};border: 1px solid {foreground};"
                                     >{new Date(bullshit).toLocaleDateString()}</td
                                 >
                             {:else if key === 'alliance'}
-                                <td style="color:{bullshit};border: 1px solid black;"
+                                <td style="color:{bullshit};border: 1px solid {foreground};"
                                     >{pretty(bullshit)}</td
                                 >
                             {:else}
-                                <td style="color:black;border: 1px solid black;">{bullshit}</td>
+                                <td style="color:{foreground};border: 1px solid {foreground};">{bullshit}</td>
                             {/if}
                         {/each}
                     </tr>
@@ -107,33 +113,81 @@
             </tbody>
         </table>
     </Datatable>
-    <h2>Team Scores</h2>
+    <h2 style="font-size:1.5em">Team Scores</h2>
+    <!-- {@html JSON.stringify(teamstuff, null, 4).replace(/\n/g, '<br />')} -->
     <Datatable basic table={tabl}>
         <table>
-            <thead style="background-color: rgb(219, 219, 219);">
-                <tr style="color:black">
-                    {#each keysss as key}
-                        <ThSort {table} field={key as (typeof keysss)[number]}>{pretty(key)}</ThSort
+            <thead style:--background={background} style="background-color: var(--background)">
+                <tr style="color:{foreground}">
+                    {#each teamkeys as key}
+                        <ThSort {table} field={key as (typeof teamkeys)[number]}>{pretty(key)}</ThSort
                         >
                     {/each}
                 </tr>
             </thead>
-            <tbody id="thiskew" style="border-color:black;">
+            <tbody class="thiskew" style="border-color:{foreground};">
                 {#each teamstuff as key, i}
                     <tr>
-                        {#each Object.entries(key), k}
-                            {#if k == 0}
-                                <td style="color:black;border: 1px solid black"
+                        <!-- {#each Object.entries(key), k} -->
+                                <td style="color:{foreground};border: 1px solid {foreground}"
                                     >{teams[i]}</td
                                 >
-                            {:else}
-                                {#each Object.keys(key.score) as bonk}
+                            <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key['match']}</td
+                        >
+                            <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key['score']['overall']}</td
+                        >
+                            <td style="color:{foreground};border: 1px solid {foreground}"
+                                        >{key.score['auto']['score']}</td
+                                    >
+                                    <td style="color:{foreground};border: 1px solid {foreground}"
+                                        >{key.score['teleop']['coral (trough)']['amount']}</td
+                                    >
+                                    <td style="color:{foreground};border: 1px solid {foreground}"
+                                        >{key.score.teleop['coral (l2 branch)'].amount}</td
+                                    >
+                                    <td style="color:{foreground};border: 1px solid {foreground}"
+                                        >{key.score.teleop['coral (l3 branch)'].amount}</td
+                                    >
+                                    <td style="color:{foreground};border: 1px solid {foreground}"
+                                        >{key.score.teleop['coral (l4 branch)'].amount}</td
+                                    >
+                                    <td style="color:{foreground};border: 1px solid {foreground}"
+                                        >{key.score.teleop['algae (processor)'].amount}</td
+                                    >
+                                    <td style="color:{foreground};border: 1px solid {foreground}"
+                                    >{key.score.teleop['algae (net)'].amount}</td
+                                >
+                                {#if key.score.teleop['deep cage']}
+                                <td style="color:{foreground};border: 1px solid {foreground}"
+                                    >Deep Cage</td
+                                >
+                                {:else if key.score.teleop['shallow cage']}
+                                <td style="color:{foreground};border: 1px solid {foreground}"
+                                >Shallow Cage</td
+                            >
+                                <!-- {:else if key.score.teleop['park']}
+                                <td style="color:black;border: 1px solid black"
+                                >Park</td
+                            > -->
+                                {:else}
+                                <td style="color:{foreground};border: 1px solid {foreground}"
+                                ><i>Not Stated</i></td
+                            >
+                                {/if}
+                                <td style="color:{foreground};border: 1px solid {foreground}"
+                                    >{key.score['accuracy'].overall *100}%</td
+                                >
+                                <!-- <td style="color:black;border: 1px solid black"
+                                    >{((key.score.teleop.score / key.score.accuracy.overall)/135).toFixed(3)}s</td
+                                > -->
+                                <!-- {#each Object.keys(key.score) as bonk}
                                     <td style="color:black;border: 1px solid black"
                                         >{JSON.stringify(key.score[bonk])}</td
                                     >
-                                {/each}
-                            {/if}
-                        {/each}
+                                {/each} -->
+                        <!-- {/each} -->
                     </tr>
                 {/each}
             </tbody>
@@ -184,10 +238,18 @@
 <!-- </div> -->
 
 <style>
-    #thiskew > *:nth-child(n) {
-        background-color: white;
+    @property --background {
+        inherits: false;
+        syntax: '<color>';
+        initial-value: black;
     }
-    #thiskew > *:nth-child(2n) {
-        background-color: rgb(219, 219, 219);
+    .thiskew > *:nth-child(n) {
+        background-color: rgb(147, 147, 147);
+    }
+    .thiskew > *:nth-child(2n) {
+        background-color: var(--background);
+    }
+    tr:hover td{
+        color: black !important;
     }
 </style>
