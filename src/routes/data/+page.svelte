@@ -8,7 +8,7 @@
     import { onMount } from 'svelte';
     import Button from '$lib/components/Button.svelte';
     import ClickForMore from '$lib/components/ClickForMore.svelte';
-    import { TableHandler } from '@vincjo/datatables';
+    import { RowCount, TableHandler } from '@vincjo/datatables';
     import { Datatable } from '@vincjo/datatables';
     import { ThSort, ThFilter } from '@vincjo/datatables';
     // import { get } from 'svelte/store';
@@ -16,12 +16,22 @@
     // let {matches} = data;
     // console.log(matches);
     console.log(data);
+    let datata = [[1,2], [2,2]];
     let rankings = $state(rank(data.matches));
     let alliances = $derived(chooseAlliances(rankings));
     let betterData = $state(data.matches);
     // svelte-ignore state_referenced_locally
     const table = new TableHandler(betterData, { rowsPerPage: 10, highlight: false });
+    const tabl = new TableHandler(datata, { rowsPerPage: 10, highlight: false });
     let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'notes'];
+    let teams = $derived<number[]>([...new Set(betterData.map(({team})=>Number(team)))]);
+    let teamstuff = $derived.by(()=>{
+        return teams.map((team) => {
+            let matches = betterData.filter(({team: _team}) => _team === team);
+            let sorted = matches.toSorted((a, b) => b.date - a.date);
+            return sorted[0];
+        });
+    });
 
     async function get() {
         let headers: RequestInit = {
@@ -90,6 +100,38 @@
                                 >
                             {:else}
                                 <td style="color:black;border: 1px solid black;">{bullshit}</td>
+                            {/if}
+                        {/each}
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    </Datatable>
+    <h2>Team Scores</h2>
+    <Datatable basic table={tabl}>
+        <table>
+            <thead style="background-color: rgb(219, 219, 219);">
+                <tr style="color:black">
+                    {#each keysss as key}
+                        <ThSort {table} field={key as (typeof keysss)[number]}>{pretty(key)}</ThSort
+                        >
+                    {/each}
+                </tr>
+            </thead>
+            <tbody id="thiskew" style="border-color:black;">
+                {#each teamstuff as key, i}
+                    <tr>
+                        {#each Object.entries(key), k}
+                            {#if k == 0}
+                                <td style="color:black;border: 1px solid black"
+                                    >{teams[i]}</td
+                                >
+                            {:else}
+                                {#each Object.keys(key.score) as bonk}
+                                    <td style="color:black;border: 1px solid black"
+                                        >{JSON.stringify(key.score[bonk])}</td
+                                    >
+                                {/each}
                             {/if}
                         {/each}
                     </tr>

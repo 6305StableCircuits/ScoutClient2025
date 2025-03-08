@@ -1,8 +1,4 @@
 <script lang="ts">
-    import Button from '$lib/components/Button.svelte';
-    import Rainbow from '$lib/components/Rainbow.svelte';
-    import Tree from '$lib/components/Tree.svelte';
-    import Graph from '$lib/components/Graph.svelte';
     import Link from '$lib/components/Link.svelte';
     import horse from '$lib/assets/blue-horse.png';
     // let count = $state(0);
