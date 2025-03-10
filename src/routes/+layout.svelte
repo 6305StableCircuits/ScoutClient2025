@@ -32,6 +32,7 @@
             class="content-center w-100 h-100"
         />
     {:else}
+        <br />
         {@render children?.()}
     {/if}
 </main>

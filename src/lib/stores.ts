@@ -47,6 +47,7 @@ export const currentMatch = writable<Match>({
     alliance: 'red',
     scout: get(scouter),
     date: 0,
+    notes: '',
     score: {
         overall: 0,
         auto: {

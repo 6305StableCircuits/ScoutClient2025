@@ -126,6 +126,7 @@
         matchScore.overall = score.overall;
         matchScore.auto.score = score.auto;
         matchScore.auto.leave = leave;
+        $currentMatch.notes = notes;
         for (let index = 0; index < Config.scoring.length; index++) {
             //@ts-ignore
             matchScore[part][Config.scoring[index].name] = $state.snapshot(scoringStuff[index]);
@@ -174,6 +175,7 @@
             alliance: 'red',
             scout: $scouter,
             date: 0,
+            notes: '',
             score: {
                 overall: 0,
                 auto: {
@@ -237,9 +239,7 @@
     //     let scorePart = score[part][Config.scoring.findIndex(({name: n})=>n === name)];
     //      ({points: score[part], } = scoreFn(name));
     // }
-    function setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
-            state: Record<string, any>
-        ) {
+    function setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state: Record<string, any>) {
         // console.log(state);
         let scoring;
         let end;
@@ -250,13 +250,18 @@
         for (let index = 0; index < Config.end.length; index++) {
             endingStuff[index] = end[Config.end[index].name];
         }
-        console.log({endingStuff, scoringStuff});
+        console.log({ endingStuff, scoringStuff });
     }
-    function scoreScore<N extends keyof (typeof Config)[T], T extends 'scoring' | 'end' | 'leave' = 'scoring'>(index: N, type?: T) {
+    function scoreScore<
+        N extends keyof (typeof Config)[T],
+        T extends 'scoring' | 'end' | 'leave' = 'scoring'
+    >(index: N, type?: T) {
         if (type === 'leave') {
-            return function() {
-                setStuffIReallyDontWannaDealWithRightNowInsertNameHere(Config.leave.score(Config.leave.points));
-            }
+            return function () {
+                setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
+                    Config.leave.score(Config.leave.points)
+                );
+            };
         }
         type ??= 'scoring' as T;
         return function () {
@@ -265,9 +270,7 @@
             setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
                 coerce<(...args: any[]) => any>(
                     coerce<Record<string, (...args: any[]) => any>>(Config[type][index]).score
-                )(
-                    coerce<Record<string, any>>(thing).points
-                )
+                )(coerce<Record<string, any>>(thing).points)
             );
         };
     }
@@ -278,7 +281,8 @@
     function miss(type: ScoreType) {
         misses[type]++;
     }
-    let scoreBindings = $state(Array(Config.scoring.length).fill(undefined));
+    let scoreBindings = $state(Array(Config.scoring.length + 1).fill(undefined));
+    let notes = $state('');
 </script>
 
 <svelte:head>
@@ -365,20 +369,39 @@
                             </select>{')'} Score
                         </Button>
                     {/if}
+                    <br /><br />
                 {/each}
-                <br /><br />
                 <!-- <Button onclick={()=>miss(Config.primaryScore.name)} class={buttonClass}>Miss {uppercase(Config.primaryScore.name)}</Button>&nbsp;
             <Button onclick={()=>miss(Config.secondaryScore.name)} class={buttonClass}>Miss {uppercase(Config.secondaryScore.name)}</Button><br><br> -->
                 <Button
                     onclick={() => updateScore(coerce<() => any>(Config.assist))}
                     class={buttonClass}>Assist</Button
                 >
+                {@const last = scoreBindings.length - 1}
+                <Button
+                    class={buttonClass}
+                    onclick={function (e) {
+                        if (e.target === this) miss(scoringNames[scoreBindings.at(-1)]);
+                    }}
+                >
+                    Miss <select
+                        class="override-select"
+                        style="width: 100%"
+                        bind:value={
+                            () => (scoreBindings[last] ??= 0), (v) => (scoreBindings[last] = v)
+                        }
+                    >
+                        {#each scoringNames as name, index}
+                            <option value={index}>{pretty(name)}</option>
+                        {/each}
+                    </select>
+                </Button>
                 {#if gameState === 'auto'}
                     <Button
                         disabled={leave}
                         onclick={scoreScore('points', 'leave')}
                         class={buttonClass}>Leave</Button
-                    ><br /><br />
+                    >
                 {:else}
                     <!-- <br><br><Button disabled={endingStuff[0]} onclick={()=>{updateScore(coerce<()=>any>(Config.scoring[endingStuff[0]].score.bind(null,endingStuff[0])))}} class={buttonClass}>{uppercase(Config.scoring[endingStuff[0]].name)}</Button>&nbsp; -->
                     {#each endingStuff as end, i}
@@ -386,12 +409,20 @@
                             disabled={endingStuff[i]}
                             onclick={scoreScore(i, 'end')}
                             class={buttonClass}>{uppercase(Config.end[i].name)}</Button
-                        ><br />
+                        >
+                        {#if i % 2}
+                            <br /><br />
+                        {/if}
                     {/each}
                 {/if}
                 {#if gameState === 'post'}
                     <Button onclick={finish} class={buttonClass}><b>Next Game</b></Button>
                 {/if}
+                <h2>Notes</h2>
+                <textarea
+                    class="border-white rounded w-[80%] outline-none text-black p-2"
+                    bind:value={notes}
+                ></textarea>
             {/if}
         </main>
     {/if}
