@@ -121,12 +121,7 @@ export function getAverageScore(matches: Match[]): Score {
         },
         accuracy: <Record<string, any>>{
             overall: Array<number>(),
-            ...Object.fromEntries(
-                Config.scoring.map(({ name }) => [
-                    name,
-                    []
-                ])
-            )
+            ...Object.fromEntries(Config.scoring.map(({ name }) => [name, []]))
         }
     };
     // type Scores = typeof res;

@@ -243,6 +243,25 @@ var config: Config = {
     },
     end: [
         {
+            name: 'park',
+            points: 2,
+            score(points: number) {
+                if (gameState === 'auto') {
+                    gameState = 'teleop';
+                    for (let score of scoring) {
+                        state.scoring[score] = {
+                            amount: 0,
+                            points: 0
+                        };
+                    }
+                }
+                actions.push({ ...state });
+                state.end['park'] = true;
+                state.points += points;
+                return state;
+            }
+        },
+        {
             name: 'deep cage',
             points: 12,
             score(points: number) {
@@ -279,7 +298,7 @@ var config: Config = {
                 state.points += points;
                 return state;
             }
-        }
+        },
     ],
     park: {
         name: 'park',

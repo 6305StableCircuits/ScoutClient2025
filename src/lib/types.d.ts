@@ -55,6 +55,7 @@ export declare type Match = {
     match: number;
     date: number;
     scout: string;
+    notes?: string;
     alliance: 'red' | 'blue';
     score: Record<string, any>;
     assists: number;

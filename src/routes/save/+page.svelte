@@ -21,6 +21,16 @@
             $matches.matches.length = 0;
         }
     }
+    let { data } = $props();
+    let key = data.key;
+    // console.log(key);
+    setInterval(
+        async () => {
+            key = (await (await fetch('./key')).json())?.key;
+            // console.log(key);
+        },
+        1 * 30 * 1000
+    );
     const fileName = function () {
         let d = new Date();
         let date =
@@ -50,6 +60,7 @@
         return 'scoutSessions_on_' + date + '.json';
     };
     async function send() {
+        $matches.key = key;
         let headers: RequestInit = {
             method: 'POST',
             headers: {
@@ -62,6 +73,7 @@
         if (res.status === 200) {
             saved = true;
             $matches.matches.length = 0;
+            $matches.key = null as unknown as undefined;
             return true;
         }
         return false;
@@ -110,10 +122,8 @@
         >Export as JSON</Button
     >&nbsp;
     <Button disabled={$matches.matches.length === 0} onclick={send}>Save Data</Button>&nbsp;
-    <Button
-        disabled={$matches.matches.length !== 0 || false}
-        class="bg-[#ef0305]"
-        onclick={deleteData}>Delete Data</Button
+    <Button disabled={$matches.matches.length === 0} class="bg-[#ef0305]" onclick={deleteData}
+        >Delete Data</Button
     >
     <div class="relative z-10">
         <Transition show={$dialog.expanded}>
