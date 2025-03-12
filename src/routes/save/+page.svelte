@@ -23,11 +23,11 @@
     }
     let { data } = $props();
     let key = data.key;
-    console.log(key);
+    // console.log(key);
     setInterval(
         async () => {
             key = (await (await fetch('./key')).json())?.key;
-            console.log(key);
+            // console.log(key);
         },
         1 * 30 * 1000
     );
@@ -73,6 +73,7 @@
         if (res.status === 200) {
             saved = true;
             $matches.matches.length = 0;
+            $matches.key = null;
             return true;
         }
         return false;
