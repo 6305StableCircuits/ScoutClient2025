@@ -73,7 +73,7 @@
         if (res.status === 200) {
             saved = true;
             $matches.matches.length = 0;
-            $matches.key = null;
+            $matches.key = null as unknown as undefined;
             return true;
         }
         return false;
