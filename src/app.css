@@ -78,9 +78,20 @@ select {
     text-indent: -2px;
     border-radius: 0.2em;
 }
-button > .override-select {
+/* button > .override-select {
     /* margin-left: -5% !important; */
-    /* padding-left: 0 !important; */
+/* padding-left: 0 !important; */
+/* } */
+
+/* :root {
+    overflow-x: hidden;
+} */
+header::-webkit-scrollbar {
+    display: none;
+}
+
+:root {
+    overflow-x: hidden;
 }
 
 input::-webkit-outer-spin-button,

@@ -21,7 +21,7 @@
 </script>
 
 <main
-    class="justify-between flex max-h-16 px-10 content-center mx-[-1em] text-center px-10 m-auto bg-gray-800 w-[100.475vw]"
+    class="justify-between flex max-h-16 px-10 content-center text-center px-10 m-auto bg-gray-800 w-[100.475vw] ml-[-10px]"
 >
     <h1 class="text-[2em] pt-2">ScoutClient 2025</h1>
     <span
@@ -38,14 +38,14 @@
                     {/if}&nbsp;
                 </span>
             {/each}
-            &nbsp;<Link class="pt-4 pb-0" url="settings"
+            &nbsp;<Link class="pt-4 pb-0" url="/settings"
                 ><img src={settingsIcon} alt="settings" width="24px" /></Link
             >
         {/key}
     </span>
     <span class="portrait" bind:this={portrait}>
         <div class="float-right flex absolute right-[5%] pt-3 pointer z-50">
-            <Link url="settings" class="float-left pt-1 pb-0"
+            <Link url="/settings" class="float-left pt-1 pb-0"
                 ><img src={settingsIcon} alt="settings" width="24px" /></Link
             >&nbsp;
             <NavMenu />

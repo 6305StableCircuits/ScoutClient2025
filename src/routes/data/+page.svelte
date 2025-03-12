@@ -11,7 +11,6 @@
     import { RowCount, TableHandler } from '@vincjo/datatables';
     import { Datatable } from '@vincjo/datatables';
     import { ThSort, ThFilter } from '@vincjo/datatables';
-    // import { get } from 'svelte/store';
     let { data }: { data: PageData } = $props();
     let background = 'rgb(0,0,0)';
     let foreground = 'rgb(255,255,255)'
@@ -42,7 +41,7 @@
             method: 'GET'
         };
         let res = await fetch('../supabase', headers);
-        betterData = await res.json();
+        betterData = (await res.json())?.scoutingData as Match[];
         console.log(betterData);
         //@ts-ignore
         table.setRows(betterData?.scoutingData);
@@ -73,17 +72,11 @@
                         {#each keysss as key}
                             {@const bullshit = row[key as keyof typeof row]}
                             {#if key === 'notes'}
-                                {#if bullshit}
-                                    <td style="color:{foreground};border: 1px solid {foreground}"
-                                        ><ClickForMore stuff={bullshit} /></td
-                                    >
+                                {#if bullshit && coerce<string>(bullshit)?.length}
+                                    <td style="color:{foreground};border: 1px solid {foreground};"><ClickForMore stuff={coerce<string>(bullshit)} /></td>
                                 {:else}
-                                    <td style="color:{foreground};border: 1px solid {foreground};"
-                                        ><i>None Provided</i></td
-                                    >
+                                    <td style="color:{foreground};border: 1px solid {foreground};"><i class="text-zinc-500">None Provided</i></td>
                                 {/if}
-                                <!-- {:else if key === 'Team'}
-                            <td><Link url=``>{bullshit}</Link></td> -->
                             {:else if key === 'score'}
                                 <td style="color:{foreground};border: 1px solid {foreground};"
                                     >{(bullshit as Record<string, any>)?.overall}</td
@@ -97,13 +90,9 @@
                                     ></td
                                 >
                             {:else if key === 'date'}
-                                <td style="color:{foreground};border: 1px solid {foreground};"
-                                    >{new Date(bullshit).toLocaleDateString()}</td
-                                >
+                                <td style="color:{foreground};border: 1px solid {foreground};">{new Date(coerce<string>(bullshit)).toLocaleDateString()}</td>
                             {:else if key === 'alliance'}
-                                <td style="color:{bullshit};border: 1px solid {foreground};"
-                                    >{pretty(bullshit)}</td
-                                >
+                                <td style="color:{bullshit};border: 1px solid {foreground};">{pretty(coerce<string>(bullshit))}</td>
                             {:else}
                                 <td style="color:{foreground};border: 1px solid {foreground};">{bullshit}</td>
                             {/if}
@@ -193,7 +182,6 @@
             </tbody>
         </table>
     </Datatable>
-</main>
 
 <!-- <h1 class="text-lg">Match Data</h1>
     {#snippet item({team,score,match,alliance,scout}:Match,index:number)}
@@ -216,26 +204,28 @@
     {/snippet}
     <center class="rounded">
         <List list={matches} {item} {head} table={true}/>
-    </center>
+    </center> -->
     <h1 class="text-lg">Predictions</h1>
     <div class="border border-white rounded">
-    <h2>Rankings</h2>
-    <ol type="1" start={1} class="text-left ml-[40%]">
-        {#each rankings as team,rank}
-            <li><b>{rank+1}</b>. {team}</li>
-        {/each}
-    </ol>
-    <h2>Alliances</h2>
-    <ol type="1" start={1} class="text-left ml-[40%]">
-        {#each alliances as alliance, rank}
-            <li><b>{rank+1}</b>. 
-                {#each alliance as team}
-                    <Link url="./data/team/{team}">{team}</Link>,&nbsp;
-                {/each}
-            </li>
-        {/each}
-    </ol> -->
-<!-- </div> -->
+        <h2>Rankings</h2>
+        <ol type="1" start={1} class="text-left ml-[40%]">
+            {#each rankings as team, rank}
+                <li><b>{rank + 1}</b>. {team}</li>
+            {/each}
+        </ol>
+        <h2>Alliances</h2>
+        <ol type="1" start={1} class="text-left ml-[40%]">
+            {#each alliances as alliance, rank}
+                <li>
+                    <b>{rank + 1}</b>.
+                    {#each alliance as team}
+                        <Link url="./data/team/{team}">{team}</Link>,&nbsp;
+                    {/each}
+                </li>
+            {/each}
+        </ol>
+    </div>
+</main>
 
 <style>
     @property --background {
