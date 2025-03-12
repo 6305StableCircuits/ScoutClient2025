@@ -4,7 +4,7 @@ import { persisted } from 'svelte-persisted-store';
 import Config from '$lib/config';
 import { coerce } from '$lib';
 export { get };
-export const matches = persisted<{ matches: Match[] }>('matches', { matches: [] });
+export const matches = persisted<{ matches: Match[], key?: number }>('matches', { matches: [] });
 export const scouter = persisted('scouter', '', {
     serializer: {
         parse: (v: string) => v,

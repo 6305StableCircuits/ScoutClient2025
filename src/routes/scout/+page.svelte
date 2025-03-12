@@ -159,7 +159,7 @@
     let part = $derived<'auto' | 'teleop'>(gameState === 'teleop' ? 'teleop' : 'auto');
     function start() {
         $currentMatch.date = Date.now();
-        timer = new Timer('2:30');
+        timer = new Timer('0:30');
         timer.start();
     }
     function finish() {
@@ -371,31 +371,32 @@
                     {/if}
                     <br /><br />
                 {/each}
-                <!-- <Button onclick={()=>miss(Config.primaryScore.name)} class={buttonClass}>Miss {uppercase(Config.primaryScore.name)}</Button>&nbsp;
-            <Button onclick={()=>miss(Config.secondaryScore.name)} class={buttonClass}>Miss {uppercase(Config.secondaryScore.name)}</Button><br><br> -->
+                
+                {@const last = scoreBindings.length - 1}
+                {#each Object.entries(scoreNames) as [name, subsets], i}
+                    <Button
+                        class={buttonClass}
+                        onclick={function (e) {
+                            if (e.target === this) miss(scoringNames[scoreBindings.at(-1)]);
+                        }}
+                    >
+                        Miss {pretty(name)} <select
+                            class="override-select"
+                            style="width: 100%"
+                            bind:value={
+                                () => (scoreBindings[i] ??= subsets[0].index), (v) => (scoreBindings[i] = v)
+                            }
+                        >
+                            {#each subsets as {name, index}}
+                                <option value={index}>{pretty(name)}</option>
+                            {/each}
+                        </select>
+                    </Button>
+                {/each}
                 <Button
                     onclick={() => updateScore(coerce<() => any>(Config.assist))}
                     class={buttonClass}>Assist</Button
                 >
-                {@const last = scoreBindings.length - 1}
-                <Button
-                    class={buttonClass}
-                    onclick={function (e) {
-                        if (e.target === this) miss(scoringNames[scoreBindings.at(-1)]);
-                    }}
-                >
-                    Miss <select
-                        class="override-select"
-                        style="width: 100%"
-                        bind:value={
-                            () => (scoreBindings[last] ??= 0), (v) => (scoreBindings[last] = v)
-                        }
-                    >
-                        {#each scoringNames as name, index}
-                            <option value={index}>{pretty(name)}</option>
-                        {/each}
-                    </select>
-                </Button>
                 {#if gameState === 'auto'}
                     <Button
                         disabled={leave}

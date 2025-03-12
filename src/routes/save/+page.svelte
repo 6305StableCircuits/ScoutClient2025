@@ -29,7 +29,7 @@
             key = (await (await fetch('./key')).json())?.key;
             console.log(key);
         },
-        1 * 60 * 1000
+        1 * 30 * 1000
     );
     const fileName = function () {
         let d = new Date();
@@ -60,6 +60,7 @@
         return 'scoutSessions_on_' + date + '.json';
     };
     async function send() {
+        $matches.key = key;
         let headers: RequestInit = {
             method: 'POST',
             headers: {
