@@ -159,7 +159,7 @@
     let part = $derived<'auto' | 'teleop'>(gameState === 'teleop' ? 'teleop' : 'auto');
     function start() {
         $currentMatch.date = Date.now();
-        timer = new Timer('0:30');
+        timer = new Timer('2:30');
         timer.start();
     }
     function finish() {
