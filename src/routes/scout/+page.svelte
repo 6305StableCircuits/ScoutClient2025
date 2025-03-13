@@ -141,19 +141,23 @@
     });
     $inspect(matchScore);
     let timer = $state<Timer<any> | null>();
-    let gameState = $derived.by<'pre' | 'auto' | 'teleop' | 'post'>(() => {
-        if (timer instanceof Timer) {
-            if (timer.time <= 0) return 'post';
-            let [minutes, seconds] = timer.formatted.split(':').map(Number);
-            let time = minutes * 60 + seconds;
-            if (time <= 2 * 60 + 15) {
-                return 'teleop';
-            }
-            return 'auto';
-        } else {
-            return 'pre';
-        }
-    });
+    // let paused_for_auto = $state(false);
+    // internals.state
+    // let gameState = $derived.by<'pre' | 'auto' | 'teleop' | 'post'>(() => {
+    //     if (timer instanceof Timer) {
+    //         if (timer.time <= 0) return 'post';
+    //         let [minutes, seconds] = timer.formatted.split(':').map(Number);
+    //         let time = minutes * 60 + seconds;
+    //         if (paused_for_auto) return 'auto';
+    //         if (time <= 2 * 60 + 15) {
+    //             return 'teleop';
+    //         }
+    //         return 'auto';
+    //     } else {
+    //         return 'pre';
+    //     }
+    // });
+    let gameState = $state<'pre' | 'auto' | 'teleop' | 'post'>('pre');
     $inspect($currentMatch);
     $inspect(endingStuff);
     let part = $derived<'auto' | 'teleop'>(gameState === 'teleop' ? 'teleop' : 'auto');
@@ -161,10 +165,21 @@
         $currentMatch.date = Date.now();
         timer = new Timer('2:30');
         timer.start();
+        gameState = 'auto';
+        timer.on('2:15', () => {
+            timer!.pause();
+            setTimeout(() => {
+                timer!.play();
+                gameState = 'teleop';
+            }, 3000);
+        });
+        timer.on('finish', () => {
+            gameState = 'post';
+        })
     }
     function finish() {
         let m = $matches.matches;
-        m.push({ ...$currentMatch! });
+        m.push({ ...$currentMatch });
         $matches = { matches: m };
         $scoutState = 0;
         timer = null;
@@ -371,7 +386,7 @@
                     {/if}
                     <br /><br />
                 {/each}
-                
+
                 {@const last = scoreBindings.length - 1}
                 {#each Object.entries(scoreNames) as [name, subsets], i}
                     <Button
@@ -380,14 +395,16 @@
                             if (e.target === this) miss(scoringNames[scoreBindings.at(-1)]);
                         }}
                     >
-                        Miss {pretty(name)} <select
+                        Miss {pretty(name)}
+                        <select
                             class="override-select"
                             style="width: 100%"
                             bind:value={
-                                () => (scoreBindings[i] ??= subsets[0].index), (v) => (scoreBindings[i] = v)
+                                () => (scoreBindings[i] ??= subsets[0].index),
+                                (v) => (scoreBindings[i] = v)
                             }
                         >
-                            {#each subsets as {name, index}}
+                            {#each subsets as { name, index }}
                                 <option value={index}>{pretty(name)}</option>
                             {/each}
                         </select>

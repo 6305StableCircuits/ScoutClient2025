@@ -298,7 +298,7 @@ var config: Config = {
                 state.points += points;
                 return state;
             }
-        },
+        }
     ],
     park: {
         name: 'park',

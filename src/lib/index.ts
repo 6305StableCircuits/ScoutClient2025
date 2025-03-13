@@ -1,9 +1,8 @@
 // place files you want to import through the `$lib` alias in this folder.
-import { page } from '$app/stores';
+import { page } from '$app/state';
 import type { Match, Score } from '$lib/types';
-import { get } from 'svelte/store';
 import Config from '$lib/config';
-export let noop = () => {};
+export const noop = () => {};
 export let paths = {
     home: '',
     scout: 'scout',
@@ -32,7 +31,7 @@ export function pretty(string: string): string {
 export function isCurrentPath(path: string): boolean {
     let [p, c] = [
         path.replace(/(^\/)|(\/$)/g, ''),
-        get(page).url.pathname.replace(/(^\/)|(\/$)/g, '')
+        page.url.pathname.replace(/(^\/)|(\/$)/g, '')
     ];
     return p === c;
 }

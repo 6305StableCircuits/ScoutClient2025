@@ -13,11 +13,14 @@
     import { ThSort, ThFilter } from '@vincjo/datatables';
     let { data }: { data: PageData } = $props();
     let background = 'rgb(0,0,0)';
-    let foreground = 'rgb(255,255,255)'
+    let foreground = 'rgb(255,255,255)';
     // let {matches} = data;
     // console.log(matches);
     console.log(data);
-    let datata = [[1,2], [2,2]];
+    let datata = [
+        [1, 2],
+        [2, 2]
+    ];
     let rankings = $state(rank(data.matches));
     let alliances = $derived(chooseAlliances(rankings));
     let betterData = $state(data.matches);
@@ -25,17 +28,30 @@
     const table = new TableHandler(betterData, { rowsPerPage: 10, highlight: false });
     const tabl = new TableHandler(datata, { rowsPerPage: 10, highlight: false });
     let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'notes'];
-    let teamkeys = ['Team','Match','Overall','Auto','L1 (Amount)','L2','L3','L4','Processor','Net','Barge','Accuracy']
-    let teams = $derived<number[]>([...new Set(betterData.map(({team})=>Number(team)))]);
-    let teamstuff = $derived.by(()=>{
+    let teamkeys = [
+        'Team',
+        'Match',
+        'Overall',
+        'Auto',
+        'L1 (Amount)',
+        'L2',
+        'L3',
+        'L4',
+        'Processor',
+        'Net',
+        'Barge',
+        'Accuracy'
+    ];
+    let teams = $derived<number[]>([...new Set(betterData.map(({ team }) => Number(team)))]);
+    let teamstuff = $derived.by(() => {
         return teams.map((team) => {
-            let matches = betterData.filter(({team: _team}) => _team === team);
+            let matches = betterData.filter(({ team: _team }) => _team === team);
             let sorted = matches.toSorted((a, b) => b.date - a.date);
             return sorted[0];
         });
     });
     //svelte-ignore state_referenced_locally
-    tabl.setRows(teamstuff);
+    tabl.setRows(teamstuff as any);
     async function get() {
         let headers: RequestInit = {
             method: 'GET'
@@ -45,7 +61,7 @@
         console.log(betterData);
         //@ts-ignore
         table.setRows(betterData?.scoutingData);
-        tabl.setRows(teamstuff);
+        tabl.setRows(teamstuff as any);
         if (res.status === 200) {
             return true;
         }
@@ -61,7 +77,7 @@
                 <!-- rgb(219, 219, 219) -->
                 <tr style="color:{foreground}">
                     {#each keysss as key}
-                        <ThSort {table} field={key as (typeof keysss)[number]}>{pretty(key)}</ThSort
+                        <ThSort {table} field={key as keyof Match}>{pretty(key)}</ThSort
                         >
                     {/each}
                 </tr>
@@ -73,9 +89,13 @@
                             {@const bullshit = row[key as keyof typeof row]}
                             {#if key === 'notes'}
                                 {#if bullshit && coerce<string>(bullshit)?.length}
-                                    <td style="color:{foreground};border: 1px solid {foreground};"><ClickForMore stuff={coerce<string>(bullshit)} /></td>
+                                    <td style="color:{foreground};border: 1px solid {foreground};"
+                                        ><ClickForMore stuff={coerce<string>(bullshit)} /></td
+                                    >
                                 {:else}
-                                    <td style="color:{foreground};border: 1px solid {foreground};"><i class="text-zinc-500">None Provided</i></td>
+                                    <td style="color:{foreground};border: 1px solid {foreground};"
+                                        ><i class="text-zinc-500">None Provided</i></td
+                                    >
                                 {/if}
                             {:else if key === 'score'}
                                 <td style="color:{foreground};border: 1px solid {foreground};"
@@ -90,11 +110,17 @@
                                     ></td
                                 >
                             {:else if key === 'date'}
-                                <td style="color:{foreground};border: 1px solid {foreground};">{new Date(coerce<string>(bullshit)).toLocaleDateString()}</td>
+                                <td style="color:{foreground};border: 1px solid {foreground};"
+                                    >{new Date(coerce<string>(bullshit)).toLocaleDateString()}</td
+                                >
                             {:else if key === 'alliance'}
-                                <td style="color:{bullshit};border: 1px solid {foreground};">{pretty(coerce<string>(bullshit))}</td>
+                                <td style="color:{bullshit};border: 1px solid {foreground};"
+                                    >{pretty(coerce<string>(bullshit))}</td
+                                >
                             {:else}
-                                <td style="color:{foreground};border: 1px solid {foreground};">{bullshit}</td>
+                                <td style="color:{foreground};border: 1px solid {foreground};"
+                                    >{bullshit}</td
+                                >
                             {/if}
                         {/each}
                     </tr>
@@ -109,7 +135,8 @@
             <thead style:--background={background} style="background-color: var(--background)">
                 <tr style="color:{foreground}">
                     {#each teamkeys as key}
-                        <ThSort {table} field={key as (typeof teamkeys)[number]}>{pretty(key)}</ThSort
+                        <ThSort {table} field={key as keyof Match}
+                            >{pretty(key)}</ThSort
                         >
                     {/each}
                 </tr>
@@ -118,60 +145,59 @@
                 {#each teamstuff as key, i}
                     <tr>
                         <!-- {#each Object.entries(key), k} -->
-                                <td style="color:{foreground};border: 1px solid {foreground}"
-                                    >{teams[i]}</td
-                                >
-                            <td style="color:{foreground};border: 1px solid {foreground}"
+                        <td style="color:{foreground};border: 1px solid {foreground}">{teams[i]}</td
+                        >
+                        <td style="color:{foreground};border: 1px solid {foreground}"
                             >{key['match']}</td
                         >
-                            <td style="color:{foreground};border: 1px solid {foreground}"
+                        <td style="color:{foreground};border: 1px solid {foreground}"
                             >{key['score']['overall']}</td
                         >
+                        <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key.score['auto']['score']}</td
+                        >
+                        <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key.score['teleop']['coral (trough)']['amount']}</td
+                        >
+                        <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key.score.teleop['coral (l2 branch)'].amount}</td
+                        >
+                        <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key.score.teleop['coral (l3 branch)'].amount}</td
+                        >
+                        <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key.score.teleop['coral (l4 branch)'].amount}</td
+                        >
+                        <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key.score.teleop['algae (processor)'].amount}</td
+                        >
+                        <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key.score.teleop['algae (net)'].amount}</td
+                        >
+                        {#if key.score.teleop['deep cage']}
                             <td style="color:{foreground};border: 1px solid {foreground}"
-                                        >{key.score['auto']['score']}</td
-                                    >
-                                    <td style="color:{foreground};border: 1px solid {foreground}"
-                                        >{key.score['teleop']['coral (trough)']['amount']}</td
-                                    >
-                                    <td style="color:{foreground};border: 1px solid {foreground}"
-                                        >{key.score.teleop['coral (l2 branch)'].amount}</td
-                                    >
-                                    <td style="color:{foreground};border: 1px solid {foreground}"
-                                        >{key.score.teleop['coral (l3 branch)'].amount}</td
-                                    >
-                                    <td style="color:{foreground};border: 1px solid {foreground}"
-                                        >{key.score.teleop['coral (l4 branch)'].amount}</td
-                                    >
-                                    <td style="color:{foreground};border: 1px solid {foreground}"
-                                        >{key.score.teleop['algae (processor)'].amount}</td
-                                    >
-                                    <td style="color:{foreground};border: 1px solid {foreground}"
-                                    >{key.score.teleop['algae (net)'].amount}</td
-                                >
-                                {#if key.score.teleop['deep cage']}
-                                <td style="color:{foreground};border: 1px solid {foreground}"
-                                    >Deep Cage</td
-                                >
-                                {:else if key.score.teleop['shallow cage']}
-                                <td style="color:{foreground};border: 1px solid {foreground}"
+                                >Deep Cage</td
+                            >
+                        {:else if key.score.teleop['shallow cage']}
+                            <td style="color:{foreground};border: 1px solid {foreground}"
                                 >Shallow Cage</td
                             >
-                                <!-- {:else if key.score.teleop['park']}
+                            <!-- {:else if key.score.teleop['park']}
                                 <td style="color:black;border: 1px solid black"
                                 >Park</td
                             > -->
-                                {:else}
-                                <td style="color:{foreground};border: 1px solid {foreground}"
+                        {:else}
+                            <td style="color:{foreground};border: 1px solid {foreground}"
                                 ><i>Not Stated</i></td
                             >
-                                {/if}
-                                <td style="color:{foreground};border: 1px solid {foreground}"
-                                    >{key.score['accuracy'].overall *100}%</td
-                                >
-                                <!-- <td style="color:black;border: 1px solid black"
+                        {/if}
+                        <td style="color:{foreground};border: 1px solid {foreground}"
+                            >{key.score['accuracy'].overall * 100}%</td
+                        >
+                        <!-- <td style="color:black;border: 1px solid black"
                                     >{((key.score.teleop.score / key.score.accuracy.overall)/135).toFixed(3)}s</td
                                 > -->
-                                <!-- {#each Object.keys(key.score) as bonk}
+                        <!-- {#each Object.keys(key.score) as bonk}
                                     <td style="color:black;border: 1px solid black"
                                         >{JSON.stringify(key.score[bonk])}</td
                                     >
@@ -183,7 +209,7 @@
         </table>
     </Datatable>
 
-<!-- <h1 class="text-lg">Match Data</h1>
+    <!-- <h1 class="text-lg">Match Data</h1>
     {#snippet item({team,score,match,alliance,scout}:Match,index:number)}
             <tr>
                 <td><Link url="./data/match/{match}">{match}</Link>&nbsp;</td>
@@ -231,7 +257,7 @@
     @property --background {
         inherits: false;
         syntax: '<color>';
-        initial-value: black;
+        initial-value: #111111;
     }
     .thiskew > *:nth-child(n) {
         background-color: rgb(147, 147, 147);
@@ -239,7 +265,7 @@
     .thiskew > *:nth-child(2n) {
         background-color: var(--background);
     }
-    tr:hover td{
+    tr:hover td {
         color: black !important;
     }
 </style>
