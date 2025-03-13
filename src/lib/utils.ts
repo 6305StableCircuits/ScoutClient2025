@@ -1,5 +1,7 @@
-export function calcAuthHeader(username: string, token: string){
+export function calcAuthHeader(username: string, token: string | undefined){
     let header : string = `${username}:${token}` 
-    header = Buffer.from(header, 'base64').toString()
+    console.log(header)
+    header = btoa(header)
+    console.log("Coinerted: " + header)
     return header
 }
