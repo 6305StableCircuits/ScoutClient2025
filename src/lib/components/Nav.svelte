@@ -8,7 +8,6 @@
     let portrait = $state<HTMLSpanElement>();
     let landscape = $state<HTMLSpanElement>();
     import settingsIcon from '$lib/assets/settings.svg';
-    console.log(settingsIcon);
     //     type $state<T> = T;
     // onMount(()=>{
     //     let landScapeStyle = getComputedStyle(landscape!);
