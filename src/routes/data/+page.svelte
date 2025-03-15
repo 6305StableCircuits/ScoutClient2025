@@ -77,8 +77,7 @@
                 <!-- rgb(219, 219, 219) -->
                 <tr style="color:{foreground}">
                     {#each keysss as key}
-                        <ThSort {table} field={key as keyof Match}>{pretty(key)}</ThSort
-                        >
+                        <ThSort {table} field={key as keyof Match}>{pretty(key)}</ThSort>
                     {/each}
                 </tr>
             </thead>
@@ -135,9 +134,7 @@
             <thead style:--background={background} style="background-color: var(--background)">
                 <tr style="color:{foreground}">
                     {#each teamkeys as key}
-                        <ThSort {table} field={key as keyof Match}
-                            >{pretty(key)}</ThSort
-                        >
+                        <ThSort {table} field={key as keyof Match}>{pretty(key)}</ThSort>
                     {/each}
                 </tr>
             </thead>

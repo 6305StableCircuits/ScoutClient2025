@@ -21,7 +21,7 @@ function format(time: number): string {
     seconds = seconds.length === 1 ? '0' + seconds : seconds;
     return `${minutes}:${seconds}`;
 }
-class TimerEvent<T extends string|number> extends CustomEvent<Timer<T>> {
+class TimerEvent<T extends string | number> extends CustomEvent<Timer<T>> {
     #instance: Timer<T>;
     #name: string;
     constructor(instance: Timer<T>, name: string) {
@@ -33,15 +33,14 @@ class TimerEvent<T extends string|number> extends CustomEvent<Timer<T>> {
     static dispatcher<T extends string | number>(instance: Timer<T>) {
         return function dispatch(name: string) {
             instance.dispatchEvent(new TimerEvent(instance, name));
-        }
+        };
     }
     get next() {
         if (this.#name !== 'finish' && this.#name !== 'start') {
             this.#instance.pause();
             return () => {
-                if (this.#instance.paused)
-                    this.#instance.play();
-            }
+                if (this.#instance.paused) this.#instance.play();
+            };
         } else {
             return noop;
         }
@@ -81,7 +80,9 @@ export default class Timer<T extends string | number> extends EventTarget {
             this.#dispatcher('finish');
         }
         if (this.#lastSecond !== Math.round((this.#end - dateNow) / 1000)) {
-            this.#dispatcher(`${format(this.#lastSecond = Math.round((this.#end - dateNow) / 1000))}`);
+            this.#dispatcher(
+                `${format((this.#lastSecond = Math.round((this.#end - dateNow) / 1000)))}`
+            );
         }
         if (this.finished && this.#stop) return 0;
         this.#curr = (this.#end - dateNow) / 1000;

@@ -41,6 +41,7 @@ export const settings = persisted<Settings>('settings', {
     fish: true,
     scoutFont: 'default'
 });
+export const started_current_match = writable(false);
 export const currentMatch = writable<Match>({
     team: 0,
     match: 0,

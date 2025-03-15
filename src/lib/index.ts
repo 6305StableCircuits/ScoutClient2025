@@ -29,10 +29,7 @@ export function pretty(string: string): string {
     );
 }
 export function isCurrentPath(path: string): boolean {
-    let [p, c] = [
-        path.replace(/(^\/)|(\/$)/g, ''),
-        page.url.pathname.replace(/(^\/)|(\/$)/g, '')
-    ];
+    let [p, c] = [path.replace(/(^\/)|(\/$)/g, ''), page.url.pathname.replace(/(^\/)|(\/$)/g, '')];
     return p === c;
 }
 /**

@@ -54,7 +54,7 @@ var config: Config = {
         return lastUndone!;
     },
     assist() {
-        actions.push({ ...state });
+        actions.push(structuredClone(state));
         assists++;
         state.assists = assists;
         return state;
@@ -82,7 +82,7 @@ var config: Config = {
                 };
             },
             score(points: number) {
-                actions.push({ ...state });
+                actions.push(structuredClone(state));
                 state.points += points;
                 state.scoring['coral (trough)'].amount++;
                 state.scoring['coral (trough)'].points += points;
@@ -111,7 +111,7 @@ var config: Config = {
                 };
             },
             score(points: number) {
-                actions.push({ ...state });
+                actions.push(structuredClone(state));
                 state.points += points;
                 state.scoring['coral (l2 branch)'].amount++;
                 state.scoring['coral (l2 branch)'].points += points;
@@ -140,7 +140,7 @@ var config: Config = {
                 };
             },
             score(points: number) {
-                actions.push({ ...state });
+                actions.push(structuredClone(state));
                 state.points += points;
                 state.scoring['coral (l3 branch)'].amount++;
                 state.scoring['coral (l3 branch)'].points += points;
@@ -169,7 +169,7 @@ var config: Config = {
                 };
             },
             score(points: number) {
-                actions.push({ ...state });
+                actions.push(structuredClone(state));
                 state.points += points;
                 state.scoring['coral (l4 branch)'].amount++;
                 state.scoring['coral (l4 branch)'].points += points;
@@ -196,7 +196,7 @@ var config: Config = {
                 };
             },
             score(points: number) {
-                actions.push({ ...state });
+                actions.push(structuredClone(state));
                 state.points += points;
                 state.scoring['algae (processor)'].amount++;
                 state.scoring['algae (processor)'].points += points;
@@ -223,7 +223,7 @@ var config: Config = {
                 };
             },
             score(points: number) {
-                actions.push({ ...state });
+                actions.push(structuredClone(state));
                 state.points += points;
                 state.scoring['algae (net)'].amount++;
                 state.scoring['algae (net)'].points += points;
@@ -235,7 +235,7 @@ var config: Config = {
         name: 'Leave',
         points: 2,
         score(points: number) {
-            actions.push({ ...state });
+            actions.push(structuredClone(state));
             state.leave = true;
             state.points += points;
             return state;
@@ -255,7 +255,7 @@ var config: Config = {
                         };
                     }
                 }
-                actions.push({ ...state });
+                actions.push(structuredClone(state));
                 state.end['park'] = true;
                 state.points += points;
                 return state;
@@ -274,7 +274,6 @@ var config: Config = {
                         };
                     }
                 }
-                actions.push({ ...state });
                 state.end['deep cage'] = true;
                 state.points += points;
                 return state;
@@ -293,7 +292,7 @@ var config: Config = {
                         };
                     }
                 }
-                actions.push({ ...state });
+                actions.push(structuredClone(state));
                 state.end['shallow cage'] = true;
                 state.points += points;
                 return state;
@@ -313,7 +312,7 @@ var config: Config = {
                     };
                 }
             }
-            actions.push({ ...state });
+            actions.push(structuredClone(state));
             state.park = true;
             state.points += points;
             return state;

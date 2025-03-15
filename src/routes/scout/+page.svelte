@@ -8,7 +8,8 @@
         matches,
         currentMatch,
         alliance as allianceStore,
-        scoutState
+        scoutState,
+        started_current_match
     } from '$lib/stores';
     import { fade, slide } from 'svelte/transition';
     import Button from '$lib/components/Button.svelte';
@@ -18,7 +19,7 @@
     let sans = $derived($scouter.toLowerCase() === 'sans');
     //globalThis.Button = Button;
     let papyrus = $derived($scouter.toLowerCase() === 'papyrus');
-    let buttonClass = $state('py-2xl h-20 w-40');
+    let buttonClass = 'py-2xl h-20 w-40';
     //@ts-ignore
     let scoringStuff: any[] = $state(Array(Config.scoring.length).fill({ amount: 0, points: 0 }));
     //@ts-ignore
@@ -35,6 +36,72 @@
     onMount(() => {
         init();
     });
+    let timer = $state<Timer<any> | null>();
+    if ($started_current_match) {
+        $scoutState = 0;
+        timer = null;
+        Config.reset();
+        $started_current_match = false;
+        $currentMatch = {
+            team: 0,
+            match: $currentMatch.match + 1,
+            alliance: 'red',
+            scout: $scouter,
+            date: 0,
+            notes: '',
+            score: {
+                overall: 0,
+                auto: {
+                    score: 0,
+                    leave: false,
+                    ...scoringStuff.reduce(
+                        (a, b, index) => ({
+                            ...a,
+                            [Config.scoring[index].name]: {
+                                amount: 0,
+                                points: 0
+                            }
+                        }),
+                        {}
+                    )
+                },
+                teleop: {
+                    score: 0,
+                    ...endingStuff.reduce(
+                        (a, b, index) => ({
+                            ...a,
+                            [Config.end[index].name]: false
+                        }),
+                        {}
+                    ),
+                    ...scoringStuff.reduce(
+                        (a, b, index) => ({
+                            ...a,
+                            [Config.scoring[index].name]: {
+                                amount: 0,
+                                points: 0
+                            }
+                        }),
+                        {}
+                    )
+                },
+                accuracy: {
+                    overall: 0,
+                    ...scoringStuff.reduce(
+                        (a, b, index) => ({
+                            ...a,
+                            [Config.scoring[index].name]: {
+                                amount: 0,
+                                points: 0
+                            }
+                        }),
+                        {}
+                    )
+                }
+            },
+            assists: 0
+        };
+    }
     let scoreNames = splitScoring(Config.scoring.map(({ name }) => name));
     const scoringNames = Config.scoring.map(({ name }) => name);
     // warning ts gets very angry here, `coerce` comes in handy
@@ -86,7 +153,7 @@
             //     matchScore.auto[Config.primaryScore.name].amount+matchScore.teleop[Config.primaryScore.name].amount,
             //     matchScore.teleop[Config.secondaryScore.name].amount+matchScore.auto[Config.secondaryScore.name].amount
             // ];
-            console.log(matchScore);
+            // console.log(matchScore);
             let fulls = Config.scoring.map(
                 (score) => this.auto[score.name].amount + this.teleop[score.name].amount
             );
@@ -140,7 +207,6 @@
         ({ undoAvailable, redoAvailable } = Config);
     });
     $inspect(matchScore);
-    let timer = $state<Timer<any> | null>();
     // let paused_for_auto = $state(false);
     // internals.state
     // let gameState = $derived.by<'pre' | 'auto' | 'teleop' | 'post'>(() => {
@@ -165,6 +231,7 @@
         $currentMatch.date = Date.now();
         timer = new Timer('2:30');
         timer.start();
+        $started_current_match = true;
         gameState = 'auto';
         timer.on('2:15', () => {
             timer!.pause();
@@ -175,7 +242,7 @@
         });
         timer.on('finish', () => {
             gameState = 'post';
-        })
+        });
     }
     function finish() {
         let m = $matches.matches;
@@ -184,6 +251,7 @@
         $scoutState = 0;
         timer = null;
         Config.reset();
+        $started_current_match = false;
         $currentMatch = {
             team: 0,
             match: $currentMatch.match + 1,
@@ -265,7 +333,7 @@
         for (let index = 0; index < Config.end.length; index++) {
             endingStuff[index] = end[Config.end[index].name];
         }
-        console.log({ endingStuff, scoringStuff });
+        // console.log({ endingStuff, scoringStuff });
     }
     function scoreScore<
         N extends keyof (typeof Config)[T],
@@ -273,20 +341,20 @@
     >(index: N, type?: T) {
         if (type === 'leave') {
             return function () {
-                setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
-                    Config.leave.score(Config.leave.points)
-                );
+                let state = Config.leave.score(Config.leave.points);
+                setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state);
+                return state;
             };
         }
         type ??= 'scoring' as T;
         return function () {
             let thing = Config[type][index];
             if (type === 'scoring') thing = thing[part as keyof unknown];
-            setStuffIReallyDontWannaDealWithRightNowInsertNameHere(
-                coerce<(...args: any[]) => any>(
-                    coerce<Record<string, (...args: any[]) => any>>(Config[type][index]).score
-                )(coerce<Record<string, any>>(thing).points)
-            );
+            let state = coerce<(...args: any[]) => Record<string, any>>(
+                coerce<Record<string, (...args: any[]) => any>>(Config[type][index]).score
+            )(coerce<Record<string, any>>(thing).points);
+            setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state);
+            return state;
         };
     }
     function updateScore(fn: () => Record<string, any>) {
@@ -298,12 +366,42 @@
     }
     let scoreBindings = $state(Array(Config.scoring.length + 1).fill(undefined));
     let notes = $state('');
+    function create_number_binding<K extends string, T extends Required<Record<K, number>>>(
+        object: T,
+        key: K
+    ): [() => string, (next: number | string) => void] {
+        return [
+            () => {
+                return object[key].toString();
+            },
+            (v: number | string) => {
+                //@ts-ignore this has wasted 30 minutes of my life
+                object[key] = (1 * coerce<number>((v + '').replace(/^\0+/, ''))) as number;
+            }
+        ];
+    }
+    function create_end_handler(index: keyof typeof Config.end): () => void {
+        let updater = scoreScore(index, 'end');
+        return function () {
+            let state = updater() as Record<string, number | Record<string, any>>;
+            for (let end of Config.end) {
+                if (Config.end[index] === end) continue;
+                if ((state['end' as keyof typeof state] as Record<string, any>)[end.name] === false)
+                    continue;
+                (state['points' as keyof typeof state] as number) -= end.points;
+                (state['end' as keyof typeof state] as Record<string, any>)[end.name] = false;
+            }
+            setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state);
+        };
+    }
+    let [team, setTeam] = create_number_binding($currentMatch, 'team');
+    let [match, setMatch] = create_number_binding($currentMatch, 'match');
 </script>
 
 <svelte:head>
     <title>Scouting - ScoutClient2025</title>
 </svelte:head>
-<main class="text-center" class:sans class:papyrus>
+<main class={{ 'text-center': true, sans, papyrus }}>
     {#if $scoutState === 0}
         <main out:slide>
             <h1 class="text-2xl">Scout</h1>
@@ -312,12 +410,12 @@
             <Input
                 label="Match Number"
                 type="number"
-                bind:value={$currentMatch.match as unknown as string}
+                bind:value={() => match(), (v) => setMatch(v)}
             /><br />
             <Input
                 label="Team Number"
                 type="number"
-                bind:value={$currentMatch.team as unknown as string}
+                bind:value={() => team(), (v) => setTeam(v)}
             /><br />
             <span class="text-lg">Alliance</span>
             <span class="space-x-0">
@@ -422,10 +520,10 @@
                     >
                 {:else}
                     <!-- <br><br><Button disabled={endingStuff[0]} onclick={()=>{updateScore(coerce<()=>any>(Config.scoring[endingStuff[0]].score.bind(null,endingStuff[0])))}} class={buttonClass}>{uppercase(Config.scoring[endingStuff[0]].name)}</Button>&nbsp; -->
-                    {#each endingStuff as end, i}
+                    {#each endingStuff, i}
                         <Button
                             disabled={endingStuff[i]}
-                            onclick={scoreScore(i, 'end')}
+                            onclick={create_end_handler(i)}
                             class={buttonClass}>{uppercase(Config.end[i].name)}</Button
                         >
                         {#if i % 2}
