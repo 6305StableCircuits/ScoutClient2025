@@ -7,7 +7,7 @@
         title?: string;
         class?: string;
         underline?: boolean;
-        onclick?: () => any;
+        onclick?: (event: MouseEvent) => unknown;
         [x: string]: any;
     };
     let {
@@ -19,8 +19,23 @@
         onclick = () => {},
         ...props
     }: Props = $props();
+    let control_held = false;
+    function handle_keypress(event: KeyboardEvent) {
+        if (event.key === 'Control') {
+            control_held = event.type === 'keydown';
+        }
+    }
+    function handle_click(this: HTMLSpanElement, event: MouseEvent) {
+        onclick.call(this, event);
+        if (control_held) {
+            window.open(url);
+        } else {
+            goto(url);
+        }
+    }
 </script>
 
+<svelte:body onkeydown={handle_keypress} onkeyup={handle_keypress} />
 <!--svelte-ignore a11y_no_static_element_interactions-->
 <!--svelte-ignore a11y_click_events_have_key_events-->
 <span
@@ -29,10 +44,7 @@
         ? 'underline'
         : ''} {className}"
     {...props}
-    onclick={() => {
-        onclick();
-        goto(url);
-    }}
+    onclick={handle_click}
 >
     {@render children?.()}
 </span>

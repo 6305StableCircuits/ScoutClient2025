@@ -3,6 +3,7 @@
     import type { Match } from '$lib/types';
     import { pretty } from '$lib';
     let { data }: { data: PageData } = $props();
+    const scouted = data.matches.filter(({ scout }) => scout === data.scouter);
     function rankScouters(matches: Match[]): string[] {
         let scouters = matches.map((match: Match) => match.scout);
         let keys = [...new Set<string>(scouters)];
@@ -11,12 +12,12 @@
         return results;
     }
     let preferred = $derived.by<Match['alliance']>(() => {
-        let blue = data.matches.filter((match: Match) => match.alliance === 'blue').length;
-        let red = data.matches.filter((match: Match) => match.alliance === 'red').length;
+        let blue = scouted.filter((match: Match) => match.alliance === 'blue').length;
+        let red = scouted.filter((match: Match) => match.alliance === 'red').length;
         return blue > red ? 'blue' : 'red';
     });
     let teams = $derived.by<number[]>(() => {
-        let arr = data.matches.map((match: Match) => match.team);
+        let arr = scouted.map((match: Match) => match.team);
         return [...new Set<number>(arr)];
     });
     $effect.pre(() => {
@@ -27,7 +28,7 @@
 
 <main class="text-center">
     <h1 class="text-lg">Scouter: {data.scouter}</h1>
-    <h2>Matches scouted: {data.matches.length}</h2>
+    <h2>Matches scouted: {scouted.length}</h2>
     <h2>Preferred Alliance: <span class="text-[{preferred}]">{pretty(preferred)}</span></h2>
     <h2>Teams scouted: {teams.length}</h2>
     <h2>Rank: {rank}</h2>

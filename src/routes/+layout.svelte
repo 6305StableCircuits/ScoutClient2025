@@ -2,7 +2,7 @@
     import '../app.css';
     import '@fontsource/inter';
     import Nav from '$lib/components/Nav.svelte';
-    import { navigating } from '$app/state';
+    import { navigating, page } from '$app/state';
     import { fade } from 'svelte/transition';
     import { settings } from '$lib/stores';
     import fish from '$lib/assets/fish-spinning-compressed.gif';

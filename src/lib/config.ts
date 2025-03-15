@@ -30,7 +30,7 @@ var config: Config = {
                 ])
             )
         };
-        console.log(state);
+        // console.log(state);
         assists = 0;
     },
     get undoAvailable() {

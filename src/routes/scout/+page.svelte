@@ -16,6 +16,7 @@
     import Input from '$lib/components/Input.svelte';
     import { uppercase, coerce, splitScoring, pretty } from '$lib';
     import { onMount } from 'svelte';
+    import { DEV } from 'esm-env';
     let sans = $derived($scouter.toLowerCase() === 'sans');
     //globalThis.Button = Button;
     let papyrus = $derived($scouter.toLowerCase() === 'papyrus');
@@ -37,70 +38,8 @@
         init();
     });
     let timer = $state<Timer<any> | null>();
-    if ($started_current_match) {
-        $scoutState = 0;
-        timer = null;
-        Config.reset();
-        $started_current_match = false;
-        $currentMatch = {
-            team: 0,
-            match: $currentMatch.match + 1,
-            alliance: 'red',
-            scout: $scouter,
-            date: 0,
-            notes: '',
-            score: {
-                overall: 0,
-                auto: {
-                    score: 0,
-                    leave: false,
-                    ...scoringStuff.reduce(
-                        (a, b, index) => ({
-                            ...a,
-                            [Config.scoring[index].name]: {
-                                amount: 0,
-                                points: 0
-                            }
-                        }),
-                        {}
-                    )
-                },
-                teleop: {
-                    score: 0,
-                    ...endingStuff.reduce(
-                        (a, b, index) => ({
-                            ...a,
-                            [Config.end[index].name]: false
-                        }),
-                        {}
-                    ),
-                    ...scoringStuff.reduce(
-                        (a, b, index) => ({
-                            ...a,
-                            [Config.scoring[index].name]: {
-                                amount: 0,
-                                points: 0
-                            }
-                        }),
-                        {}
-                    )
-                },
-                accuracy: {
-                    overall: 0,
-                    ...scoringStuff.reduce(
-                        (a, b, index) => ({
-                            ...a,
-                            [Config.scoring[index].name]: {
-                                amount: 0,
-                                points: 0
-                            }
-                        }),
-                        {}
-                    )
-                }
-            },
-            assists: 0
-        };
+    if ($started_current_match || $scoutState! > 0) {
+        reset();
     }
     let scoreNames = splitScoring(Config.scoring.map(({ name }) => name));
     const scoringNames = Config.scoring.map(({ name }) => name);
@@ -229,7 +168,7 @@
     let part = $derived<'auto' | 'teleop'>(gameState === 'teleop' ? 'teleop' : 'auto');
     function start() {
         $currentMatch.date = Date.now();
-        timer = new Timer('2:30');
+        timer = new Timer(DEV ? '0:30' : '2:30');
         timer.start();
         $started_current_match = true;
         gameState = 'auto';
@@ -244,14 +183,10 @@
             gameState = 'post';
         });
     }
-    function finish() {
-        let m = $matches.matches;
-        m.push({ ...$currentMatch });
-        $matches = { matches: m };
+    function reset() {
         $scoutState = 0;
         timer = null;
         Config.reset();
-        $started_current_match = false;
         $currentMatch = {
             team: 0,
             match: $currentMatch.match + 1,
@@ -311,6 +246,87 @@
             },
             assists: 0
         };
+        $started_current_match = false;
+        gameState = 'pre';
+        score = {
+            auto: 0,
+            teleop: 0,
+            overall: 0
+        };
+        end = Object.fromEntries(Config.end.map(({ name }) => [name, false]));
+        endingStuff = Array(Config.end.length).fill(false);
+        scoringStuff = Array(Config.scoring.length).fill({ amount: 0, points: 0 });
+        matchScore = {
+            overall: 0,
+            auto: {
+                score: 0,
+                leave: false,
+                ...Object.fromEntries(
+                    coerce<[string, Record<string, any>][]>(
+                        Config.scoring.map(
+                            coerce<() => any>((score: Record<string, string>) => [
+                                score.name,
+                                {
+                                    amount: 0,
+                                    points: 0
+                                }
+                            ])
+                        )
+                    )
+                )
+            },
+            teleop: {
+                score: 0,
+                ...Object.fromEntries(
+                    coerce<[string, boolean][]>(
+                        Config.end.map(
+                            coerce<() => any>((score: Record<string, string>) => [
+                                score.name,
+                                false
+                            ])
+                        )
+                    )
+                ),
+                ...Object.fromEntries(
+                    coerce<[string, Record<string, any>][]>(
+                        Config.scoring.map(
+                            coerce<() => any>((score: Record<string, string>) => [
+                                score.name,
+                                {
+                                    amount: 0,
+                                    points: 0
+                                }
+                            ])
+                        )
+                    )
+                )
+            },
+            get accuracy() {
+                let fulls = Config.scoring.map(
+                    (score) => this.auto[score.name].amount + this.teleop[score.name].amount
+                );
+                let amounts = Config.scoring
+                    .map((score) => score.name)
+                    .map((name, index) => misses[name] + fulls[index]);
+                let parts = fulls.map((f, i) => f / amounts[i]).map((n) => (n !== n ? 1 : n));
+                return {
+                    overall: parts.reduce((a, b) => a + b, 0) / parts.length,
+                    ...Object.fromEntries(
+                        Config.scoring.map((score) => score.name).map((s, i) => [s, parts[i]])
+                    )
+                };
+            }
+        };
+        misses = Object.fromEntries(Config.scoring.map((score: any) => [score.name, 0]));
+        leave = false;
+        notes = '';
+        scoreBindings = Array(Config.scoring.length + 1).fill(undefined);
+    }
+    function finish() {
+        let m = $matches.matches;
+        m.push({ ...$currentMatch });
+        $matches = { matches: m };
+        reset();
     }
     // function scorePrimary(){
     //     ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.primaryScore.score(Config?.primaryScore?.[part].points));

@@ -57,11 +57,14 @@
             method: 'GET'
         };
         let res = await fetch('../supabase', headers);
-        betterData = (await res.json())?.scoutingData as Match[];
-        console.log(betterData);
-        //@ts-ignore
-        table.setRows(betterData?.scoutingData);
-        tabl.setRows(teamstuff as any);
+        let json = (await res.json())?.scoutingData as Match[];
+        if (JSON.stringify(json) !== JSON.stringify(betterData)) {
+            betterData = json;
+            console.log(betterData);
+            //@ts-ignore
+            table.setRows(betterData?.scoutingData);
+            tabl.setRows(teamstuff as any);
+        }
         if (res.status === 200) {
             return true;
         }

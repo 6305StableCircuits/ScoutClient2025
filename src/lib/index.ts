@@ -29,7 +29,10 @@ export function pretty(string: string): string {
     );
 }
 export function isCurrentPath(path: string): boolean {
-    let [p, c] = [path.replace(/(^\/)|(\/$)/g, ''), page.url.pathname.replace(/(^\/)|(\/$)/g, '')];
+    let [p, c] = [
+        path.replace(/(^\/)|(\/$)/g, ''),
+        page?.url?.pathname?.replace?.(/(^\/)|(\/$)/g, '')
+    ];
     return p === c;
 }
 /**
@@ -64,7 +67,7 @@ export function splitScoring(scoreNames: string[]) {
     for (let name of scoreNames) {
         let main = name.split(' ')[0];
         let subset = pretty(name.replace(main + '', '').replace(/\((.*?)\)/, (_, m) => m));
-        console.log(subset);
+        // console.log(subset);
         (res[main] ??= []).push({
             name: subset,
             index: scoreNames.indexOf(name)
@@ -86,7 +89,7 @@ export function splitScoring(scoreNames: string[]) {
 // }
 
 export function getAverageScore(matches: Match[]): Score {
-    console.log(matches);
+    // console.log(matches);
     let res = {
         overall: <any[]>[],
         auto: <Record<string, any>>{

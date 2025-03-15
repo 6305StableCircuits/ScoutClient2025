@@ -1,7 +1,6 @@
 import type { PageServerLoad } from './$types';
 import type { Match } from '$lib/types';
 import { coerce } from '$lib';
-import { json } from '@sveltejs/kit';
 
 import { supabase } from '$lib/supabase';
 export const load: PageServerLoad = async ({ params }) => {
