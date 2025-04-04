@@ -165,8 +165,16 @@
     let gameState = $state<'pre' | 'auto' | 'teleop' | 'post'>('pre');
     $inspect($currentMatch);
     $inspect(endingStuff);
+    let wakeLock: WakeLockSentinel | null = null;
     let part = $derived<'auto' | 'teleop'>(gameState === 'teleop' ? 'teleop' : 'auto');
-    function start() {
+    async function start() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (err) {
+
+            }
+        }
         $currentMatch.date = Date.now();
         timer = new Timer(DEV ? '0:30' : '2:30');
         timer.start();
@@ -327,6 +335,9 @@
         m.push({ ...$currentMatch });
         $matches = { matches: m };
         reset();
+        wakeLock?.release?.()?.then?.(() => {
+            wakeLock = null;
+        });
     }
     // function scorePrimary(){
     //     ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.primaryScore.score(Config?.primaryScore?.[part].points));

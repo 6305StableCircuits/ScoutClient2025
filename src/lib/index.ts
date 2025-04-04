@@ -263,10 +263,11 @@ export function chooseAlliances(array: number[]): number[][] {
             result.push(coerce<number[]>(alliance));
         }
     }
-    for (let i = 0; i < 4; i++) {
-        result.forEach((alliance: number[]) => {
-            if (arr.length !== 0) alliance.push(coerce<number>(arr.shift()));
-        });
-    }
+    result.toReversed().forEach((alliance: number[]) => {
+        if (arr.length !== 0) alliance.push(coerce<number>(arr.shift()));
+    });
+    result.forEach((alliance: number[]) => {
+        if (arr.length !== 0) alliance.push(coerce<number>(arr.shift()));
+    });
     return coerce<number[][]>(result);
 }

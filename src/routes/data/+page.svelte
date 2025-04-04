@@ -21,9 +21,9 @@
         [1, 2],
         [2, 2]
     ];
-    let rankings = $state(rank(data.matches));
-    let alliances = $derived(chooseAlliances(rankings));
     let betterData = $state(data.matches);
+    let rankings = $derived(rank(betterData));
+    let alliances = $derived(chooseAlliances(rankings));
     // svelte-ignore state_referenced_locally
     const table = new TableHandler(betterData, { rowsPerPage: 10, highlight: false });
     const tabl = new TableHandler(datata, { rowsPerPage: 10, highlight: false });
