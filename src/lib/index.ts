@@ -229,7 +229,7 @@ export function average<T extends boolean | number>(arr: T[]): T {
             );
         case 'number':
             //@ts-ignore
-            return deNaN(arr.reduce((a, b) => a + b, 0) / length);
+            return deNaN(arr.reduce((a, b) => a + b, 0) / length).toFixed(2);
     }
 }
 export function deNaN(value: number): number {

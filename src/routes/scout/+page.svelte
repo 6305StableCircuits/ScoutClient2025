@@ -17,6 +17,41 @@
     import { uppercase, coerce, splitScoring, pretty } from '$lib';
     import { onMount } from 'svelte';
     import { DEV } from 'esm-env';
+    import { createDialog } from 'svelte-headlessui';
+    //@ts-ignore
+     import Transition from 'svelte-transition';
+     import { onDestroy } from 'svelte';
+     let stateConfirm = $state<boolean | null>();
+     let intervals = $state<(number | NodeJS.Timeout)[]>([]);
+     onDestroy(() => {
+         for (let interval of intervals) clearInterval(interval);
+     });
+     async function confirm(): Promise<boolean> {
+         stateConfirm = null;
+         dialog.open();
+         let actual = new Promise((resolve, reject) => {
+             let interval = setInterval(() => {
+                 if (stateConfirm !== null) {
+                     dialog.close();
+                     clearInterval(interval);
+                     intervals.splice(intervals.indexOf(interval), 1);
+                     resolve(stateConfirm as boolean);
+                 }
+             });
+             intervals.push(coerce<number>(interval));
+         }) as Promise<boolean>;
+         return actual; //Promise.race([timeout,actual])
+     }
+     let dialog_label = $state('');
+     let dialog_text = $state('');
+     let dialog_header = $state('');
+     let dialog = $derived(createDialog({ label: dialog_label }));
+     async function alert({ label, text, header }: { label: string; text: string; header: string }) {
+         dialog_label = label;
+         dialog_text = text;
+         dialog_header = header;
+         await confirm();
+     }
     let sans = $derived($scouter.toLowerCase() === 'sans');
     //globalThis.Button = Button;
     let papyrus = $derived($scouter.toLowerCase() === 'papyrus');
@@ -404,6 +439,9 @@
             (v: number | string) => {
                 //@ts-ignore this has wasted 30 minutes of my life
                 object[key] = (1 * coerce<number>((v + '').replace(/^\0+/, ''))) as number;
+                if (object[key] !== object[key]) {
+                    (object[key] as unknown as number) = 0;
+                }
             }
         ];
     }
@@ -429,6 +467,57 @@
     <title>Scouting - ScoutClient2025</title>
 </svelte:head>
 <main class={{ 'text-center': true, sans, papyrus }}>
+    <div class="relative z-10">
+        <Transition show={$dialog.expanded}>
+            <Transition
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+            >
+                <Button class="fixed inset-0 bg-black bg-opacity-25" onclick={dialog.close} />
+            </Transition>
+
+            <div class="fixed inset-0 overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+                    <Transition
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 scale-100"
+                        leaveTo="opacity-0 scale-95"
+                    >
+                        <div
+                            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-slate-950 shadow-[0_0_2px_white] p-6 text-left align-middle shadow-xl transition-all"
+                            use:dialog.modal
+                        >
+                            <h3 class="text-lg font-medium leading-6 text-white">
+                                {dialog_header}
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-grey-900">
+                                    {dialog_text}
+                                </p>
+                            </div>
+
+                            <div class="mt-4">
+                                <Button
+                                    onclick={() => {
+                                        stateConfirm = true;
+                                    }}
+                                >
+                                    OK
+                                </Button>
+                            </div>
+                        </div>
+                    </Transition>
+                </div>
+            </div>
+        </Transition>
+    </div>
     {#if $scoutState === 0}
         <main out:slide>
             <h1 class="text-2xl">Scout</h1>
@@ -455,7 +544,20 @@
                 >
             </span>
             <br /><br />
-            <Button class="bg-specialgreen" onclick={() => ($scoutState = 1)}>Ready</Button>
+            <Button
+                 class="bg-specialgreen"
+                 onclick={async () => {
+                     if ($currentMatch.team === 0) {
+                         await alert({
+                             label: 'Invalid Team',
+                             header: 'Invalid Team',
+                             text: 'Please enter a valid team number.'
+                         });
+                     } else {
+                        $scoutState = 1;
+                     }
+                 }}>Ready</Button
+             >
         </main>
     {:else if $scoutState === 1}
         <main in:slide out:slide>

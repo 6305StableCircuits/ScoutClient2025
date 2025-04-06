@@ -28,6 +28,7 @@
     let graphData = $state(formatForGraph(td.matches));
     console.log(graphData);
     let teamImg = $state<HTMLImageElement>();
+    let notes = $derived(data.matches.map((match: Match) => [match.match, match.notes]));
 </script>
 
 <main class="text-center place-content-center content-center">
@@ -63,7 +64,7 @@
             </p>
         </details>
     </div>
-    <h2>Autonomous (Total Score: {Config.scoring.reduce((a, {name}) => a + td.avg.score.auto[coerce<number>(name)].points, 0)})</h2>
+    <h2>Autonomous</h2>
     <div class="border border-white rounded">
         {#each Config.scoring as score}
             {uppercase(score.name)}: {deNaN(
@@ -71,7 +72,7 @@
             )}<br />
         {/each}
     </div>
-    <h2>Teleop (Total Score: {Config.scoring.reduce((a, {name}) => a + td.avg.score.auto[coerce<number>(name)].points, 0)})</h2>
+    <h2>Teleop</h2>
     <div class="border border-white rounded">
         {#each Config.scoring as score}
             {uppercase(score.name)}: {deNaN(
@@ -83,4 +84,8 @@
     <center>
         <Graph data={graphData} />
     </center>
+    <h2>Notes</h2>
+    {#each notes as [match, note]}
+    <b>Match {match}</b>: {note}<br />
+    {/each}
 </main>
