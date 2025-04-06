@@ -63,7 +63,12 @@
             </p>
         </details>
     </div>
-    <h2>Autonomous (Total Score: {Config.scoring.reduce((a, {name}) => a + td.avg.score.auto[coerce<number>(name)].points, 0)})</h2>
+    <h2>
+        Autonomous (Total Score: {Config.scoring.reduce(
+            (a, { name }) => a + td.avg.score.auto[coerce<number>(name)].points,
+            0
+        )})
+    </h2>
     <div class="border border-white rounded">
         {#each Config.scoring as score}
             {uppercase(score.name)}: {deNaN(
@@ -71,11 +76,18 @@
             )}<br />
         {/each}
     </div>
-    <h2>Teleop (Total Score: {Config.scoring.reduce((a, {name}) => a + td.avg.score.auto[coerce<number>(name)].points, 0)})</h2>
+    <h2>
+        Teleop (Total Score: {Config.scoring.reduce(
+            (a, { name }) => a + td.avg.score.auto[coerce<number>(name)].points,
+            0
+        )})
+    </h2>
     <div class="border border-white rounded">
         {#each Config.scoring as score}
             {uppercase(score.name)}: {deNaN(
-                td.avg.score.teleop[coerce<number>(score.name)]['amount' as keyof typeof td.avg.score.teleop[number]]
+                td.avg.score.teleop[coerce<number>(score.name)][
+                    'amount' as keyof (typeof td.avg.score.teleop)[number]
+                ]
             )}<br />
         {/each}
     </div>

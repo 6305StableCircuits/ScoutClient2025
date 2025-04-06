@@ -233,7 +233,7 @@ export function average<T extends boolean | number>(arr: T[]): T {
     }
 }
 export function deNaN(value: number): number {
-    return value !== value ? 0 : value;
+    return value !== value ? 0 : value.toFixed(2);
 }
 export function splitParts<T>(arr: T[], amount: number): T[][] {
     let res = [];

@@ -17,6 +17,39 @@
     import { uppercase, coerce, splitScoring, pretty } from '$lib';
     import { onMount } from 'svelte';
     import { DEV } from 'esm-env';
+    import { createDialog } from 'svelte-headlessui';
+    import Transition from 'svelte-transition';
+    import { onDestroy } from 'svelte';
+    let stateConfirm = $state<boolean | null>();
+    let intervals = $state<(number | NodeJS.Timeout)[]>([]);
+    onDestroy(() => {
+        for (let interval of intervals) clearInterval(interval);
+    });
+    async function confirm(): Promise<boolean> {
+        stateConfirm = null;
+        let actual = new Promise((resolve, reject) => {
+            let interval = setInterval(() => {
+                if (stateConfirm !== null) {
+                    dialog.close();
+                    clearInterval(interval);
+                    intervals.splice(intervals.indexOf(interval), 1);
+                    resolve(stateConfirm as boolean);
+                }
+            });
+            intervals.push(coerce<number>(interval));
+        }) as Promise<boolean>;
+        return actual; //Promise.race([timeout,actual])
+    }
+    let dialog_label = $state('');
+    let dialog_text = $state('');
+    let dialog_header = $state('');
+    let dialog = $derived(createDialog({ label: dialog_label }));
+    async function alert({ label, text, header }: { label: string; text: string; header: string }) {
+        dialog_label = label;
+        dialog_text = text;
+        dialog_header = header;
+        await confirm();
+    }
     let sans = $derived($scouter.toLowerCase() === 'sans');
     //globalThis.Button = Button;
     let papyrus = $derived($scouter.toLowerCase() === 'papyrus');
@@ -45,21 +78,22 @@
     const scoringNames = Config.scoring.map(({ name }) => name);
     // warning ts gets very angry here, `coerce` comes in handy
     let misses = Object.fromEntries(Config.scoring.map((score: any) => [score.name, 0]));
+    type Entries<Key, Value> = [Key, Value][];
     let matchScore: Record<string, any> = {
         overall: 0,
         auto: {
             score: 0,
             leave: false,
             ...Object.fromEntries(
-                coerce<[string, Record<string, any>][]>(
+                coerce<Entries<string, Record<string, any>>>(
                     Config.scoring.map(
-                        coerce<() => any>((score: Record<string, string>) => [
+                        (score: {name: string}) => [
                             score.name,
                             {
                                 amount: 0,
                                 points: 0
                             }
-                        ])
+                        ]
                     )
                 )
             )
@@ -69,20 +103,19 @@
             ...Object.fromEntries(
                 coerce<[string, boolean][]>(
                     Config.end.map(
-                        coerce<() => any>((score: Record<string, string>) => [score.name, false])
+                        (score: {name: string}) => [score.name, false]
                     )
                 )
             ),
             ...Object.fromEntries(
                 coerce<[string, Record<string, any>][]>(
-                    Config.scoring.map(
-                        coerce<() => any>((score: Record<string, string>) => [
+                    Config.scoring.map((score: {name: string}) => [
                             score.name,
                             {
                                 amount: 0,
                                 points: 0
                             }
-                        ])
+                        ]
                     )
                 )
             )
@@ -171,9 +204,7 @@
         if ('wakeLock' in navigator) {
             try {
                 wakeLock = await navigator.wakeLock.request('screen');
-            } catch (err) {
-
-            }
+            } catch (err) {}
         }
         $currentMatch.date = Date.now();
         timer = new Timer(DEV ? '0:30' : '2:30');
@@ -271,14 +302,13 @@
                 leave: false,
                 ...Object.fromEntries(
                     coerce<[string, Record<string, any>][]>(
-                        Config.scoring.map(
-                            coerce<() => any>((score: Record<string, string>) => [
+                        Config.scoring.map((score: {name: string}) => [
                                 score.name,
                                 {
                                     amount: 0,
                                     points: 0
                                 }
-                            ])
+                            ]
                         )
                     )
                 )
@@ -287,24 +317,22 @@
                 score: 0,
                 ...Object.fromEntries(
                     coerce<[string, boolean][]>(
-                        Config.end.map(
-                            coerce<() => any>((score: Record<string, string>) => [
+                        Config.end.map((score: {name: string}) => [
                                 score.name,
                                 false
-                            ])
+                            ]
                         )
                     )
                 ),
                 ...Object.fromEntries(
                     coerce<[string, Record<string, any>][]>(
-                        Config.scoring.map(
-                            coerce<() => any>((score: Record<string, string>) => [
+                        Config.scoring.map((score: {name: string}) => [
                                 score.name,
                                 {
                                     amount: 0,
                                     points: 0
                                 }
-                            ])
+                            ]
                         )
                     )
                 )
@@ -377,9 +405,7 @@
         return function () {
             let thing = Config[type][index];
             if (type === 'scoring') thing = thing[part as keyof unknown];
-            let state = coerce<(...args: any[]) => Record<string, any>>(
-                coerce<Record<string, (...args: any[]) => any>>(Config[type][index]).score
-            )(coerce<Record<string, any>>(thing).points);
+            let state = coerce<{score: Function}>(Config[type][index]).score(coerce<Record<string, any>>(thing).points);
             setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state);
             return state;
         };
@@ -402,10 +428,10 @@
                 return object[key].toString();
             },
             (v: number | string) => {
-                //@ts-ignore this has wasted 30 minutes of my life
-                object[key] = (1 * coerce<number>((v + '').replace(/^\0+/, ''))) as number;
+                (object[key] as unknown as number) = (1 *
+                    coerce<number>((v + '').replace(/^\0+/, ''))) as number;
             }
-        ];
+        ]; 
     }
     function create_end_handler(index: keyof typeof Config.end): () => void {
         let updater = scoreScore(index, 'end');
@@ -429,6 +455,57 @@
     <title>Scouting - ScoutClient2025</title>
 </svelte:head>
 <main class={{ 'text-center': true, sans, papyrus }}>
+    <div class="relative z-10">
+        <Transition show={$dialog.expanded}>
+            <Transition
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+            >
+                <Button class="fixed inset-0 bg-black bg-opacity-25" onclick={dialog.close} />
+            </Transition>
+
+            <div class="fixed inset-0 overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+                    <Transition
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 scale-100"
+                        leaveTo="opacity-0 scale-95"
+                    >
+                        <div
+                            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-slate-950 shadow-[0_0_2px_white] p-6 text-left align-middle shadow-xl transition-all"
+                            use:dialog.modal
+                        >
+                            <h3 class="text-lg font-medium leading-6 text-white">
+                                {dialog_header}
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-grey-900">
+                                    {dialog_text}
+                                </p>
+                            </div>
+
+                            <div class="mt-4">
+                                <Button
+                                    onclick={() => {
+                                        stateConfirm = true;
+                                    }}
+                                >
+                                    OK
+                                </Button>
+                            </div>
+                        </div>
+                    </Transition>
+                </div>
+            </div>
+        </Transition>
+    </div>
     {#if $scoutState === 0}
         <main out:slide>
             <h1 class="text-2xl">Scout</h1>
@@ -455,7 +532,20 @@
                 >
             </span>
             <br /><br />
-            <Button class="bg-specialgreen" onclick={() => ($scoutState = 1)}>Ready</Button>
+            <Button
+                class="bg-specialgreen"
+                onclick={async () => {
+                    if ($currentMatch.team === 0) {
+                        await alert({
+                            label: 'Invalid Team',
+                            header: 'Invalid Team',
+                            text: 'Please enter a valid team number.'
+                        });
+                    } else {
+                        $scoutState = 1;
+                    }
+                }}>Ready</Button
+            >
         </main>
     {:else if $scoutState === 1}
         <main in:slide out:slide>
@@ -470,7 +560,7 @@
                     disabled={undoAvailable}
                     class={buttonClass}
                     onclick={() => {
-                        updateScore(coerce<() => any>(Config.undo));
+                        updateScore(Config.undo);
                     }}>Undo</Button
                 >&nbsp;<Button
                     disabled={redoAvailable}
@@ -536,7 +626,7 @@
                     </Button>
                 {/each}
                 <Button
-                    onclick={() => updateScore(coerce<() => any>(Config.assist))}
+                    onclick={() => updateScore(Config.assist)}
                     class={buttonClass}>Assist</Button
                 >
                 {#if gameState === 'auto'}
