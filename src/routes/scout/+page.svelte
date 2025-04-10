@@ -548,6 +548,7 @@
             >
         </main>
     {:else if $scoutState === 1}
+    
         <main in:slide out:slide>
             {#if gameState === 'pre'}
                 <Button onclick={start} class="bg-specialred">Start Game</Button>
