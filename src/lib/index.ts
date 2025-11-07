@@ -139,6 +139,7 @@ export function get_average_score(matches: Match[]): Score {
     }
     let avg: Score = {
         overall: average(res.overall),
+        // @ts-expect-error
         auto: {
             score: average(res.auto.score),
             leave: average(res.auto.leave),

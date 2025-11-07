@@ -107,12 +107,12 @@ export default class Match {
             };
         }
         toJSON() {
-            return JSON.stringify({
+            return {
                 overall: this.overall,
                 auto: this.auto,
                 teleop: this.teleop,
                 accuracy: this.accuracy
-            });
+            };
         }
         constructor() {
             this.overall = $derived(this.auto.score + this.teleop.score);
@@ -196,14 +196,14 @@ export default class Match {
     alliance = $state<'red' | 'blue'>('red');
     score = new Match.Scoring();
     toJSON() {
-        return JSON.stringify({
+        return {
             score: this.score,
             team: this.team,
             date: this.date,
             alliance: this.alliance,
             notes: this.notes,
             assists: this.assists
-        });
+        };
     }
     clone(): Match {
         type POJO<T> = {
