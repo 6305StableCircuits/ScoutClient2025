@@ -5,6 +5,6 @@ import { supabase } from '$lib/supabase';
 export const load: PageServerLoad = async () => {
     const { data } = await supabase.from('scoutingData').select('*');
     return {
-        matches: data!.map(match => Match.from(match))
+        matches: (data ?? []).map(match => Match.from(match))
     };
 };

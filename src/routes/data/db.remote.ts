@@ -5,7 +5,7 @@ import { supabase } from '$lib/supabase';
 export const matches = query(async () => {
     const { data } = await supabase.from('scoutingData').select('*');
     const matches = [];
-    for (const match of data!) {
+    for (const match of data ?? []) {
         matches.push(Match.from(match));
     }
     return matches;
