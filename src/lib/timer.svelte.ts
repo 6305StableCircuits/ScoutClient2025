@@ -1,7 +1,7 @@
 import { noop } from '$lib';
-import type { Time, TimerOptions } from '$lib/types';
+import type { TimerOptions } from '$lib/types';
 import { onMount } from 'svelte';
-let dateNow = $state<number>(0);
+let date_now = $state<number>(0);
 let interval: number | NodeJS.Timeout;
 export function init() {
     onMount(() => {
@@ -9,17 +9,16 @@ export function init() {
             clearInterval(interval);
         }
         interval = setInterval(() => {
-            dateNow = Date.now();
+            date_now = Date.now();
         }, 1);
         return () => clearInterval(interval);
     });
 }
 function format(time: number): string {
     if (time < 0) return '-' + format(Math.abs(time));
-    let minutes = Math.abs(Math.floor(time / 60)).toString();
-    let seconds = Math.abs(Math.floor(time % 60)).toString();
-    seconds = seconds.length === 1 ? '0' + seconds : seconds;
-    return `${minutes}:${seconds}`;
+    const minutes = Math.abs(Math.floor(time / 60)).toString();
+    const seconds = Math.abs(Math.floor(time % 60)).toString();
+    return `${minutes}:${(seconds.length === 1 ? '0' : '') + seconds}`;
 }
 class TimerEvent<T extends string | number> extends CustomEvent<Timer<T>> {
     #instance: Timer<T>;
@@ -29,7 +28,6 @@ class TimerEvent<T extends string | number> extends CustomEvent<Timer<T>> {
         this.#instance = instance;
         this.#name = name;
     }
-    #next = false;
     static dispatcher<T extends string | number>(instance: Timer<T>) {
         return function dispatch(name: string) {
             instance.dispatchEvent(new TimerEvent(instance, name));
@@ -47,7 +45,6 @@ class TimerEvent<T extends string | number> extends CustomEvent<Timer<T>> {
     }
 }
 export default class Timer<T extends string | number> extends EventTarget {
-    #init = $state<number>(0);
     #end = $state<number>(0);
     #dispatcher = TimerEvent.dispatcher(this);
     /**
@@ -63,29 +60,27 @@ export default class Timer<T extends string | number> extends EventTarget {
     started = $state<boolean>(false);
     #amount = $state<number>(0);
     finished = $state<boolean>(false);
-    #lastSecond = 0;
+    #last_second = 0;
     #stop = false;
     paused = $state<boolean>(false);
     #curr = 0;
-    #last_dispatched = false;
     /**
      * The current time of the timer.
      */
     time = $derived.by<number>(() => {
         if (this.started === false) return this.#amount;
         if (this.paused === true) return this.#curr;
-        if (Math.round((this.#end - dateNow) / 1000) === 0 && this.finished !== true) {
+        if (Math.round((this.#end - date_now) / 1000) === 0 && this.finished !== true) {
             this.finished = true;
-            // this.dispatchEvent(new CustomEvent('finish'));
             this.#dispatcher('finish');
         }
-        if (this.#lastSecond !== Math.round((this.#end - dateNow) / 1000)) {
+        if (this.#last_second !== Math.round((this.#end - date_now) / 1000)) {
             this.#dispatcher(
-                `${format((this.#lastSecond = Math.round((this.#end - dateNow) / 1000)))}`
+                `${format((this.#last_second = Math.round((this.#end - date_now) / 1000)))}`
             );
         }
         if (this.finished && this.#stop) return 0;
-        this.#curr = (this.#end - dateNow) / 1000;
+        this.#curr = (this.#end - date_now) / 1000;
         return this.#curr;
     });
     /**
@@ -99,12 +94,11 @@ export default class Timer<T extends string | number> extends EventTarget {
      */
     start = (): void => {
         this.started = true;
-        this.#init = dateNow;
         let ms = this.#amount * 1000;
-        this.#end = dateNow + ms;
+        this.#end = date_now + ms;
         this.#dispatcher('start');
     };
-    #pauseStart = 0;
+    #pause_start = 0;
     /**
      * Pauses the timer, if it is not finished.
      */
@@ -112,7 +106,7 @@ export default class Timer<T extends string | number> extends EventTarget {
         if (this.finished === true) return;
         if (this.paused === true) return this.play();
         this.paused = true;
-        this.#pauseStart = dateNow;
+        this.#pause_start = date_now;
     };
     /**
      * Resumes the timer, if it was paused.
@@ -120,8 +114,13 @@ export default class Timer<T extends string | number> extends EventTarget {
     play = (): void => {
         if (this.finished === true) return;
         if (this.paused === false) return this.pause();
-        this.#end += dateNow - this.#pauseStart;
+        this.#end += date_now - this.#pause_start;
         this.paused = false;
+    };
+    finish = (): Promise<void> => {
+        return new Promise(resolve => {
+            this.on('finish', () => resolve());
+        });
     };
     constructor(amount: T, { start = false, stop = true, ...events }: TimerOptions = {}) {
         super();
@@ -144,4 +143,9 @@ export default class Timer<T extends string | number> extends EventTarget {
         }
         if (start === true) this.start();
     }
+}
+
+export async function sleep(seconds: number): Promise<void> {
+    const timer = new Timer(`0:${seconds}`);
+    return await timer.finish();
 }

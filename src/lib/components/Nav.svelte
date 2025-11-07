@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { uppercase, pathEntries, isCurrentPath } from '$lib';
+    import { uppercase, path_entries, is_current_path } from '$lib';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import Button from '$lib/components/Button.svelte';
@@ -28,9 +28,9 @@
         bind:this={landscape}
     >
         {#key $page}
-            {#each pathEntries as [title, path]}
+            {#each path_entries as [title, path]}
                 <span class="text-lg pt-4 pb-0">
-                    {#if isCurrentPath(path)}
+                    {#if is_current_path(path)}
                         <span class="cursor-not-allowed text-white">{uppercase(title ?? '')}</span>
                     {:else}
                         <Link url={path} class="text-white">{uppercase(title ?? '')}</Link>

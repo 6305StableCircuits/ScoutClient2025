@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Snippet } from 'svelte';
     import Button from '$lib/components/Button.svelte';
-    import { splitParts } from '$lib';
+    import { split_parts } from '$lib';
     interface Props<T> {
         list?: T[];
         length?: number;
@@ -11,7 +11,7 @@
     }
     let { list = [], length = 10, item, head, table = false }: Props<any> = $props();
     let page = $state(0);
-    let parts = $derived(splitParts(list, length));
+    let parts = $derived(split_parts(list, length));
     $inspect(parts[page]);
     function decrement() {
         if (page - 1 in parts) {

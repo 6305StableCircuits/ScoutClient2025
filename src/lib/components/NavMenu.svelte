@@ -3,7 +3,7 @@
     import Link from '$lib/components/Link.svelte';
     import { page } from '$app/stores';
     import { slide, fade, fly } from 'svelte/transition';
-    import { uppercase, pathEntries, isCurrentPath } from '$lib';
+    import { uppercase, path_entries, is_current_path } from '$lib';
     let mobile = globalThis?.matchMedia?.('only screen and (max-width: 600px)')?.matches;
     import Button from '$lib/components/Button.svelte';
     let showing = $state(false);
@@ -44,14 +44,14 @@
         >
             <!--Can't quite decide between out:fly and out:slide-->
             {#key $page}
-                {#each pathEntries as [title, path]}
+                {#each path_entries as [title, path]}
                     {#if showing}
                         <p
                             class="text-lg px-5"
                             in:fade={{ duration: 250 }}
                             out:fade={{ duration: 250 }}
                         >
-                            {#if isCurrentPath(path)}
+                            {#if is_current_path(path)}
                                 <span class="cursor-not-allowed text-white"
                                     >{uppercase(title ?? '')}</span
                                 >

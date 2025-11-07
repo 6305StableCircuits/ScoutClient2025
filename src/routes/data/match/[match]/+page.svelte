@@ -1,9 +1,8 @@
 <script lang="ts">
-    import type { PageData } from './$types';
-    import type { Match } from '$lib/types';
-    import { coerce } from '$lib';
+    import type { PageProps } from './$types';
     import Link from '$lib/components/Link.svelte';
-    let { data }: { data: PageData } = $props();
+    import Match from '$lib/Match.svelte';
+    let { data }: PageProps = $props();
     let scores = $derived({
         blue: data.matches
             .filter((match: Match) => match.alliance === 'blue')

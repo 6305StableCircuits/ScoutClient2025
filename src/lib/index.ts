@@ -1,15 +1,16 @@
 // place files you want to import through the `$lib` alias in this folder.
 import { page } from '$app/state';
-import type { Match, Score } from '$lib/types';
+import type { Score } from '$lib/types';
 import Config from '$lib/config';
+import type Match from './Match.svelte';
 export const noop = () => {};
-export let paths = {
+export const paths = {
     home: '',
     scout: 'scout',
     'save data': 'save',
     'view data': 'data'
 } as const;
-export let pathEntries = [
+export const path_entries = [
     ['home', '/'],
     ['scout', '/scout'],
     ['save data', '/save'],
@@ -20,21 +21,24 @@ export let pathEntries = [
  */
 export function uppercase(string: string): string {
     string ??= '';
-    return string.replace(/(( |^)[a-z])/g, (m) => m.toUpperCase());
+    return string.replace(/(( |^)[a-z])/g, m => m.toUpperCase());
 }
+
 export function pretty(string: string): string {
     string ??= '';
     return uppercase(
-        string.replace(/_/g, ' ').replace(/[a-z][A-Z]/g, (m) => m.charAt(0) + ' ' + m.charAt(1))
+        string.replace(/_/g, ' ').replace(/[a-z][A-Z]/g, m => m.charAt(0) + ' ' + m.charAt(1))
     );
 }
-export function isCurrentPath(path: string): boolean {
+
+export function is_current_path(path: string): boolean {
     let [p, c] = [
         path.replace(/(^\/)|(\/$)/g, ''),
         page?.url?.pathname?.replace?.(/(^\/)|(\/$)/g, '')
     ];
     return p === c;
 }
+
 /**
  * Coerces a value to the specified type.
  * @template T The type you want to coerce to
@@ -44,51 +48,37 @@ export function isCurrentPath(path: string): boolean {
 export function coerce<T>(value: any): T {
     return value as unknown as T;
 }
+
 export function rank(matches: Match[]): number[] {
-    let teams = [...new Set(matches.map((match) => match.team))];
-    let scores = teams
-        .map((team) => ({
-            [team]: getAverageScore(matches.filter((match) => match.team === team))
+    const teams = [...new Set(matches.map(match => match.team))];
+    const scores = teams
+        .map(team => ({
+            [team]: get_average_score(matches.filter(match => match.team === team))
         }))
         .reduce((a, b) => Object.assign(a, b), {});
-    let rankings = Object.entries(scores)
+    const rankings = Object.entries(scores)
         .sort(([k, v], [k1, v1]) => v1.overall - v.overall)
         .map(([team, score]) => {
             return coerce<number>(team) * 1;
         });
     return rankings;
 }
-type ScoreAmount = {
-    amount: number[];
-    points: number[];
-};
-export function splitScoring(scoreNames: string[]) {
-    let res: Record<string, { name: string; index: number }[]> = {};
-    for (let name of scoreNames) {
-        let main = name.split(' ')[0];
-        let subset = pretty(name.replace(main + '', '').replace(/\((.*?)\)/, (_, m) => m));
+
+export function split_scoring(score_names: string[]) {
+    const res: Record<string, { name: string; index: number }[]> = {};
+    for (const name of score_names) {
+        const main = name.split(' ')[0];
+        const subset = pretty(name.replace(main + '', '').replace(/\((.*?)\)/, (_, m) => m));
         // console.log(subset);
         (res[main] ??= []).push({
             name: subset,
-            index: scoreNames.indexOf(name)
+            index: score_names.indexOf(name)
         });
     }
     return res;
 }
-// export type Scores = {
-//     overall: number[],
-//     auto: {
-//         [x: string]: (boolean[]|number[])|ScoreAmount,
-//     },
-//     teleop: {
-//         [x: string]: (boolean[]|number[])|ScoreAmount,
-//     },
-//     accuracy: {
-//         [x: string]: number[],
-//     }
-// }
 
-export function getAverageScore(matches: Match[]): Score {
+export function get_average_score(matches: Match[]): Score {
     // console.log(matches);
     let res = {
         overall: <any[]>[],
@@ -123,50 +113,35 @@ export function getAverageScore(matches: Match[]): Score {
             ...Object.fromEntries(Config.scoring.map(({ name }) => [name, []]))
         }
     };
-    // type Scores = typeof res;
-    //@ts-ignore
-    matches.forEach(({ score }: { score: Record<string, any> }) => {
+    for (const { score } of matches) {
         res.overall.push(score.overall);
         res.auto.score.push(score.auto.score);
         res.auto.leave.push(score.auto.leave);
         for (let s of Config.scoring) {
-            res.auto[coerce<Record<string, any>>(s).name].amount.push(score.auto[s.name].amount);
-            res.auto[s.name].points.push(score.auto[s.name].points);
-            res.teleop[s.name].amount.push(score.teleop[s.name].amount);
+            res.auto[coerce<Record<string, any>>(s).name].amount.push(
+                score.auto[s.name as keyof InstanceType<(typeof Match)['Scoring']>['auto']].amount
+            );
+            res.auto[s.name].points.push(
+                score.auto[s.name as keyof InstanceType<(typeof Match)['Scoring']>['auto']].points
+            );
+            res.teleop[s.name].amount.push(
+                score.teleop[s.name as keyof InstanceType<(typeof Match)['Scoring']>['teleop']]
+                    .amount
+            );
             res.teleop[s.name].points.push(score.teleop[s.name].points);
             res.accuracy[s.name].push(score.accuracy[s.name]);
         }
         for (let end of Config.end) {
             res.teleop[end.name].push(score.teleop[end.name]);
         }
-        // res.auto[Config.primaryScore.name].amount.push(score.auto[Config.primaryScore.name].amount);
-        // res.auto[Config.primaryScore.name].points.push(score.auto[Config.primaryScore.name].points);
-        // res.auto[Config.secondaryScore.name].amount.push(score.auto[Config.secondaryScore.name].amount);
-        // res.auto[Config.secondaryScore.name].points.push(score.auto[Config.secondaryScore.name].points);
         res.teleop.score.push(score.teleop.score);
-        // res.teleop[Config.endGoal.name].push(score.teleop[Config.endGoal.name]);
-        // res.teleop[Config.secondaryEndGoal.name].push(score.teleop[Config.secondaryEndGoal.name]);
-        // res.teleop[Config.primaryScore.name].amount.push(score.teleop[Config.primaryScore.name].amount);
-        // res.teleop[Config.primaryScore.name].points.push(score.teleop[Config.primaryScore.name].points);
-        // res.teleop[Config.secondaryScore.name].amount.push(score.teleop[Config.secondaryScore.name].amount);
-        // res.teleop[Config.secondaryScore.name].points.push(score.teleop[Config.secondaryScore.name].points);
         res.accuracy.overall.push(score.accuracy.overall);
-        // res.accuracy[Config.primaryScore.name].push(score.accuracy[Config.primaryScore.name]);
-        // res.accuracy[Config.secondaryScore.name].push(score.accuracy[Config.secondaryScore.name]);
-    });
+    }
     let avg: Score = {
         overall: average(res.overall),
         auto: {
             score: average(res.auto.score),
             leave: average(res.auto.leave),
-            // [Config.primaryScore.name]: {
-            //     amount: average(res.auto[Config.primaryScore.name].amount),
-            //     points: average(res.auto[Config.primaryScore.name].points)
-            // },
-            // [Config.secondaryScore.name]: {
-            //     amount: average(res.auto[Config.secondaryScore.name].amount),
-            //     points: average(res.auto[Config.secondaryScore.name].points)
-            // },
             ...Config.scoring
                 .map(({ name }) => ({
                     amount: average(res.auto[name].amount),
@@ -182,17 +157,7 @@ export function getAverageScore(matches: Match[]): Score {
         },
         teleop: <Record<string & 'score', any>>{
             score: average(res.teleop.score),
-            // [Config.endGoal.name]: average(res.teleop[Config.endGoal.name]),
-            // [Config.secondaryEndGoal.name]: average(res.teleop[Config.secondaryEndGoal.name]),
             ...Object.fromEntries(Config.end.map(({ name }) => [name, average(res.teleop[name])])),
-            // [Config.primaryScore.name]: {
-            //     amount: average(res.teleop[Config.primaryScore.name].amount),
-            //     points: average(res.teleop[Config.primaryScore.name].points)
-            // },
-            // [Config.secondaryScore.name]: {
-            //     amount: average(res.teleop[Config.secondaryScore.name].amount),
-            //     points: average(res.teleop[Config.secondaryScore.name].points)
-            // },
             ...Config.scoring
                 .map(({ name }) => ({
                     amount: average(res.teleop[name].amount),
@@ -216,7 +181,7 @@ export function getAverageScore(matches: Match[]): Score {
     return avg;
 }
 export function average<T extends boolean | number>(arr: T[]): T {
-    let { length } = arr;
+    const { length } = arr;
     switch (typeof arr[0]) {
         case 'boolean':
             //@ts-ignore
@@ -235,39 +200,39 @@ export function average<T extends boolean | number>(arr: T[]): T {
 export function deNaN(value: number): number {
     return value !== value ? 0 : value;
 }
-export function splitParts<T>(arr: T[], amount: number): T[][] {
-    let res = [];
+export function split_parts<T>(arr: T[], amount: number): T[][] {
+    const res: Array<T[]> = [];
     let part: T[] = [];
-    arr.forEach((item) => {
+    for (const item of arr) {
         part.push(item);
         if (part.length === amount) {
             res.push(part);
             part = [];
         }
-    });
+    }
     if (part.length > 0) {
         res.push(part);
         part = [];
     }
     return res;
 }
-export function chooseAlliances(array: number[]): number[][] {
-    let result = [];
-    let arr = [...array];
+export function choose_alliances(array: number[]): number[][] {
+    const result = [];
+    const arr = [...array];
     for (let i = 0; i < 8; i++) {
         if (arr.length !== 0) {
-            let alliance = [arr.shift()];
+            const alliance = [arr.shift()];
             if (arr.length !== 0) {
                 alliance.push(arr.shift());
             }
             result.push(coerce<number[]>(alliance));
         }
     }
-    result.toReversed().forEach((alliance: number[]) => {
-        if (arr.length !== 0) alliance.push(coerce<number>(arr.shift()));
-    });
-    result.forEach((alliance: number[]) => {
-        if (arr.length !== 0) alliance.push(coerce<number>(arr.shift()));
-    });
+    for (const alliance of result.toReversed()) {
+        if (arr.length !== 0) alliance.push(arr.shift()!);
+    }
+    for (const alliance of result) {
+        if (arr.length !== 0) alliance.push(arr.shift()!);
+    }
     return coerce<number[][]>(result);
 }

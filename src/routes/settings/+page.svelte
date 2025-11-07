@@ -12,30 +12,27 @@
     <select
         bind:value={
             () => pretty($settings.mode),
-            (v) =>
-                v === 'Auto'
+            v =>
+                v === 'auto'
                     ? ($settings.mode = window.matchMedia('prefers-color-scheme: dark')
                           ? 'dark'
                           : 'light')
-                    : ($settings.mode = v.toLowerCase() as typeof $settings.mode)
+                    : ($settings.mode = v as typeof $settings.mode)
         }
         class="px-2 py-1 dark:bg-[#222222] rounded bg-[#dddddd]"
     >
-        <option value="Auto">Auto</option>
-        <option value="Dark">Dark</option>
-        <option value="Light">Light</option>
+        <option value="auto">Auto</option>
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
     </select>
     <br />
     <h2>
         Fish <img src={fish} alt="fish" class="inline w-[10%] h-[10%]" /><br />
         <Button disabled={$settings.fish} onclick={() => ($settings.fish = true)} class="text-sm"
-            >Yes Please :)</Button
+            >Yes Please :&rpar;</Button
         ><br />
         <Button disabled={!$settings.fish} onclick={() => ($settings.fish = false)} class="text-sm"
             >No, I have no taste</Button
         >
     </h2>
 </main>
-
-<style>
-</style>

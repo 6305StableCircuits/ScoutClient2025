@@ -1,410 +1,187 @@
 <script lang="ts">
-    import type { Match } from '$lib/types';
-    import Timer, { init } from '$lib/timer.svelte';
+    import Timer, { init } from '$lib/Timer.svelte';
     import Config from '$lib/config';
     Config.reset();
     import {
         scouter,
         matches,
-        currentMatch,
-        alliance as allianceStore,
-        scoutState,
+        current_match,
+        alliance as alliance_score,
+        scout_state,
         started_current_match
     } from '$lib/stores';
-    import { fade, slide } from 'svelte/transition';
+    import { slide } from 'svelte/transition';
     import Button from '$lib/components/Button.svelte';
     import Input from '$lib/components/Input.svelte';
-    import { uppercase, coerce, splitScoring, pretty } from '$lib';
+    import { uppercase, coerce, split_scoring, pretty } from '$lib';
     import { onMount } from 'svelte';
     import { DEV } from 'esm-env';
     import { createDialog } from 'svelte-headlessui';
-    //@ts-ignore
-     import Transition from 'svelte-transition';
-     import { onDestroy } from 'svelte';
-     let stateConfirm = $state<boolean | null>();
-     let intervals = $state<(number | NodeJS.Timeout)[]>([]);
-     onDestroy(() => {
-         for (let interval of intervals) clearInterval(interval);
-     });
-     async function confirm(): Promise<boolean> {
-         stateConfirm = null;
-         dialog.open();
-         let actual = new Promise((resolve, reject) => {
-             let interval = setInterval(() => {
-                 if (stateConfirm !== null) {
-                     dialog.close();
-                     clearInterval(interval);
-                     intervals.splice(intervals.indexOf(interval), 1);
-                     resolve(stateConfirm as boolean);
-                 }
-             });
-             intervals.push(coerce<number>(interval));
-         }) as Promise<boolean>;
-         return actual; //Promise.race([timeout,actual])
-     }
-     let dialog_label = $state('');
-     let dialog_text = $state('');
-     let dialog_header = $state('');
-     let dialog = $derived(createDialog({ label: dialog_label }));
-     async function alert({ label, text, header }: { label: string; text: string; header: string }) {
-         dialog_label = label;
-         dialog_text = text;
-         dialog_header = header;
-         await confirm();
-     }
+    // @ts-ignore
+    import Transition from 'svelte-transition';
+    import { onDestroy } from 'svelte';
+    import Match from '$lib/Match.svelte';
+    let state_confirm = $state<boolean | null>();
+    const intervals = $state<(number | NodeJS.Timeout)[]>([]);
+    onDestroy(() => {
+        for (const interval of intervals) clearInterval(interval);
+    });
+    async function confirm(): Promise<boolean> {
+        state_confirm = null;
+        dialog.open();
+        const actual = new Promise(resolve => {
+            const interval = setInterval(() => {
+                if (state_confirm !== null) {
+                    dialog.close();
+                    clearInterval(interval);
+                    intervals.splice(intervals.indexOf(interval), 1);
+                    resolve(state_confirm!);
+                }
+            });
+            intervals.push(coerce<number>(interval));
+        }) as Promise<boolean>;
+        return actual;
+    }
+    let dialog_label = $state('');
+    let dialog_text = $state('');
+    let dialog_header = $state('');
+    let dialog = $derived(createDialog({ label: dialog_label }));
+    async function alert({ label, text, header }: { label: string; text: string; header: string }) {
+        dialog_label = label;
+        dialog_text = text;
+        dialog_header = header;
+        await confirm();
+    }
     let sans = $derived($scouter.toLowerCase() === 'sans');
     //globalThis.Button = Button;
     let papyrus = $derived($scouter.toLowerCase() === 'papyrus');
-    let buttonClass = 'py-2xl h-20 w-40';
-    //@ts-ignore
-    let scoringStuff: any[] = $state(Array(Config.scoring.length).fill({ amount: 0, points: 0 }));
-    //@ts-ignore
-    let endingStuff: any[] = $state(Array(Config.end.length).fill(false));
-    scouter; //used to shut up intellisense
-    let score = $state({
-        auto: 0,
-        teleop: 0,
-        overall: 0
-    });
-    $effect(() => {
-        score.overall = score.auto + score.teleop;
-    });
+    const button_class = 'py-2xl h-20 w-40';
+    let scoring_stuff: Array<{ amount: number; points: number }> = $state(Array(Config.scoring.length).fill({ amount: 0, points: 0 }));
+    let ending_stuff: any[] = $state(Array(Config.end.length).fill(false));
+    scouter; // used to shut up intellisense
+    let score = $derived($current_match.score.concise);
     onMount(() => {
         init();
     });
     let timer = $state<Timer<any> | null>();
-    if ($started_current_match || $scoutState! > 0) {
+    if ($started_current_match || $scout_state! > 0) {
         reset();
     }
-    let scoreNames = splitScoring(Config.scoring.map(({ name }) => name));
-    const scoringNames = Config.scoring.map(({ name }) => name);
+    const scoring_names = Config.scoring.map(({ name }) => name);
+    let score_names = split_scoring(scoring_names);
     // warning ts gets very angry here, `coerce` comes in handy
     let misses = Object.fromEntries(Config.scoring.map((score: any) => [score.name, 0]));
-    let matchScore: Record<string, any> = {
-        overall: 0,
-        auto: {
-            score: 0,
-            leave: false,
-            ...Object.fromEntries(
-                coerce<[string, Record<string, any>][]>(
-                    Config.scoring.map(
-                        coerce<() => any>((score: Record<string, string>) => [
-                            score.name,
-                            {
-                                amount: 0,
-                                points: 0
-                            }
-                        ])
-                    )
-                )
-            )
-        },
-        teleop: {
-            score: 0,
-            ...Object.fromEntries(
-                coerce<[string, boolean][]>(
-                    Config.end.map(
-                        coerce<() => any>((score: Record<string, string>) => [score.name, false])
-                    )
-                )
-            ),
-            ...Object.fromEntries(
-                coerce<[string, Record<string, any>][]>(
-                    Config.scoring.map(
-                        coerce<() => any>((score: Record<string, string>) => [
-                            score.name,
-                            {
-                                amount: 0,
-                                points: 0
-                            }
-                        ])
-                    )
-                )
-            )
-        },
-        get accuracy() {
-            // let fulls = [
-            //     matchScore.auto[Config.primaryScore.name].amount+matchScore.teleop[Config.primaryScore.name].amount,
-            //     matchScore.teleop[Config.secondaryScore.name].amount+matchScore.auto[Config.secondaryScore.name].amount
-            // ];
-            // console.log(matchScore);
-            let fulls = Config.scoring.map(
-                (score) => this.auto[score.name].amount + this.teleop[score.name].amount
-            );
-            // console.log(fulls);
-            let amounts = Config.scoring
-                .map((score) => score.name)
-                .map((name, index) => misses[name] + fulls[index]);
-            // console.log(amounts);
-            let parts = fulls.map((f, i) => f / amounts[i]).map((n) => (n !== n ? 1 : n));
-            // console.log(parts);
-            return {
-                overall: parts.reduce((a, b) => a + b, 0) / parts.length,
-                ...Object.fromEntries(
-                    Config.scoring.map((score) => score.name).map((s, i) => [s, parts[i]])
-                )
-            };
-        }
-    };
-    //globalThis.matchScore = matchScore;
+    let match_score = $derived($current_match.score);
     let leave = $state(false);
     let end = $state(Object.fromEntries(Config.end.map(({ name }) => [name, false])));
-    let red = $state($allianceStore === 'red');
+    let red = $state($alliance_score === 'red');
     let alliance = $derived<Match['alliance']>(red ? 'red' : 'blue');
     $effect(() => {
-        $currentMatch.scout = $scouter;
-        $currentMatch.alliance = alliance;
-        $currentMatch.assists = assists;
-        $allianceStore = alliance;
+        $current_match.scout = $scouter;
+        $current_match.alliance = alliance;
+        $current_match.assists = assists;
+        $alliance_score = alliance;
     });
-    let undoAvailable = $state(false);
-    let redoAvailable = $state(false);
+    let undo_available = $state(false);
+    let redo_available = $state(false);
     let assists = $state(0);
-    $inspect(scoringStuff);
+    $inspect(scoring_stuff);
     $effect(() => {
-        let names = Config.scoring.map(({ name }) => name);
-        score;
-        matchScore.overall = score.overall;
-        matchScore.auto.score = score.auto;
-        matchScore.auto.leave = leave;
-        $currentMatch.notes = notes;
+        $current_match.notes = notes;
         for (let index = 0; index < Config.scoring.length; index++) {
-            //@ts-ignore
-            matchScore[part][Config.scoring[index].name] = $state.snapshot(scoringStuff[index]);
+            match_score[part][
+                Config.scoring[index].name as keyof InstanceType<(typeof Match)['Scoring']>[
+                    | 'auto'
+                    | 'teleop']
+            ] = $state.snapshot(scoring_stuff[index]);
         }
         for (let index = 0; index < Config.end.length; index++) {
-            //@ts-ignore
-            matchScore.teleop[Config.end[index].name] = $state.snapshot(endingStuff[index]);
+            match_score.teleop[
+                Config.end[index].name as keyof InstanceType<(typeof Match)['Scoring']>['teleop']
+            ] = $state.snapshot(ending_stuff[index]);
         }
-        matchScore.teleop.score = score.teleop;
-        ($currentMatch as Record<string, any>).score = matchScore;
-        ({ undoAvailable, redoAvailable } = Config);
+        ({ undo_available, redo_available } = Config);
     });
-    $inspect(matchScore);
-    // let paused_for_auto = $state(false);
-    // internals.state
-    // let gameState = $derived.by<'pre' | 'auto' | 'teleop' | 'post'>(() => {
-    //     if (timer instanceof Timer) {
-    //         if (timer.time <= 0) return 'post';
-    //         let [minutes, seconds] = timer.formatted.split(':').map(Number);
-    //         let time = minutes * 60 + seconds;
-    //         if (paused_for_auto) return 'auto';
-    //         if (time <= 2 * 60 + 15) {
-    //             return 'teleop';
-    //         }
-    //         return 'auto';
-    //     } else {
-    //         return 'pre';
-    //     }
-    // });
-    let gameState = $state<'pre' | 'auto' | 'teleop' | 'post'>('pre');
-    $inspect($currentMatch);
-    $inspect(endingStuff);
-    let wakeLock: WakeLockSentinel | null = null;
-    let part = $derived<'auto' | 'teleop'>(gameState === 'teleop' ? 'teleop' : 'auto');
+    // $inspect(match_score);
+    let game_state = $state<'pre' | 'auto' | 'teleop' | 'post'>('pre');
+    $inspect($current_match);
+    $inspect(ending_stuff);
+    let wake_lock: WakeLockSentinel | null = null;
+    let part = $derived<'auto' | 'teleop'>(game_state === 'teleop' ? 'teleop' : 'auto');
     async function start() {
         if ('wakeLock' in navigator) {
             try {
-                wakeLock = await navigator.wakeLock.request('screen');
-            } catch (err) {
-
-            }
+                wake_lock = await navigator.wakeLock.request('screen');
+            } catch {}
         }
-        $currentMatch.date = Date.now();
+        $current_match.date = Date.now();
         timer = new Timer(DEV ? '0:30' : '2:30');
         timer.start();
         $started_current_match = true;
-        gameState = 'auto';
+        game_state = 'auto';
         timer.on('2:15', () => {
             timer!.pause();
             setTimeout(() => {
                 timer!.play();
-                gameState = 'teleop';
+                game_state = 'teleop';
             }, 3000);
         });
         timer.on('finish', () => {
-            gameState = 'post';
+            game_state = 'post';
         });
     }
     function reset() {
-        $scoutState = 0;
+        $scout_state = 0;
         timer = null;
         Config.reset();
-        $currentMatch = {
-            team: 0,
-            match: $currentMatch.match + 1,
-            alliance: 'red',
-            scout: $scouter,
-            date: 0,
-            notes: '',
-            score: {
-                overall: 0,
-                auto: {
-                    score: 0,
-                    leave: false,
-                    ...scoringStuff.reduce(
-                        (a, b, index) => ({
-                            ...a,
-                            [Config.scoring[index].name]: {
-                                amount: 0,
-                                points: 0
-                            }
-                        }),
-                        {}
-                    )
-                },
-                teleop: {
-                    score: 0,
-                    ...endingStuff.reduce(
-                        (a, b, index) => ({
-                            ...a,
-                            [Config.end[index].name]: false
-                        }),
-                        {}
-                    ),
-                    ...scoringStuff.reduce(
-                        (a, b, index) => ({
-                            ...a,
-                            [Config.scoring[index].name]: {
-                                amount: 0,
-                                points: 0
-                            }
-                        }),
-                        {}
-                    )
-                },
-                accuracy: {
-                    overall: 0,
-                    ...scoringStuff.reduce(
-                        (a, b, index) => ({
-                            ...a,
-                            [Config.scoring[index].name]: {
-                                amount: 0,
-                                points: 0
-                            }
-                        }),
-                        {}
-                    )
-                }
-            },
-            assists: 0
-        };
+        $current_match = new Match($scouter, 0, $current_match.match + 1, 'red');
         $started_current_match = false;
-        gameState = 'pre';
-        score = {
-            auto: 0,
-            teleop: 0,
-            overall: 0
-        };
+        game_state = 'pre';
+        score;
         end = Object.fromEntries(Config.end.map(({ name }) => [name, false]));
-        endingStuff = Array(Config.end.length).fill(false);
-        scoringStuff = Array(Config.scoring.length).fill({ amount: 0, points: 0 });
-        matchScore = {
-            overall: 0,
-            auto: {
-                score: 0,
-                leave: false,
-                ...Object.fromEntries(
-                    coerce<[string, Record<string, any>][]>(
-                        Config.scoring.map(
-                            coerce<() => any>((score: Record<string, string>) => [
-                                score.name,
-                                {
-                                    amount: 0,
-                                    points: 0
-                                }
-                            ])
-                        )
-                    )
-                )
-            },
-            teleop: {
-                score: 0,
-                ...Object.fromEntries(
-                    coerce<[string, boolean][]>(
-                        Config.end.map(
-                            coerce<() => any>((score: Record<string, string>) => [
-                                score.name,
-                                false
-                            ])
-                        )
-                    )
-                ),
-                ...Object.fromEntries(
-                    coerce<[string, Record<string, any>][]>(
-                        Config.scoring.map(
-                            coerce<() => any>((score: Record<string, string>) => [
-                                score.name,
-                                {
-                                    amount: 0,
-                                    points: 0
-                                }
-                            ])
-                        )
-                    )
-                )
-            },
-            get accuracy() {
-                let fulls = Config.scoring.map(
-                    (score) => this.auto[score.name].amount + this.teleop[score.name].amount
-                );
-                let amounts = Config.scoring
-                    .map((score) => score.name)
-                    .map((name, index) => misses[name] + fulls[index]);
-                let parts = fulls.map((f, i) => f / amounts[i]).map((n) => (n !== n ? 1 : n));
-                return {
-                    overall: parts.reduce((a, b) => a + b, 0) / parts.length,
-                    ...Object.fromEntries(
-                        Config.scoring.map((score) => score.name).map((s, i) => [s, parts[i]])
-                    )
-                };
-            }
-        };
+        ending_stuff = Array(Config.end.length).fill(false);
+        scoring_stuff = Array(Config.scoring.length).fill({ amount: 0, points: 0 });
         misses = Object.fromEntries(Config.scoring.map((score: any) => [score.name, 0]));
         leave = false;
         notes = '';
-        scoreBindings = Array(Config.scoring.length + 1).fill(undefined);
+        score_bindings = Array(Config.scoring.length + 1).fill(undefined);
     }
     function finish() {
-        let m = $matches.matches;
-        m.push({ ...$currentMatch });
+        const m = $matches.matches;
+        m.push($current_match.clone());
         $matches = { matches: m };
         reset();
-        wakeLock?.release?.()?.then?.(() => {
-            wakeLock = null;
+        wake_lock?.release?.()?.then?.(() => {
+            wake_lock = null;
         });
     }
-    // function scorePrimary(){
-    //     ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.primaryScore.score(Config?.primaryScore?.[part].points));
-    // }
-    // function scoreSecondary(){
-    //     ({points:score[part],charged,leave,endGoal,secondaryEndGoal,secondaryScore,primaryScore,assists} = Config.secondaryScore.score(Config?.secondaryScore?.[part].points));
-    // }
-    // function scoreFn<N extends typeof Config["scoring"][number]["name"]>(name: N) {
-    //     let scorePart = score[part][Config.scoring.findIndex(({name: n})=>n === name)];
-    //      ({points: score[part], } = scoreFn(name));
-    // }
-    function setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state: Record<string, any>) {
-        // console.log(state);
+    function set_stuff_i_really_dont_wanna_deal_with_right_now_insert_name_here(
+        state: Record<string, any>
+    ) {
         let scoring;
         let end;
-        ({ points: score[part], leave, end, scoring, assists } = state);
+        ({
+            points: score[part],
+            leave: $current_match.score.auto.leave,
+            end,
+            scoring,
+            assists
+        } = state);
         for (let index = 0; index < Config.scoring.length; index++) {
-            scoringStuff[index] = scoring[Config.scoring[index].name];
+            scoring_stuff[index] = scoring[Config.scoring[index].name];
         }
         for (let index = 0; index < Config.end.length; index++) {
-            endingStuff[index] = end[Config.end[index].name];
+            ending_stuff[index] = end[Config.end[index].name];
         }
-        // console.log({ endingStuff, scoringStuff });
     }
-    function scoreScore<
+    function score_score<
         N extends keyof (typeof Config)[T],
         T extends 'scoring' | 'end' | 'leave' = 'scoring'
     >(index: N, type?: T) {
         if (type === 'leave') {
             return function () {
-                let state = Config.leave.score(Config.leave.points);
-                setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state);
+                const state = Config.leave.score(Config.leave.points);
+                set_stuff_i_really_dont_wanna_deal_with_right_now_insert_name_here(state);
                 return state;
             };
         }
@@ -412,21 +189,22 @@
         return function () {
             let thing = Config[type][index];
             if (type === 'scoring') thing = thing[part as keyof unknown];
-            let state = coerce<(...args: any[]) => Record<string, any>>(
+            const state = coerce<(...args: any[]) => Record<string, any>>(
                 coerce<Record<string, (...args: any[]) => any>>(Config[type][index]).score
             )(coerce<Record<string, any>>(thing).points);
-            setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state);
+            set_stuff_i_really_dont_wanna_deal_with_right_now_insert_name_here(state);
             return state;
         };
     }
-    function updateScore(fn: () => Record<string, any>) {
-        setStuffIReallyDontWannaDealWithRightNowInsertNameHere(fn());
+    function update_score(fn: () => Record<string, any>) {
+        set_stuff_i_really_dont_wanna_deal_with_right_now_insert_name_here(fn());
     }
-    type ScoreType = [(typeof Config.scoring)[number]['name']][number];
-    function miss(type: ScoreType) {
+    function miss(type: string) {
         misses[type]++;
     }
-    let scoreBindings = $state(Array(Config.scoring.length + 1).fill(undefined));
+    let score_bindings = $state<Array<number | undefined>>(
+        Array(Config.scoring.length + 1).fill(undefined)
+    );
     let notes = $state('');
     function create_number_binding<K extends string, T extends Required<Record<K, number>>>(
         object: T,
@@ -437,7 +215,7 @@
                 return object[key].toString();
             },
             (v: number | string) => {
-                //@ts-ignore this has wasted 30 minutes of my life
+                // @ts-ignore this has wasted 30 minutes of my life
                 object[key] = (1 * coerce<number>((v + '').replace(/^\0+/, ''))) as number;
                 if (object[key] !== object[key]) {
                     (object[key] as unknown as number) = 0;
@@ -446,21 +224,20 @@
         ];
     }
     function create_end_handler(index: keyof typeof Config.end): () => void {
-        let updater = scoreScore(index, 'end');
+        const updater = score_score(index, 'end');
         return function () {
-            let state = updater() as Record<string, number | Record<string, any>>;
-            for (let end of Config.end) {
+            const state = updater() as { end: Record<string, boolean>; points: number };
+            for (const end of Config.end) {
                 if (Config.end[index] === end) continue;
-                if ((state['end' as keyof typeof state] as Record<string, any>)[end.name] === false)
-                    continue;
-                (state['points' as keyof typeof state] as number) -= end.points;
-                (state['end' as keyof typeof state] as Record<string, any>)[end.name] = false;
+                if (state.end[end.name] === false) continue;
+                state.points -= end.points;
+                state.end[end.name] = false;
             }
-            setStuffIReallyDontWannaDealWithRightNowInsertNameHere(state);
+            set_stuff_i_really_dont_wanna_deal_with_right_now_insert_name_here(state);
         };
     }
-    let [team, setTeam] = create_number_binding($currentMatch, 'team');
-    let [match, setMatch] = create_number_binding($currentMatch, 'match');
+    const [team, set_team] = create_number_binding($current_match, 'team');
+    const [match, set_match] = create_number_binding($current_match, 'match');
 </script>
 
 <svelte:head>
@@ -506,7 +283,7 @@
                             <div class="mt-4">
                                 <Button
                                     onclick={() => {
-                                        stateConfirm = true;
+                                        state_confirm = true;
                                     }}
                                 >
                                     OK
@@ -518,7 +295,7 @@
             </div>
         </Transition>
     </div>
-    {#if $scoutState === 0}
+    {#if $scout_state === 0}
         <main out:slide>
             <h1 class="text-2xl">Scout</h1>
             <br />
@@ -526,12 +303,12 @@
             <Input
                 label="Match Number"
                 type="number"
-                bind:value={() => match(), (v) => setMatch(v)}
+                bind:value={() => match(), v => set_match(v)}
             /><br />
             <Input
                 label="Team Number"
                 type="number"
-                bind:value={() => team(), (v) => setTeam(v)}
+                bind:value={() => team(), v => set_team(v)}
             /><br />
             <span class="text-lg">Alliance</span>
             <span class="space-x-0">
@@ -545,63 +322,58 @@
             </span>
             <br /><br />
             <Button
-                 class="bg-specialgreen"
-                 onclick={async () => {
-                     if ($currentMatch.team === 0) {
-                         await alert({
-                             label: 'Invalid Team',
-                             header: 'Invalid Team',
-                             text: 'Please enter a valid team number.'
-                         });
-                     } else {
-                        $scoutState = 1;
-                     }
-                 }}>Ready</Button
-             >
+                class="bg-specialgreen"
+                onclick={async () => {
+                    if ($current_match.team === 0) {
+                        await alert({
+                            label: 'Invalid Team',
+                            header: 'Invalid Team',
+                            text: 'Please enter a valid team number.'
+                        });
+                    } else {
+                        $scout_state = 1;
+                    }
+                }}>Ready</Button
+            >
         </main>
-    {:else if $scoutState === 1}
+    {:else if $scout_state === 1}
         <main in:slide out:slide>
-            {#if gameState === 'pre'}
+            {#if game_state === 'pre'}
                 <Button onclick={start} class="bg-specialred">Start Game</Button>
             {:else}
                 <h1 class="text-2xl border border-white inline p-0.1 rounded">
-                    &nbsp;{timer?.formatted ?? ''}&nbsp;{uppercase(gameState)} | Score: {score.overall}&nbsp;
+                    &nbsp;{timer?.formatted ?? ''}&nbsp;{uppercase(game_state)} | Score: {score.overall}&nbsp;
                 </h1>
                 <br /><br />
                 <Button
-                    disabled={undoAvailable}
-                    class={buttonClass}
+                    disabled={undo_available}
+                    class={button_class}
                     onclick={() => {
-                        updateScore(coerce<() => any>(Config.undo));
+                        update_score(Config.undo);
                     }}>Undo</Button
                 >&nbsp;<Button
-                    disabled={redoAvailable}
-                    class={buttonClass}
+                    disabled={redo_available}
+                    class={button_class}
                     onclick={() => {
-                        updateScore(Config.redo);
+                        update_score(Config.redo);
                     }}>Redo</Button
                 ><br /><br />
-                <!-- {#each Config.scoring as score, i}
-                    <Button onclick={scoreScore(i)} class={buttonClass}
-                        >{uppercase(score.name)} Score</Button
-                    >&nbsp;
-                {/each} -->
-                {#each Object.entries(scoreNames) as [name, subsets], i}
+                {#each Object.entries(score_names) as [name, subsets], i}
                     {#if subsets.length === 1}
-                        <Button onclick={scoreScore(subsets[0].index)}
+                        <Button onclick={score_score(subsets[0].index)}
                             >{pretty(name + '(' + subsets[0].name + ')')} Score</Button
                         >
                     {:else}
                         <Button
                             onclick={function (e) {
-                                e.target === this ? scoreScore(scoreBindings[i])() : null;
+                                e.target === this ? score_score(score_bindings[i]!)() : null;
                             }}
                         >
                             {pretty(name)}
                             {'('}<select
                                 bind:value={
-                                    () => (scoreBindings[i] ??= subsets[0].index),
-                                    (v) => (scoreBindings[i] = v)
+                                    () => (score_bindings[i] ??= subsets[0].index),
+                                    v => (score_bindings[i] = v)
                                 }
                                 class="override-select px-0 mx-0"
                             >
@@ -614,12 +386,12 @@
                     <br /><br />
                 {/each}
 
-                {@const last = scoreBindings.length - 1}
-                {#each Object.entries(scoreNames) as [name, subsets], i}
+                {@const last = score_bindings.length - 1}
+                {#each Object.entries(score_names) as [name, subsets], i}
                     <Button
-                        class={buttonClass}
+                        class={button_class}
                         onclick={function (e) {
-                            if (e.target === this) miss(scoringNames[scoreBindings.at(-1)]);
+                            if (e.target === this) miss(scoring_names[score_bindings.at(-1)!]);
                         }}
                     >
                         Miss {pretty(name)}
@@ -627,8 +399,8 @@
                             class="override-select"
                             style="width: 100%"
                             bind:value={
-                                () => (scoreBindings[i] ??= subsets[0].index),
-                                (v) => (scoreBindings[i] = v)
+                                () => (score_bindings[i] ??= subsets[0].index),
+                                v => (score_bindings[i] = v)
                             }
                         >
                             {#each subsets as { name, index }}
@@ -638,30 +410,29 @@
                     </Button>
                 {/each}
                 <Button
-                    onclick={() => updateScore(coerce<() => any>(Config.assist))}
-                    class={buttonClass}>Assist</Button
+                    onclick={() => update_score(Config.assist)}
+                    class={button_class}>Assist</Button
                 >
-                {#if gameState === 'auto'}
+                {#if game_state === 'auto'}
                     <Button
                         disabled={leave}
-                        onclick={scoreScore('points', 'leave')}
-                        class={buttonClass}>Leave</Button
+                        onclick={score_score('points', 'leave')}
+                        class={button_class}>Leave</Button
                     >
                 {:else}
-                    <!-- <br><br><Button disabled={endingStuff[0]} onclick={()=>{updateScore(coerce<()=>any>(Config.scoring[endingStuff[0]].score.bind(null,endingStuff[0])))}} class={buttonClass}>{uppercase(Config.scoring[endingStuff[0]].name)}</Button>&nbsp; -->
-                    {#each endingStuff, i}
+                    {#each ending_stuff, i}
                         <Button
-                            disabled={endingStuff[i]}
+                            disabled={ending_stuff[i]}
                             onclick={create_end_handler(i)}
-                            class={buttonClass}>{uppercase(Config.end[i].name)}</Button
+                            class={button_class}>{uppercase(Config.end[i].name)}</Button
                         >
                         {#if i % 2}
                             <br /><br />
                         {/if}
                     {/each}
                 {/if}
-                {#if gameState === 'post'}
-                    <Button onclick={finish} class={buttonClass}><b>Next Game</b></Button>
+                {#if game_state === 'post'}
+                    <Button onclick={finish} class={button_class}><b>Next Game</b></Button>
                 {/if}
                 <h2>Notes</h2>
                 <textarea

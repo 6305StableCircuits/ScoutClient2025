@@ -24,7 +24,7 @@
     let minY = $derived(Math.min(...data.map(({ y }) => y)));
     let maxY = $derived(Math.max(...data.map(({ y }) => y)));
     let points = $derived(
-        mergeArr(
+        merge_array(
             data.map(({ x, y }) => [
                 (x * (width + 13.5)) / (maxX - minX) + 1.5,
                 height - (y * height) / (maxY - minY) - 1.5
@@ -32,7 +32,7 @@
         )
     );
 
-    function mergeArr<T>(arr: T[]): T[][] {
+    function merge_array<T>(arr: T[]): T[][] {
         let a: T[][] = [];
         let c: T[] = [];
         arr.forEach((x: T, i: number) => {
@@ -58,7 +58,7 @@
         return a;
     }
 
-    function makeArr(startValue: number, stopValue: number, cardinality: number): number[] {
+    function generate_array(startValue: number, stopValue: number, cardinality: number): number[] {
         var arr = [];
         var step = (stopValue - startValue) / (cardinality - 1);
         for (var i = 0; i < cardinality; i++) {
@@ -67,8 +67,8 @@
         return arr.map((e) => Math.round(e * 10) / 10);
     }
 
-    let divideY = $derived(makeArr(minY, maxY, yPoints));
-    let divideX = $derived(makeArr(minX, maxX, xPoints));
+    let divideY = $derived(generate_array(minY, maxY, yPoints));
+    let divideX = $derived(generate_array(minX, maxX, xPoints));
 </script>
 
 <div>

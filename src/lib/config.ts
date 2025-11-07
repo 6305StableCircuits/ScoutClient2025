@@ -1,19 +1,19 @@
 import type { Config } from '$lib/types';
 let amps = 0;
 let charged = false;
-let chargeStart = 0;
+let charge_start = 0;
 let assists = 0;
 let state: Record<string, any> = {};
 let actions: Record<string, any>[] = [];
 let undone: Record<string, any>[] = [];
-let gameState = 'auto';
+let game_state = 'auto';
 let scoring: Config['scoring'][number]['name'][] = [];
 let end: Config['end'][number]['name'][] = [];
 var config: Config = {
     reset() {
         actions = [];
         undone = [];
-        gameState = 'auto';
+        game_state = 'auto';
         state = {
             assists,
             charged,
@@ -33,25 +33,25 @@ var config: Config = {
         // console.log(state);
         assists = 0;
     },
-    get undoAvailable() {
+    get undo_available() {
         return actions.length === 0;
     },
-    get redoAvailable() {
+    get redo_available() {
         return undone.length === 0;
     },
     undo() {
         if (actions.length === 0) return state;
-        let lastAction = actions.pop();
-        undone.push(lastAction!);
-        state = lastAction!;
-        return lastAction!;
+        const last_action = actions.pop();
+        undone.push(last_action!);
+        state = last_action!;
+        return last_action!;
     },
     redo() {
         if (undone.length === 0) return state;
-        let lastUndone = undone.pop();
-        actions.push(lastUndone!);
-        state = lastUndone!;
-        return lastUndone!;
+        const last_undone = undone.pop();
+        actions.push(last_undone!);
+        state = last_undone!;
+        return last_undone!;
     },
     assist() {
         actions.push(structuredClone(state));
@@ -66,8 +66,8 @@ var config: Config = {
                 points: 3
             },
             get teleop() {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
                     for (let score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
@@ -95,8 +95,8 @@ var config: Config = {
                 points: 4
             },
             get teleop() {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
                     for (let score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
@@ -124,8 +124,8 @@ var config: Config = {
                 points: 6
             },
             get teleop() {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
                     for (let score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
@@ -153,8 +153,8 @@ var config: Config = {
                 points: 7
             },
             get teleop() {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
                     for (let score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
@@ -182,8 +182,8 @@ var config: Config = {
                 points: 6
             },
             get teleop() {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
                     for (let score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
@@ -209,9 +209,9 @@ var config: Config = {
                 points: 4
             },
             get teleop() {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
-                    for (let score of scoring) {
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
+                    for (const score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
                             points: 0
@@ -246,9 +246,9 @@ var config: Config = {
             name: 'park',
             points: 2,
             score(points: number) {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
-                    for (let score of scoring) {
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
+                    for (const score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
                             points: 0
@@ -265,9 +265,9 @@ var config: Config = {
             name: 'deep cage',
             points: 12,
             score(points: number) {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
-                    for (let score of scoring) {
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
+                    for (const score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
                             points: 0
@@ -283,9 +283,9 @@ var config: Config = {
             name: 'shallow cage',
             points: 6,
             score(points: number) {
-                if (gameState === 'auto') {
-                    gameState = 'teleop';
-                    for (let score of scoring) {
+                if (game_state === 'auto') {
+                    game_state = 'teleop';
+                    for (const score of scoring) {
                         state.scoring[score] = {
                             amount: 0,
                             points: 0
@@ -303,9 +303,9 @@ var config: Config = {
         name: 'park',
         points: 2,
         score(points: number) {
-            if (gameState === 'auto') {
-                gameState = 'teleop';
-                for (let score of scoring) {
+            if (game_state === 'auto') {
+                game_state = 'teleop';
+                for (const score of scoring) {
                     state.scoring[score] = {
                         amount: 0,
                         points: 0
@@ -338,19 +338,4 @@ state = {
 };
 scoring = config.scoring.map(({ name }) => name);
 end = config.end.map(({ name }) => name);
-type Action = {
-    assists: number;
-    charged: boolean;
-    points: number;
-    leave: boolean;
-    end: {
-        [x: (typeof config)['end'][number]['name']]: boolean;
-    };
-    scoring: {
-        [x: (typeof config)['scoring'][number]['name']]: {
-            amount: number;
-            points: number;
-        };
-    };
-};
 export default config;

@@ -2,38 +2,27 @@
     import Tree from '$lib/components/Tree.svelte';
     import Button from '$lib/components/Button.svelte';
     import { matches } from '$lib/stores';
-    import { createDialog } from 'svelte-headlessui';
+    import { createDialog as create_dialog } from 'svelte-headlessui';
     import Transition from 'svelte-transition';
-    import { onDestroy } from 'svelte';
-    import { coerce } from '$lib';
-    let dialog = createDialog({ label: 'Delete scouting data?' });
-    let downloadLink = $state<{ [x: string]: any }>();
-    let saved = $state(false);
-    function download(type: 'json' | 'csv') {
-        if (type === 'json') {
-            let file = new Blob([JSON.stringify($matches)], { type: 'text/json;charset=utf-8;' });
-            let url = URL.createObjectURL(file);
-            downloadLink!.href = url;
-            downloadLink!.download = fileName();
-            downloadLink!.click();
-            downloadLink!.href = 'about:blank';
-            saved = true;
-            $matches.matches.length = 0;
-        }
+    import { save, key_generator } from './db.remote.js';
+    const { data } = $props();
+    const no_matches = $derived($matches.matches.length === 0);
+    const dialog = create_dialog({ label: 'Delete scouting data?' });
+    let download_link = $state<Record<string, any>>();
+    let key = key_generator(data.key);
+    let active_resolver: PromiseWithResolvers<boolean>['resolve'];
+    function download() {
+        const file = new Blob([JSON.stringify($matches)], { type: 'text/json;charset=utf-8;' });
+        const url = URL.createObjectURL(file);
+        download_link!.href = url;
+        download_link!.download = file_name();
+        download_link!.click();
+        download_link!.href = 'about:blank';
+        $matches.matches.length = 0;
     }
-    let { data } = $props();
-    let key = data.key;
-    // console.log(key);
-    setInterval(
-        async () => {
-            key = (await (await fetch('./key')).json())?.key;
-            // console.log(key);
-        },
-        1 * 30 * 1000
-    );
-    const fileName = function () {
-        let d = new Date();
-        let date =
+    function file_name() {
+        const d = new Date();
+        const date =
             [
                 'January',
                 'February',
@@ -57,60 +46,26 @@
             ':' +
             d.getMinutes() +
             (d.getHours() > 12 ? 'PM' : 'AM');
-        return 'scoutSessions_on_' + date + '.json';
-    };
+        return `scout_sessions_${date}.json`;
+    }
     async function send() {
-        $matches.key = key;
-        let headers: RequestInit = {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify($matches)
-        };
-        let res = await fetch('../supabase', headers);
-        if (res.status === 200) {
-            saved = true;
-            $matches.matches.length = 0;
-            $matches.key = null as unknown as undefined;
-            return true;
-        }
-        return false;
+        $matches.key = await key;
+        await save($matches as typeof $matches & { key: number }).updates();
+        key = key_generator(key.current!);
+        $matches = { matches: [] };
+        return true;
     }
-    async function deleteData() {
+    async function delete_data() {
         dialog.open();
-        let confirmation = await confirm();
+        const confirmation = await confirm();
         if (confirmation) {
-            saved = true;
             $matches.matches.length = 0;
         }
     }
-    let stateConfirm = $state<boolean | null>();
-    let intervals = $state<(number | NodeJS.Timeout)[]>([]);
-    onDestroy(() => {
-        for (let interval of intervals) clearInterval(interval);
-    });
     async function confirm(): Promise<boolean> {
-        stateConfirm = null;
-        // let timeout = new Promise((resolve,reject)=>{
-        //     setTimeout(()=>{
-        //         dialog.close();
-        //         resolve(false);
-        //     },60000);
-        // }) as Promise<boolean>;
-        let actual = new Promise((resolve, reject) => {
-            let interval = setInterval(() => {
-                if (stateConfirm !== null) {
-                    dialog.close();
-                    clearInterval(interval);
-                    intervals.splice(intervals.indexOf(interval), 1);
-                    resolve(stateConfirm as boolean);
-                }
-            });
-            intervals.push(coerce<number>(interval));
-        }) as Promise<boolean>;
-        return actual; //Promise.race([timeout,actual])
+        const { promise, resolve } = Promise.withResolvers<boolean>();
+        active_resolver = resolve;
+        return promise;
     }
 </script>
 
@@ -118,13 +73,9 @@
     <Tree bind:object={$matches.matches}>
         You haven't entered any matches yet, start scouting!
     </Tree><br />
-    <Button disabled={$matches.matches.length === 0} onclick={() => download('json')}
-        >Export as JSON</Button
-    >&nbsp;
-    <Button disabled={$matches.matches.length === 0} onclick={send}>Save Data</Button>&nbsp;
-    <Button disabled={$matches.matches.length === 0} class="bg-[#ef0305]" onclick={deleteData}
-        >Delete Data</Button
-    >
+    <Button disabled={no_matches} onclick={download}>Export as JSON</Button>&nbsp;
+    <Button disabled={no_matches} onclick={send}>Save Data</Button>&nbsp;
+    <Button disabled={no_matches} class="bg-[#ef0305]" onclick={delete_data}>Delete Data</Button>
     <div class="relative z-10">
         <Transition show={$dialog.expanded}>
             <Transition
@@ -164,14 +115,16 @@
                                 <Button
                                     class="bg-specialred"
                                     onclick={() => {
-                                        stateConfirm = true;
+                                        dialog.close();
+                                        active_resolver(true);
                                     }}
                                 >
                                     Delete
                                 </Button>
                                 <Button
                                     onclick={() => {
-                                        stateConfirm = false;
+                                        dialog.close();
+                                        active_resolver(false);
                                     }}
                                 >
                                     Cancel
@@ -184,5 +137,5 @@
         </Transition>
     </div>
     <!--svelte-ignore a11y_consider_explicit_label-->
-    <a bind:this={downloadLink} style="display:none" href="about:blank" download><span></span></a>
+    <a bind:this={download_link} style="display:none" href="about:blank" download><span></span></a>
 </main>
