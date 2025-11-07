@@ -1,5 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
+    import { page } from '$app/state';
     import type { Snippet } from 'svelte';
     type Props = {
         url: string;
@@ -25,7 +26,17 @@
             control_held = event.type === 'keydown';
         }
     }
+    function to_absolute(url: string): string {
+        try {
+            return new URL(url).toString();
+        } catch {
+            return new URL(url, `https://${page.url.hostname}`).toString();
+        }
+    }
     function handle_click(this: HTMLSpanElement, event: MouseEvent) {
+        if (page.url.toString() === to_absolute(url)) {
+            return;
+        }
         onclick.call(this, event);
         if (control_held) {
             window.open(url);

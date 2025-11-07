@@ -1,6 +1,6 @@
 <script lang="ts">
     import Link from '$lib/components/Link.svelte';
-    import horse from '$lib/assets/blue-horse.png';
+    import horse from '$lib/assets/blue-horse.png?enhanced';
     // let count = $state(0);
     // let double = $derived(count * 2);
     // let isHigh = $state(false);
@@ -27,7 +27,7 @@
     <title>ScoutClient 2025</title>
 </svelte:head>
 <main style="display:flex;flex-direction:column;align-items:center;">
-    <img src={horse} alt="Honse" />
+    <enhanced:img src={horse} alt="Honse" />
     <h1 style="font-size: 40px; font-weight:700; margin-bottom:1em">6305 Scouting</h1>
     <div style="display: flex; flex-direction:column">
         <Link

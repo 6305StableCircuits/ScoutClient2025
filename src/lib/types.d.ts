@@ -22,35 +22,33 @@ export declare type Score = {
     auto: {
         score: number;
         leave: boolean;
-        [Config.primaryScore.name]: {
+        [x: typeof Config.scoring[number]['name']]: {
+            amount: number;
+            points: number;
+        }
+        [x: typeof Config.primaryScore.name]: {
             amount: number;
             points: number;
         };
-        [Config.secondaryScore.name]: {
+        [x: typeof Config.secondaryScore.name]: {
             amount: number;
             points: number;
         };
     };
     teleop: {
         score: number;
-        [Config.endGoal.name]: boolean;
-        [Config.secondaryEndGoal.name]: boolean;
-        [Config.primaryScore.name]: {
+        [x: typeof Config.scoring[number]['name']]: {
             amount: number;
             points: number;
-        };
-        [Config.secondaryScore.name]: {
-            amount: number;
-            points: number;
-        };
+        }
+        [x: typeof Config.end[number]['name']]: boolean;
     };
     accuracy: {
         overall: number;
-        [Config.primaryScore.name]: number;
-        [Config.secondaryScore.name]: number;
+        [x: typeof Config.scoring[number]['name']]: number;
     };
 };
-export declare type Match = {
+export declare interface Match {
     team: number;
     match: number;
     date: number;
@@ -66,7 +64,7 @@ export declare type TeamData = {
         score: Score;
         assists: number;
     };
-    prefers: typeof Config.primaryScore.name | typeof Config.secondaryScore.name;
+    prefers: typeof Config.scoring[number]['name'];
     matches: Match[];
 };
 let numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
@@ -74,7 +72,7 @@ type EventName = `on${string}`;
 export declare type NumberString = (typeof numbers)[number];
 export declare type Time =
     `${'-' | ''}${NumberString}${NumberString | ''}:${NumberString}${NumberString}`;
-export declare type TimerOptions = {
+export declare interface TimerOptions {
     start?: boolean;
     stop?: boolean;
     [x: EventName]: () => void;
@@ -87,8 +85,8 @@ export declare type Config = {
     readonly undo: () => object;
     readonly redo: () => object;
     readonly assist: () => object;
-    readonly undoAvailable: boolean;
-    readonly redoAvailable: boolean;
+    readonly undo_available: boolean;
+    readonly redo_available: boolean;
     readonly scoring: Scoring[];
     readonly leave: Goal;
     readonly end: Goal[];
@@ -97,7 +95,7 @@ export declare type Config = {
 type Goal = {
     readonly name: string;
     readonly points: number;
-    readonly score: (points: number) => object;
+    readonly score: (points: number) => Record<string, any>;
 };
 type Scoring = {
     readonly name: string;

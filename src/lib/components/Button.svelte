@@ -6,16 +6,16 @@
         children?: Snippet;
         width?: number;
         height?: number;
-        textSize?: StyleSize;
+        text_size?: StyleSize;
         class?: string;
         [x: string]: any;
     }
     let {
         children,
         width = 20,
-        textSize = '2xl',
+        text_size: text_size = '2xl',
         height,
-        class: className = '',
+        class: class_name = '',
         ...props
     }: Props = $props();
 </script>
@@ -28,6 +28,6 @@ You can customize its width, height, and text size.
 <button
     type="button"
     {...props}
-    class={`disabled:saturate-[0.5] disabled:hover:brightness-100 transition-all px-lg py-md mt-sm mx-sm text-${textSize} ${height ? `h-[${height}%]` : ``} w-[${width}%] bg-[#135fef] hover:brightness-110 text-white rounded ${className} `}
+    class={`disabled:saturate-[0.5] disabled:hover:brightness-100 transition-all px-lg py-md mt-sm mx-sm text-${text_size} ${height ? `h-[${height}%]` : ``} w-[${width}%] bg-[#135fef] hover:brightness-110 text-white rounded ${class_name} `}
     >&nbsp;{@render children?.()}&nbsp;</button
 >

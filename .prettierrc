@@ -4,6 +4,7 @@
     "trailingComma": "none",
     "printWidth": 100,
     "tabWidth": 4,
+    "arrowParens": "avoid",
     "plugins": ["prettier-plugin-svelte"],
     "overrides": [
         {

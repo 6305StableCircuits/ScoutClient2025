@@ -1,34 +1,29 @@
 <script lang="ts">
-    import type { PageData } from './$types';
-    import { uppercase, rank, splitParts, chooseAlliances, pretty, coerce } from '$lib';
-    import type { Match } from '$lib/types';
+    import type { PageProps } from './$types';
+    import { rank, choose_alliances, pretty, coerce } from '$lib';
+    import Match from '$lib/Match.svelte';
     import Link from '$lib/components/Link.svelte';
-    import List from '$lib/components/List.svelte';
-    import Tree from '$lib/components/Tree.svelte';
-    import { onMount } from 'svelte';
     import Button from '$lib/components/Button.svelte';
     import ClickForMore from '$lib/components/ClickForMore.svelte';
-    import { RowCount, TableHandler } from '@vincjo/datatables';
+    import { TableHandler } from '@vincjo/datatables';
     import { Datatable } from '@vincjo/datatables';
-    import { ThSort, ThFilter } from '@vincjo/datatables';
-    let { data }: { data: PageData } = $props();
+    import { ThSort } from '@vincjo/datatables';
+    import { matches } from './db.remote';
+    let { data }: PageProps = $props();
     let background = 'rgb(0,0,0)';
     let foreground = 'rgb(255,255,255)';
-    // let {matches} = data;
-    // console.log(matches);
-    console.log(data);
     let datata = [
         [1, 2],
         [2, 2]
     ];
-    let betterData = $state(data.matches);
-    let rankings = $derived(rank(betterData));
-    let alliances = $derived(chooseAlliances(rankings));
+    let better_data = $state<Match[]>(data.matches);
+    const rankings = $derived(rank(better_data));
+    const alliances = $derived(choose_alliances(rankings));
     // svelte-ignore state_referenced_locally
-    const table = new TableHandler(betterData, { rowsPerPage: 10, highlight: false });
+    const table = new TableHandler(better_data, { rowsPerPage: 10, highlight: false });
     const tabl = new TableHandler(datata, { rowsPerPage: 10, highlight: false });
-    let keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'notes'];
-    let teamkeys = [
+    const keysss = ['match', 'team', 'alliance', 'scout', 'date', 'score', 'notes'];
+    const teamkeys = [
         'Team',
         'Match',
         'Overall',
@@ -42,31 +37,23 @@
         'Barge',
         'Accuracy'
     ];
-    let teams = $derived<number[]>([...new Set(betterData.map(({ team }) => Number(team)))]);
-    let teamstuff = $derived.by(() => {
-        return teams.map((team) => {
-            let matches = betterData.filter(({ team: _team }) => _team === team);
+    const teams = $derived<number[]>([...new Set(better_data.map(({ team }) => Number(team)))]);
+    const teamstuff = $derived.by(() => {
+        return teams.map(team => {
+            let matches = better_data.filter(({ team: _team }) => _team === team);
             let sorted = matches.toSorted((a, b) => b.date - a.date);
             return sorted[0];
         });
     });
-    //svelte-ignore state_referenced_locally
+    // svelte-ignore state_referenced_locally
     tabl.setRows(teamstuff as any);
+    const get_matches = matches();
     async function get() {
-        let headers: RequestInit = {
-            method: 'GET'
-        };
-        let res = await fetch('../supabase', headers);
-        let json = (await res.json())?.scoutingData as Match[];
-        if (JSON.stringify(json) !== JSON.stringify(betterData)) {
-            betterData = json;
-            console.log(betterData);
-            //@ts-ignore
-            table.setRows(betterData?.scoutingData);
+        const matches = await get_matches;
+        if (JSON.stringify(matches) !== JSON.stringify(better_data)) {
+            better_data = matches;
+            table.setRows(better_data);
             tabl.setRows(teamstuff as any);
-        }
-        if (res.status === 200) {
-            return true;
         }
         return false;
     }

@@ -5,7 +5,7 @@
     import { navigating, page } from '$app/state';
     import { fade } from 'svelte/transition';
     import { settings } from '$lib/stores';
-    import fish from '$lib/assets/fish-spinning-compressed.gif';
+    import fish from '$lib/assets/fish-spinning-compressed.gif?enhanced';
     //globalThis["$"] = eval("$");
     let loaded = $state(false);
     let { children } = $props();
@@ -19,20 +19,23 @@
     });
 </script>
 
-<header class="font-inter mt-[-10px] {$settings.mode}">
+<header class="font-inter mt-[-10px] mb-[5px] {$settings.mode}">
     <Nav />
 </header>
 <main in:fade out:fade class="font-inter {$settings.mode}">
-    {#if $settings.fish && !loaded}
-        <img
-            src={fish}
-            in:fade={{ delay: 50 }}
-            out:fade={{ duration: 200 }}
-            alt="Loading..."
-            class="content-center w-100 h-100"
-        />
-    {:else}
+    <svelte:boundary>
+        {#snippet pending()}
+            {#if $settings.fish}
+                <enhanced:img
+                    src={fish}
+                    in:fade={{ delay: 50 }}
+                    out:fade={{ duration: 200 }}
+                    alt="Loading..."
+                    class="content-center w-100 h-100"
+                />
+            {/if}
+        {/snippet}
         <br />
         {@render children?.()}
-    {/if}
+    </svelte:boundary>
 </main>

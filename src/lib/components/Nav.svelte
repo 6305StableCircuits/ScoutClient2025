@@ -1,13 +1,11 @@
 <script lang="ts">
-    import { uppercase, pathEntries, isCurrentPath } from '$lib';
-    import { onMount } from 'svelte';
-    import { page } from '$app/stores';
+    import { uppercase, path_entries, is_current_path } from '$lib';
+    import { page } from '$app/state';
     import Button from '$lib/components/Button.svelte';
     import NavMenu from '$lib/components/NavMenu.svelte';
     import Link from '$lib/components/Link.svelte';
     let portrait = $state<HTMLSpanElement>();
     let landscape = $state<HTMLSpanElement>();
-    import settingsIcon from '$lib/assets/settings.svg';
     //     type $state<T> = T;
     // onMount(()=>{
     //     let landScapeStyle = getComputedStyle(landscape!);
@@ -27,10 +25,10 @@
         class="landscape flex justify-between content-center text-center px-10 w-[75vw]"
         bind:this={landscape}
     >
-        {#key $page}
-            {#each pathEntries as [title, path]}
+        {#key page.url.pathname}
+            {#each path_entries as [title, path]}
                 <span class="text-lg pt-4 pb-0">
-                    {#if isCurrentPath(path)}
+                    {#if is_current_path(path)}
                         <span class="cursor-not-allowed text-white">{uppercase(title ?? '')}</span>
                     {:else}
                         <Link url={path} class="text-white">{uppercase(title ?? '')}</Link>
@@ -38,14 +36,24 @@
                 </span>
             {/each}
             &nbsp;<Link class="pt-4 pb-0" url="/settings"
-                ><img src={settingsIcon} alt="settings" width="24px" /></Link
+                ><enhanced:img
+                    src="../assets/settings.svg"
+                    class="settings-icon"
+                    alt="settings"
+                    style="width: 24px"
+                /></Link
             >
         {/key}
     </span>
     <span class="portrait" bind:this={portrait}>
         <div class="float-right flex absolute right-[5%] pt-3 pointer z-50">
             <Link url="/settings" class="float-left pt-1 pb-0"
-                ><img src={settingsIcon} alt="settings" width="24px" /></Link
+                ><enhanced:img
+                    src="../assets/settings.svg"
+                    class="settings-icon"
+                    alt="settings"
+                    style="width: 24px"
+                /></Link
             >&nbsp;
             <NavMenu />
         </div>
@@ -61,6 +69,13 @@
     @media screen and (orientation: landscape) {
         .portrait {
             display: none;
+        }
+    }
+    .settings-icon {
+        transition: filter 0.2s ease-in;
+        &:hover {
+            filter: brightness(0.75);
+            transition: filter 0.2s ease-out;
         }
     }
 </style>
