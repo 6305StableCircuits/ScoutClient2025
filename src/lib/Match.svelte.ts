@@ -1,6 +1,6 @@
 import { DEV } from 'esm-env';
 import Config from './config';
-import Timer, { sleep } from '$lib/Timer.svelte';
+import Timer, { sleep } from '$lib/Timer.svelte.js';
 
 export default class Match {
     static State = class State {

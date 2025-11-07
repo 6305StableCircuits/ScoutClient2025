@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Timer, { init } from '$lib/Timer.svelte';
+    import Timer, { init } from '$lib/Timer.svelte.js';
     import Config from '$lib/config';
     Config.reset();
     import {
