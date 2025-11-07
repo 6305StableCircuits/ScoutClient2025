@@ -66,7 +66,7 @@
     .settings-icon {
         transition: filter 0.2s ease-in;
         &:hover {
-            filter: brightness(0.9);
+            filter: brightness(0.75);
             transition: filter 0.2s ease-out;
         }
     }
