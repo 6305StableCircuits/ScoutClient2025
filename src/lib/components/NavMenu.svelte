@@ -1,7 +1,7 @@
 <script lang="ts">
     import { clickoutside } from '@svelte-put/clickoutside';
     import Link from '$lib/components/Link.svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { slide, fade, fly } from 'svelte/transition';
     import { uppercase, path_entries, is_current_path } from '$lib';
     let mobile = globalThis?.matchMedia?.('only screen and (max-width: 600px)')?.matches;
@@ -43,7 +43,7 @@
             out:fly={{ x: 100, duration: 1000 }}
         >
             <!--Can't quite decide between out:fly and out:slide-->
-            {#key $page}
+            {#key page.url.pathname}
                 {#each path_entries as [title, path]}
                     {#if showing}
                         <p

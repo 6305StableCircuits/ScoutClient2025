@@ -5,7 +5,7 @@
     import { navigating, page } from '$app/state';
     import { fade } from 'svelte/transition';
     import { settings } from '$lib/stores';
-    import fish from '$lib/assets/fish-spinning-compressed.gif';
+    import fish from '$lib/assets/fish-spinning-compressed.gif?enhanced';
     //globalThis["$"] = eval("$");
     let loaded = $state(false);
     let { children } = $props();
@@ -26,7 +26,7 @@
     <svelte:boundary>
         {#snippet pending()}
             {#if $settings.fish}
-                <img
+                <enhanced:img
                     src={fish}
                     in:fade={{ delay: 50 }}
                     out:fade={{ duration: 200 }}

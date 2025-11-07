@@ -1,13 +1,12 @@
 <script lang="ts">
     import { uppercase, path_entries, is_current_path } from '$lib';
-    import { onMount } from 'svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import Button from '$lib/components/Button.svelte';
     import NavMenu from '$lib/components/NavMenu.svelte';
     import Link from '$lib/components/Link.svelte';
     let portrait = $state<HTMLSpanElement>();
     let landscape = $state<HTMLSpanElement>();
-    import settingsIcon from '$lib/assets/settings.svg';
+    import settings_icon from '$lib/assets/settings.svg?enhanced';
     //     type $state<T> = T;
     // onMount(()=>{
     //     let landScapeStyle = getComputedStyle(landscape!);
@@ -27,7 +26,7 @@
         class="landscape flex justify-between content-center text-center px-10 w-[75vw]"
         bind:this={landscape}
     >
-        {#key $page}
+        {#key page.url.pathname}
             {#each path_entries as [title, path]}
                 <span class="text-lg pt-4 pb-0">
                     {#if is_current_path(path)}
@@ -38,14 +37,24 @@
                 </span>
             {/each}
             &nbsp;<Link class="pt-4 pb-0" url="/settings"
-                ><img src={settingsIcon} class="settings-icon" alt="settings" width="24px" /></Link
+                ><enhanced:img
+                    src={settings_icon}
+                    class="settings-icon"
+                    alt="settings"
+                    width="24px"
+                /></Link
             >
         {/key}
     </span>
     <span class="portrait" bind:this={portrait}>
         <div class="float-right flex absolute right-[5%] pt-3 pointer z-50">
             <Link url="/settings" class="float-left pt-1 pb-0"
-                ><img src={settingsIcon} class="settings-icon" alt="settings" width="24px" /></Link
+                ><enhanced:img
+                    src={settings_icon}
+                    class="settings-icon"
+                    alt="settings"
+                    width="24px"
+                /></Link
             >&nbsp;
             <NavMenu />
         </div>
