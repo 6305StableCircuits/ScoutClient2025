@@ -45,7 +45,7 @@
     <span class="portrait" bind:this={portrait}>
         <div class="float-right flex absolute right-[5%] pt-3 pointer z-50">
             <Link url="/settings" class="float-left pt-1 pb-0"
-                ><img src={settingsIcon} alt="settings" width="24px" /></Link
+                ><img src={settingsIcon} class="settings-icon" alt="settings" width="24px" /></Link
             >&nbsp;
             <NavMenu />
         </div>
@@ -61,6 +61,13 @@
     @media screen and (orientation: landscape) {
         .portrait {
             display: none;
+        }
+    }
+    .settings-icon {
+        transition: filter 0.2s ease-in;
+        &:hover {
+            filter: brightness(0.9);
+            transition: filter 0.2s ease-out;
         }
     }
 </style>
