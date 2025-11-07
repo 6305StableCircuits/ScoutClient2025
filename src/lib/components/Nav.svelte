@@ -6,7 +6,6 @@
     import Link from '$lib/components/Link.svelte';
     let portrait = $state<HTMLSpanElement>();
     let landscape = $state<HTMLSpanElement>();
-    import settings_icon from '$lib/assets/settings.svg?enhanced';
     //     type $state<T> = T;
     // onMount(()=>{
     //     let landScapeStyle = getComputedStyle(landscape!);
@@ -38,10 +37,10 @@
             {/each}
             &nbsp;<Link class="pt-4 pb-0" url="/settings"
                 ><enhanced:img
-                    src={settings_icon}
+                    src="../assets/settings.svg"
                     class="settings-icon"
                     alt="settings"
-                    width="24px"
+                    style="width: 24px"
                 /></Link
             >
         {/key}
@@ -50,10 +49,10 @@
         <div class="float-right flex absolute right-[5%] pt-3 pointer z-50">
             <Link url="/settings" class="float-left pt-1 pb-0"
                 ><enhanced:img
-                    src={settings_icon}
+                    src="../assets/settings.svg"
                     class="settings-icon"
                     alt="settings"
-                    width="24px"
+                    style="width: 24px"
                 /></Link
             >&nbsp;
             <NavMenu />
