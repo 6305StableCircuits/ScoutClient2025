@@ -197,6 +197,8 @@ export default class Match {
     score = new Match.Scoring();
     toJSON() {
         return {
+            match: this.match,
+            scout: this.scout,
             score: this.score,
             team: this.team,
             date: this.date,
