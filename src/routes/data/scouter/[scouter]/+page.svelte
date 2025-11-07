@@ -20,12 +20,12 @@
         let arr = scouted.map(match => match.team);
         return [...new Set<number>(arr)];
     });
-    $effect.pre(() => {
-        document.title = `${data.scouter} - ScoutClient 2025 Scouters`;
-    });
     let rank = $derived(rank_scouters(data.matches).indexOf(data.scouter) + 1);
 </script>
 
+<svelte:head>
+    <title>{data.scouter} - ScoutClient 2025</title>
+</svelte:head>
 <main class="text-center">
     <h1 class="text-lg">Scouter: {data.scouter}</h1>
     <h2>Matches scouted: {scouted.length}</h2>

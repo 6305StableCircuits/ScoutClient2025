@@ -17,11 +17,11 @@
         blue: data.matches.filter((match: Match) => match.alliance === 'blue'),
         red: data.matches.filter((match: Match) => match.alliance === 'red')
     });
-    $effect.pre(() => {
-        document.title = `Match ${data.number} - ScoutClient2025`;
-    });
 </script>
 
+<svelte:head>
+    <title>Match {data.number} - ScoutClient2025</title>
+</svelte:head>
 <main class="text-center content-center">
     <h1 class="text-lg">Match {data.number}</h1>
     <h2>

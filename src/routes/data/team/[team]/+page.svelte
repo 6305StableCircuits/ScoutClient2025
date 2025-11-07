@@ -42,6 +42,9 @@
     }
 </script>
 
+<svelte:head>
+    <title>Team {data.number} - ScoutClient2025</title>
+</svelte:head>
 <main class="text-center place-content-center content-center">
     <h1 class="text-lg">
         Team {td.number}
