@@ -38,7 +38,7 @@
                 </span>
             {/each}
             &nbsp;<Link class="pt-4 pb-0" url="/settings"
-                ><img src={settingsIcon} alt="settings" width="24px" /></Link
+                ><img src={settingsIcon} class="settings-icon" alt="settings" width="24px" /></Link
             >
         {/key}
     </span>
